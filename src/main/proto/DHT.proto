@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.ssd";
+option java_outer_classname = "DHTService";
+
+service Comms {
+  rpc PING(Ping) returns (Ping) {}
+  // store
+  //find node
+  // find value
+  // send message
+  // etc
+}
+
+message Ping {
+  bytes nodeId = 1;
+  int32 reqNodePort = 2;
+}
+
