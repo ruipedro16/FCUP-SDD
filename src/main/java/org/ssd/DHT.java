@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ssd.ledger.Blockchain;
-import org.ssd.p2p.Consensus;
+import org.ssd.ledger.Consensus;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.grpc.GrpcServer;
 import org.ssd.utils.Config;
@@ -32,7 +32,6 @@ public class DHT {
         random.nextBytes(placeholder);
         this.node = this.server.init(placeholder, PORT); //defaults
         //add option for bootstrap
-
     }
 
     //chain
@@ -40,13 +39,15 @@ public class DHT {
     //auctions
 
     /*
-     * args[0]: Address of the bootstrap node
+     * args[0]: Address of one of the bootstrap nodes
      * args[1]: Consensus mechanism: PoW or PoS
+     *
+     * Convêm haver > 1 bootstrap nodes para evitar CPoF
      */
     public static void main(String[] args) throws Exception {
         // System.out.println("Hello world!");
         if (args.length != 2) {
-            System.err.println("Usage:\nargs[0]: Address of the bootstrap node\nargs[1]: Consensus mechanism: PoW or PoS");
+            System.err.println("Usage:\nargs[0]: Address of a bootstrap node\nargs[1]: Consensus mechanism: PoW or PoS");
             System.exit(1);
             return;
         }

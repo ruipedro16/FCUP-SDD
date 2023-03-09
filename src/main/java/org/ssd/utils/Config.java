@@ -2,7 +2,7 @@ package org.ssd.utils;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.ssd.p2p.Consensus;
+import org.ssd.ledger.Consensus;
 
 public class Config {
     @Getter

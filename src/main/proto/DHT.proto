@@ -11,6 +11,8 @@ service Comms {
   rpc findNode(FindNodeRequest) returns (stream FindNodeResponse) {}
   rpc findValue(FindValueRequest) returns (stream FindValueResponse) {}
 
+  // todo: rpc to join the network
+
   // send message
   rpc broadcastMessage(Message) returns (Empty) {} // todo
   rpc sendMessage(Message) returns (Empty) {} // todo

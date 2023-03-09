@@ -1,8 +1,14 @@
 package org.ssd.utils;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import java.security.*;
 
 public class CryptoUtils {
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     public static byte[] hash(byte[] data) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

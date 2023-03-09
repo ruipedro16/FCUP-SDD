@@ -1,4 +1,4 @@
-package org.ssd.p2p;
+package org.ssd.ledger;
 
 public enum Consensus {
     PoW,
