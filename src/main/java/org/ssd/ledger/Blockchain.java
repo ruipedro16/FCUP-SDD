@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Blockchain {
-    // private static final Logger logger = LogManager.getLogger(Blockchain.class);
+    private static final Logger logger = LogManager.getLogger(Blockchain.class);
 
     private static final int DIFFICULTY = 4;
 
@@ -19,7 +19,7 @@ public class Blockchain {
         this.blocks = new ArrayList<>();
 
         blocks.add(Block.generateGensis());
-        // logger.debug("Initialized the blockchain");
+        logger.debug("Initialized the blockchain");
     }
 
     public Block getLastBlock() {
@@ -30,7 +30,7 @@ public class Blockchain {
         block.setPreviousHash(getLastBlock().getHash());
         block.mineBlock(DIFFICULTY);
         blocks.add(block);
-        // logger.debug("Added block " + Hex.toHexString(block.getHash()));
+        logger.debug("Added block " + Hex.toHexString(block.getHash()));
     }
 
     public boolean isValid() {

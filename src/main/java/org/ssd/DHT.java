@@ -1,12 +1,20 @@
 package org.ssd;
 
+import lombok.NoArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ssd.ledger.Blockchain;
+import org.ssd.p2p.Consensus;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.grpc.GrpcServer;
+import org.ssd.utils.Config;
 
 import java.util.Random;
 
+@NoArgsConstructor
 public class DHT {
+    private static final Logger logger = LogManager.getLogger(DHT.class);
+
 
     //default port, use 80 for now
     public static final int PORT = 80;
@@ -26,11 +34,29 @@ public class DHT {
         //add option for bootstrap
 
     }
+
     //chain
     Blockchain blockchain = new Blockchain();//move this to its handler
     //auctions
 
-    public static void main(String[] args) {
-        System.out.println("Hello world!");
+    /*
+     * args[0]: Address of the bootstrap node
+     * args[1]: Consensus mechanism: PoW or PoS
+     */
+    public static void main(String[] args) throws Exception {
+        // System.out.println("Hello world!");
+        if (args.length != 2) {
+            System.err.println("Usage:\nargs[0]: Address of the bootstrap node\nargs[1]: Consensus mechanism: PoW or PoS");
+            System.exit(1);
+            return;
+        }
+
+        switch (args[1]) {
+            case "PoW" -> Config.setConsensus(Consensus.PoW);
+            case "PoS" -> Config.setConsensus(Consensus.PoS);
+            default -> throw new IllegalArgumentException();
+        }
+
+        DHT dht = new DHT(); // todo
     }
 }

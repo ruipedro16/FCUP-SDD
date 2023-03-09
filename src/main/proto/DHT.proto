@@ -5,13 +5,19 @@ option java_package = "org.ssd";
 option java_outer_classname = "DHTService";
 
 service Comms {
-  //Kademlia messages
+  // Kademlia messages
   rpc ping(Ping) returns (Ping) {}
   rpc store(Store) returns (Store) {}
   rpc findNode(FindNodeRequest) returns (stream FindNodeResponse) {}
   rpc findValue(FindValueRequest) returns (stream FindValueResponse) {}
+
   // send message
+  rpc broadcastMessage(Message) returns (Empty) {} // todo
+  rpc sendMessage(Message) returns (Empty) {} // todo
   // etc
+}
+
+message Empty {
 }
 
 message Ping {
@@ -48,3 +54,8 @@ message FindValueResponse {
   // todo
 }
 
+message Message {
+  bytes senderID = 1;
+  int32 senderPort = 2;
+  bytes message = 3;
+}

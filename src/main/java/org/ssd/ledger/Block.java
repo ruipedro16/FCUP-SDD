@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
+import org.ssd.p2p.Consensus;
 import org.ssd.utils.CryptoUtils;
 import org.ssd.utils.Utils;
 
@@ -15,28 +16,30 @@ import java.util.stream.Collectors;
 
 @Data
 public class Block {
-    // private static final Logger logger = LogManager.getLogger(Block.class);
+    private static final Logger logger = LogManager.getLogger(Block.class);
 
     private long timestamp;
     private int nonce;
     private byte[] hash;
     private byte[] previousHash;
-    private PublicKey validator; // in proof of stake (?)
+    private PublicKey validator; // PoS : Validator, PoW : Miner
+    private final Consensus consensus;
     private List<Transaction> transactions;
 
-    public Block(PublicKey validator, List<Transaction> transactions) {
+    public Block(PublicKey validator, List<Transaction> transactions, Consensus consensus) {
         this.timestamp = System.currentTimeMillis();
         this.previousHash = null; // this is set in the Blockchain class
         this.validator = validator;
         this.transactions = transactions;
         this.nonce = 0;
+        this.consensus = consensus;
         this.hash = calculateHash();
     }
 
     protected static Block generateGensis() {
-        Block genesis = new Block(null, null);
+        Block genesis = new Block(null, null, Consensus.PoW);
         genesis.setPreviousHash(null);
-        // logger.debug("Generated genesis block");
+        logger.debug("Generated genesis block");
         return genesis;
     }
 
@@ -51,9 +54,15 @@ public class Block {
                     .collect(Collectors.toList()));
 
             // TODO: include the previous hash(?)
-            dataToHash = Arrays.concatenate(
+
+            byte[] tmp = Arrays.concatenate(
+                    previousHash,
                     Longs.toByteArray(timestamp),
-                    Longs.toByteArray(nonce),
+                    Longs.toByteArray(nonce)
+            );
+
+            dataToHash = Arrays.concatenate(
+                    tmp,
                     validator.getEncoded(),
                     transactionBytes
             );
@@ -70,6 +79,6 @@ public class Block {
             nonce++;
             hash = calculateHash();
         }
-        // logger.debug("Mined block " + Hex.toHexString(hash));
+        logger.debug("Mined block " + Hex.toHexString(hash));
     }
 }
