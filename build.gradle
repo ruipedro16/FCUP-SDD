@@ -9,7 +9,7 @@ plugins {
 
 group 'org.ssd'
 version '1.0-SNAPSHOT'
-mainClassName = 'org.ssd.Main'
+mainClassName = 'org.ssd.DHT'
 
 repositories {
     mavenLocal()
