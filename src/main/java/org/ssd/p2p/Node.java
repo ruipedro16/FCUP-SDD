@@ -1,13 +1,16 @@
 package org.ssd.p2p;
 
 import lombok.Getter;
+import org.ssd.constants.KademliaConstants;
+
+import java.util.Random;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.util.Arrays;
 
 public class Node {
-    private static final int NODE_ID_LEN = 160; // length of the node id, in bits              160 bits: Output of SHA-1
 
+    private static final Random random = new Random();
     @Getter
     private final byte[] id;
 
@@ -21,6 +24,12 @@ public class Node {
     private final RoutingTable routingTable;
 
     //add a channel manager for this node or create it here alongside the keys
+
+    /**
+     * Node constructor
+     * @param id node id
+     * @param port node port
+     */
     public Node(byte[] id, int port /*add key or channel manager here*/) {
         this.id = id;
         this.port = port;
@@ -29,8 +38,20 @@ public class Node {
         //init the rest
     }
 
+    /**
+     * Constructor with omitted nodeId. It generates a random one.
+     * @param port node port
+     */
+    public Node(int port) {
+        byte[] genId = new byte[KademliaConstants.B];
+        random.nextBytes(genId);
+        this.id = genId;
+        this.port = port;
+        this.routingTable = new RoutingTable(genId); // initializes the routingtable & k buckets
+    }
+
     public static byte[] getDistance(byte[] id1, byte[] id2) {
-        if (id1.length != NODE_ID_LEN || id2.length != NODE_ID_LEN) {
+        if (id1.length != KademliaConstants.B || id2.length != KademliaConstants.B) {
             throw new IllegalArgumentException();
         }
 
@@ -70,4 +91,5 @@ public class Node {
     public void init() {
         //todo
     }
+
 }

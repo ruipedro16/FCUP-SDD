@@ -4,7 +4,7 @@ option java_multiple_files = true;
 option java_package = "org.ssd";
 option java_outer_classname = "DHTService";
 
-service Comms {
+service P2PGrpcService {
   // Kademlia messages
   rpc ping(Ping) returns (Ping) {}
   rpc store(Store) returns (Store) {}

@@ -9,12 +9,9 @@ import org.ssd.p2p.Node;
 import org.ssd.p2p.grpc.GrpcServer;
 import org.ssd.utils.Config;
 
-import java.util.Random;
-
 @NoArgsConstructor
 public class DHT {
     private static final Logger logger = LogManager.getLogger(DHT.class);
-
 
     //default port, use 80 for now
     public static final int PORT = 80;
@@ -25,12 +22,9 @@ public class DHT {
     private GrpcServer server;
 
     public DHT(String[] args) {
-        Random random = new Random();
         this.server = new GrpcServer();
-
-        byte[] placeholder = new byte[160];
-        random.nextBytes(placeholder);
-        this.node = this.server.init(placeholder, PORT); //defaults
+        //if node id is provided at startup then use a different init
+        this.node = this.server.autoInit(PORT); //defaults
         //add option for bootstrap
     }
 
@@ -45,7 +39,6 @@ public class DHT {
      * Convêm haver > 1 bootstrap nodes para evitar CPoF
      */
     public static void main(String[] args) throws Exception {
-        // System.out.println("Hello world!");
         if (args.length != 2) {
             System.err.println("Usage:\nargs[0]: Address of a bootstrap node\nargs[1]: Consensus mechanism: PoW or PoS");
             System.exit(1);

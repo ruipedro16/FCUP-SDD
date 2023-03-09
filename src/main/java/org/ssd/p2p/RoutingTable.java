@@ -2,6 +2,7 @@ package org.ssd.p2p;
 
 import lombok.Data;
 import lombok.NonNull;
+import org.ssd.constants.KademliaConstants;
 
 import java.util.ArrayList;
 
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class RoutingTable {
-    protected static final int N_BUCKETS = 20;
+    protected static final int N_BUCKETS = KademliaConstants.K;
 
     private /* final */ byte[] currentNodeID;
     private final List<Bucket> buckets;
