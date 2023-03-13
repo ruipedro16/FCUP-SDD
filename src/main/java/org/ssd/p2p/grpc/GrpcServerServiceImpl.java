@@ -1,5 +1,6 @@
 package org.ssd.p2p.grpc;
 
+import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import org.ssd.*;
 import org.ssd.p2p.Node;
@@ -20,17 +21,29 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
     @Override
     public void ping(Ping request, StreamObserver<Ping> responseObserver) {
-        super.ping(request, responseObserver);
+        Ping.Builder pingResponse = Ping.newBuilder();
+        pingResponse.setNodeId(ByteString.copyFrom(this.node.getId()));
+        pingResponse.setReqNodePort(this.node.getPort()); // return this node's port unless we want to return another message
+        responseObserver.onNext(pingResponse.build());
+        responseObserver.onCompleted();
     }
 
     @Override
     public void store(Store request, StreamObserver<Store> responseObserver) {
-        super.store(request, responseObserver);
+        byte[] nodeId = request.getNodeId().toByteArray();
+        byte[] key = request.getKey().toByteArray();
+        byte[] value = request.getValue().toByteArray();
+        this.node.store(nodeId, key, value);
+        Store.Builder storeResponse = Store.newBuilder();
+        storeResponse.setValue(request.getValue());
+        responseObserver.onNext(storeResponse.build());
+        responseObserver.onCompleted();
     }
 
     @Override
     public void findNode(FindNodeRequest request, StreamObserver<FindNodeResponse> responseObserver) {
-        super.findNode(request, responseObserver);
+        //find node in routing table, add this.node.findNodes
+        responseObserver.onCompleted();
     }
 
     @Override

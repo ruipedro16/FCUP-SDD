@@ -68,7 +68,7 @@ public class Node {
     /*
      * Counts the number of 0s in the beginning of a byte sequence
      */
-    public static int getPrefixLengh(byte[] seq) {
+    public static int getPrefixLength(byte[] seq) {
         return 0; // todo: MOve to utils
     }
 
@@ -77,7 +77,7 @@ public class Node {
      */
     public static int getBucket(byte[] currentNodeId, byte[] other) {
         byte[] distance = getDistance(currentNodeId, other);
-        return getPrefixLengh(distance);
+        return getPrefixLength(distance);
     }
 
     @Override
@@ -89,6 +89,10 @@ public class Node {
      * Function receives the necessary info to place this node into a kademlia network
      */
     public void init() {
+        //todo
+    }
+
+    public void store(byte[] nodeId, byte[] key, byte[] value) {
         //todo
     }
 
