@@ -3,13 +3,16 @@ package org.ssd;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.units.qual.A;
 import org.ssd.auction.AuctionsService;
-import org.ssd.ledger.Blockchain;
+import org.ssd.ledger.blockchain.Blockchain;
 import org.ssd.ledger.Consensus;
+import org.ssd.ledger.blockchain.PoSBlockchain;
+import org.ssd.ledger.blockchain.PoWBlockchain;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.grpc.GrpcServer;
-import org.ssd.utils.Config;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 @NoArgsConstructor
 public class DHT {
@@ -22,18 +25,25 @@ public class DHT {
     private Node node;
     //server
     private GrpcServer server;
-    //chain
-    private Blockchain blockchain;
+    private Blockchain blockchain; // TODO: nao e preciso ter a blockchain toda => Merkle tree
     //auctions
     private AuctionsService auctionsService;
+    private InetAddress bootstrapNodeAddress;
 
-    public DHT(String[] args) {
+
+    public DHT(InetAddress bootstrapNodeAddress, Consensus consensus) {
+        switch (consensus) {
+            case PoW -> this.blockchain = new PoWBlockchain();
+            case PoS -> this.blockchain = new PoSBlockchain();
+        }
+
         this.server = new GrpcServer();
         //if node id is provided at startup then use a different init
         this.node = this.server.autoInit(PORT); //defaults
-        this.blockchain = new Blockchain();
+
         this.auctionsService = new AuctionsService(this.node);
         //add option for bootstrap
+        this.bootstrapNodeAddress = bootstrapNodeAddress;
     }
 
     /*
@@ -49,12 +59,21 @@ public class DHT {
             return;
         }
 
+        InetAddress bootstrapNodeAddress;
+        Consensus consensus;
+
+        try {
+            bootstrapNodeAddress = InetAddress.getByName(args[0]);
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException("Invalid IP address: " + args[0], e);
+        }
+
         switch (args[1]) {
-            case "PoW" -> Config.setConsensus(Consensus.PoW);
-            case "PoS" -> Config.setConsensus(Consensus.PoS);
+            case "PoW" -> consensus = Consensus.PoW;
+            case "PoS" -> consensus = Consensus.PoS;
             default -> throw new IllegalArgumentException();
         }
 
-        DHT dht = new DHT(); // todo
+        DHT dht = new DHT(bootstrapNodeAddress, consensus);
     }
 }

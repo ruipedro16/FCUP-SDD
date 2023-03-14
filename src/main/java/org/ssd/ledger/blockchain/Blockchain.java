@@ -1,17 +1,17 @@
-package org.ssd.ledger;
+package org.ssd.ledger.blockchain;
 
+import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.util.encoders.Hex;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+@NoArgsConstructor
+public abstract class Blockchain {
 
-public class Blockchain {
-    private static final Logger logger = LogManager.getLogger(Blockchain.class);
-
+    /*
     private static final int DIFFICULTY = 4;
+
+    @Getter
+    private  Consensus consensus;
 
     private final List<Block> blocks;
 
@@ -48,4 +48,6 @@ public class Blockchain {
 
         return true;
     }
+
+     */
 }

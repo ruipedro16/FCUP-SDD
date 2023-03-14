@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class RoutingTable {
     protected static final int N_BUCKETS = KademliaConstants.K;
 
-    private /* final */ byte[] currentNodeID;
+    private final byte[] currentNodeID;
     private final List<Bucket> buckets;
 
     public RoutingTable(byte[] currentNodeID) {

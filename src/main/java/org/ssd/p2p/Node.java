@@ -1,23 +1,25 @@
 package org.ssd.p2p;
 
+import lombok.Data;
 import lombok.Getter;
 import org.ssd.constants.KademliaConstants;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.Random;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.util.Arrays;
 
+@Data
 public class Node {
 
     private static final Random random = new Random();
-    @Getter
     private final byte[] id;
 
-    @Getter
     private final int port;
+    private final InetAddress address;
 
-    @Getter
     private long seen;
 
     //add k_buckets
@@ -36,6 +38,7 @@ public class Node {
         //init k_buckets
         this.routingTable = new RoutingTable(id); // initializes the routingtable & k buckets
         //init the rest
+        this.address = null; // todo: change this
     }
 
     /**
@@ -48,6 +51,7 @@ public class Node {
         this.id = genId;
         this.port = port;
         this.routingTable = new RoutingTable(genId); // initializes the routingtable & k buckets
+        this.address = null; // todo: change this
     }
 
     public static byte[] getDistance(byte[] id1, byte[] id2) {

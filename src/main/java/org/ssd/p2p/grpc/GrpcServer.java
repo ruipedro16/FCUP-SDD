@@ -2,12 +2,17 @@ package org.ssd.p2p.grpc;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ssd.p2p.Node;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class GrpcServer {
-    private ServerBuilder serverBuilder;
+    private static final Logger logger = LogManager.getLogger(GrpcServer.class);
+
+    // private ServerBuilder serverBuilder;
     private Server server;
     private GrpcServerServiceImpl protoServerService;
 
@@ -16,11 +21,17 @@ public class GrpcServer {
     }
 
     public GrpcServer(int port) throws IOException {
+        /*
         serverBuilder = ServerBuilder.forPort(port); // 80
         serverBuilder.addService(protoServerService); // protobuf
         server = serverBuilder.build();
+         */
+        server = ServerBuilder.forPort(port)
+                .addService(protoServerService)
+                .build();
         server.start();
     }
+
 
     /**
      * Initializes the node

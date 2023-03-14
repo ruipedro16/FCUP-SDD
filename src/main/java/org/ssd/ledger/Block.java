@@ -6,7 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
-import org.ssd.utils.Config;
 import org.ssd.utils.CryptoUtils;
 import org.ssd.utils.Utils;
 
@@ -74,8 +73,6 @@ public class Block {
     }
 
     public void mineBlock(int difficulty) {
-        assert Config.getConsensus().equals(Consensus.PoW);
-
         String target = new String(new char[difficulty]).replace('\0', '0');
         while (!Hex.toHexString(hash).substring(0, difficulty).equals(target)) {
             nonce++;
