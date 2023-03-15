@@ -7,12 +7,12 @@ import org.apache.logging.log4j.Logger;
 import org.ssd.p2p.Node;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.util.concurrent.TimeUnit;
 
 public class GrpcServer {
     private static final Logger logger = LogManager.getLogger(GrpcServer.class);
 
-    // private ServerBuilder serverBuilder;
     private Server server;
     private GrpcServerServiceImpl protoServerService;
 
@@ -21,15 +21,26 @@ public class GrpcServer {
     }
 
     public GrpcServer(int port) throws IOException {
-        /*
-        serverBuilder = ServerBuilder.forPort(port); // 80
-        serverBuilder.addService(protoServerService); // protobuf
-        server = serverBuilder.build();
-         */
         server = ServerBuilder.forPort(port)
                 .addService(protoServerService)
                 .build();
         server.start();
+
+        logger.info("gRPC server running on port " + port);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("Shutting down gRPC server");
+
+            try {
+                if (server != null) {
+                    server.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            logger.info("gRPC server shut down");
+        }));
     }
 
 

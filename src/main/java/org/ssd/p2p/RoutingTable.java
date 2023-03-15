@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class RoutingTable {
+    /*
     protected static final int N_BUCKETS = KademliaConstants.K;
 
     private final byte[] currentNodeID;
@@ -40,11 +41,11 @@ public class RoutingTable {
                 .flatMap(bucket -> bucket.getNodes().stream())
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        
+
         for (int i = 0; i < N_BUCKETS; i++) {
             if (!buckets.get(i).isEmpty()) {
                 sb.append("Bucket: ").append(i).append('\n');
@@ -56,4 +57,5 @@ public class RoutingTable {
 
         return sb.toString();
     }
+     */
 }

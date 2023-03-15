@@ -47,11 +47,11 @@ public class Block {
         byte[] dataToHash = null;
 
         if (this.transactions != null) {
-
+            /*
             transactionBytes = Utils.toByteArray(transactions.stream()
                     .map(Transaction::getBytes)
                     .collect(Collectors.toList()));
-
+            */
             // TODO: include the previous hash(?)
 
             byte[] tmp = Arrays.concatenate(
@@ -62,8 +62,8 @@ public class Block {
 
             dataToHash = Arrays.concatenate(
                     tmp,
-                    validator.getEncoded(),
-                    transactionBytes
+                    validator.getEncoded() // ,
+                    //transactionBytes
             );
         } else {
             dataToHash = Longs.toByteArray(timestamp);

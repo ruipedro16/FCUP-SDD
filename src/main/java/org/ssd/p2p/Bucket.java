@@ -4,77 +4,55 @@ import lombok.Data;
 import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.util.encoders.Hex;
+import org.ssd.constants.KademliaConstants;
+import org.ssd.utils.Triple;
 
-import java.util.ArrayList;
+import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.List;
-import java.util.ListIterator;
 
 
 @Data
 public class Bucket {
     private static final Logger logger = LogManager.getLogger(Bucket.class);
-    protected static final int BUCKET_SIZE = 1; // todo: change this
 
-    private final byte[] currentNodeID;
-    private final List<Node> nodes;
-    private final int bucketIndex;
+    /*
+     * Contains information about each node
+     * byte[]      -> Node ID
+     * InetAddress -> Address of the node
+     * Integer     -> port
+     */
+    private final List<Triple<byte[], InetAddress, Integer>> contacts;
 
-    public Bucket(byte[] currentNodeID, int bucketIndex) {
-        this.currentNodeID = currentNodeID;
-        this.bucketIndex = bucketIndex;
-        this.nodes = new ArrayList<>();
+    public boolean isFull() {
+        return this.contacts.size() == KademliaConstants.K;
     }
 
     public int size() {
-        return nodes.size();
+        return this.contacts.size();
     }
 
-    /*
-     * If the node is already in the list, we remove it and re-add it
-     * If list is full, we ping oldest node. If it answers, ...
-     */
-    public void insertNode(@NonNull Node node) {
-        ListIterator<Node> it = (ListIterator<Node>) this.nodes.iterator();
-        while (it.hasNext()) {
-            Node itNode = it.next();
-            if (itNode.getAddress().toString().equals(node.getAddress().toString()) &&
-            itNode.getPort() == node.getPort()) {
-                it.remove();
-                it.add(node);
+    public void addNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
+        this.contacts.add(node);
+    }
+
+    public boolean containsNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
+        boolean found = false;
+
+        Triple<byte[], InetAddress, Integer> tmp = null;
+
+        for (Triple<byte[], InetAddress, Integer> n : this.contacts) {
+            if (Arrays.equals(n.getFirst(), node.getFirst())) { // compare the IDs of the nodes
+                tmp = n;
+                found = true;
             }
         }
 
-        if (nodes.size() == BUCKET_SIZE) {
-            // ping the oldest node
-            Node oldestNode = nodes.get(0);
-
-            byte[] response = null; // TODO: response of pinging the node
-            if (response != null) {
-                this.nodes.remove(this.nodes.get(0));
-                // TODO: re add the node
-            }
-            else {
-                this.nodes.remove(this.nodes.get(0));
-                this.nodes.add(node);
-            }
-         } else {
-            this.nodes.add(node);
+        if (found) { // if the node is in the k bucket we remove it and re add it
+            this.contacts.remove(tmp);
+            this.contacts.add(tmp);
         }
 
-        logger.debug("Inserted node: " + Hex.toHexString(node.getId()));
-    }
-
-    public void removeNode(@NonNull Node node) {
-        nodes.remove(node);
-        logger.debug("Removed node: " + Hex.toHexString(node.getId()));
-    }
-
-    public boolean isFull() {
-        return nodes.size() == BUCKET_SIZE;
-    }
-
-    public boolean isEmpty() {
-        return nodes.isEmpty();
+        return found;
     }
 }

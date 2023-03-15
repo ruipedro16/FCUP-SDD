@@ -7,6 +7,7 @@ import org.ssd.constants.KademliaConstants;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.Random;
+
 import org.bouncycastle.util.encoders.Hex;
 
 import java.util.Arrays;
@@ -23,26 +24,28 @@ public class Node {
     private long seen;
 
     //add k_buckets
-    private final RoutingTable routingTable;
+    // private final RoutingTable routingTable;
 
     //add a channel manager for this node or create it here alongside the keys
 
     /**
      * Node constructor
-     * @param id node id
+     *
+     * @param id   node id
      * @param port node port
      */
     public Node(byte[] id, int port /*add key or channel manager here*/) {
         this.id = id;
         this.port = port;
         //init k_buckets
-        this.routingTable = new RoutingTable(id); // initializes the routingtable & k buckets
+        // this.routingTable = new RoutingTable(id); // initializes the routingtable & k buckets
         //init the rest
         this.address = null; // todo: change this
     }
 
     /**
      * Constructor with omitted nodeId. It generates a random one.
+     *
      * @param port node port
      */
     public Node(int port) {
@@ -50,7 +53,7 @@ public class Node {
         random.nextBytes(genId);
         this.id = genId;
         this.port = port;
-        this.routingTable = new RoutingTable(genId); // initializes the routingtable & k buckets
+        // this.routingTable = new RoutingTable(genId); // initializes the routingtable & k buckets
         this.address = null; // todo: change this
     }
 
@@ -71,9 +74,31 @@ public class Node {
 
     /*
      * Counts the number of 0s in the beginning of a byte sequence
+     *
+     * Probably wrong
      */
     public static int getPrefixLength(byte[] seq) {
-        return 0; // todo: MOve to utils
+        int pref = 0;
+        if (seq.length == 0) {
+            return pref;
+        }
+
+        byte b = seq[0];
+        if (b == 0) {
+            pref = 8;
+        } else {
+            int extras = 0;
+            for (int i = 7; i >= 0; i--) {
+                boolean a = (b & (1 << i)) == 0;
+                if (a) {
+                    extras++;
+                } else {
+                    break;
+                }
+            }
+            pref = extras;
+        }
+        return pref;
     }
 
     /*
@@ -94,6 +119,10 @@ public class Node {
      */
     public void init() {
         //todo
+    }
+
+    public boolean ping(byte[] nodeId, InetAddress address, int port) {
+        return true;
     }
 
     public void store(byte[] nodeId, byte[] key, byte[] value) {

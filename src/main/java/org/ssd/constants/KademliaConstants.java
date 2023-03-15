@@ -3,6 +3,11 @@ package org.ssd.constants;
 import java.util.concurrent.TimeUnit;
 
 public class KademliaConstants {
+    /**
+     * Number of leading zeros in the ID of the node
+     * Ensures resistance against Sybil attacks
+     */
+    public static final int PREFIX_LENGTH = 3;
 
     /**
      * B : size in bits of the key
