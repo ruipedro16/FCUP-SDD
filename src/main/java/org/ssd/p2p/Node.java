@@ -6,6 +6,7 @@ import org.ssd.constants.KademliaConstants;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.util.List;
 import java.util.Random;
 
 import org.bouncycastle.util.encoders.Hex;
@@ -17,13 +18,11 @@ public class Node {
 
     private static final Random random = new Random();
     private final byte[] id;
-
     private final int port;
     private final InetAddress address;
-
     private long seen;
-
-    //add k_buckets
+    //add k_buckets here or in helper RoutingTable
+    private List<Bucket> kBucketList;
     // private final RoutingTable routingTable;
 
     //add a channel manager for this node or create it here alongside the keys
@@ -133,7 +132,7 @@ public class Node {
      */
     public void store(byte[] nodeId, byte[] key, byte[] value) {
         //get nearest nodes
-        if (Arrays.equals(nodeId, this.id)) {
+        if (Arrays.equals(nodeId, this.getId())) {
             //store locally or extract this condition
         } else {
             //get best k_bucket

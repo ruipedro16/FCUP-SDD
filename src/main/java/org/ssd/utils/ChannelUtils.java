@@ -32,6 +32,7 @@ import org.bouncycastle.pkcs.jcajce.JcePKCSPBEOutputEncryptorBuilder;
 import javax.net.ssl.SSLException;
 import java.io.*;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,29 +61,26 @@ public class ChannelUtils {
     /**
      * Initialize an unsecure channel to a specific address and port (used for testing)
      *
-     * @param address Address to call
-     * @param port    Port to connect to
+     * @param target  Address
      * @return ManagedChannel Object to give to Stubs
      */
-    public static ManagedChannel initUnsecureChannel(String address, int port) {
-        ManagedChannel _channel = ManagedChannelBuilder.forAddress(address, port)
+    public static ManagedChannel initUnsecureChannel(Triple<byte[], InetAddress, Integer> target) {
+        return ManagedChannelBuilder.forAddress(target.getSecond().getHostAddress(), target.getThird())
                 //change this to TLS
                 .usePlaintext()
                 .build();
-
-        return _channel;
     }
 
     /**
      * Initialize a TLS secured channel for a specific address and port
      * @return Managed Channel with creds
      */
-    public static ManagedChannel initSecureChannel(String address, int port, String cert) throws IOException, CertificateException {
+    public static ManagedChannel initSecureChannel(Triple<byte[], InetAddress, Integer> target, String cert) throws IOException, CertificateException {
         X509Certificate serverCertificate = readCertificate(cert);
         SslContext ctx = GrpcSslContexts.forClient().trustManager(serverCertificate).build();
 
-        return NettyChannelBuilder.forAddress(address, port)
-                .overrideAuthority("PubSub")
+        return NettyChannelBuilder.forAddress(target.getSecond().getHostAddress(), target.getThird())
+                .overrideAuthority("SSD")
                 .sslContext(ctx)
                 .build();
     }
@@ -90,14 +88,12 @@ public class ChannelUtils {
     /**
      * Initialize a mutually TLS secured channel for a specific address and port
      *
-     * @param address                 Address to call
-     * @param port                    Port to connect to
      * @param trustCertCollectionFile Custom CA root certificates
      * @param clientCertChainFile     Client's Certificate Chain
      * @param clientPrivateKeyFile    Client's Private Key
      * @return Managed Channel with creds
      */
-    public static ManagedChannel initMutualSecureChannel(String address, int port, File trustCertCollectionFile, File clientCertChainFile, File clientPrivateKeyFile) throws IOException {
+    public static ManagedChannel initMutualSecureChannel(Triple<byte[], InetAddress, Integer> target, File trustCertCollectionFile, File clientCertChainFile, File clientPrivateKeyFile) throws IOException {
         //TODO
         TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
         if (trustCertCollectionFile != null && clientCertChainFile != null && clientPrivateKeyFile != null) {
@@ -105,10 +101,8 @@ public class ChannelUtils {
             tlsBuilder.trustManager(trustCertCollectionFile);
         }
 
-        ManagedChannel _channel = Grpc.newChannelBuilderForAddress(address, port, tlsBuilder.build())
+        return Grpc.newChannelBuilderForAddress(target.getSecond().getHostAddress(), target.getThird(), tlsBuilder.build())
                 .build();
-
-        return _channel;
     }
 
     /**
