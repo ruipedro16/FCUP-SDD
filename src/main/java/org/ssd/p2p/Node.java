@@ -125,8 +125,22 @@ public class Node {
         return true;
     }
 
+    /**
+     * Store a given message to this node and propagate to nearby k nodes
+     * @param nodeId id of the node that requested the store
+     * @param key id key for the message
+     * @param value value/message to store
+     */
     public void store(byte[] nodeId, byte[] key, byte[] value) {
-        //todo
+        //get nearest nodes
+        if (Arrays.equals(nodeId, this.id)) {
+            //store locally or extract this condition
+        } else {
+            //get best k_bucket
+            //iterate through all (Bucket.containsNode)
+            //if found -> store locally on target node
+            //if no found -> send find_node to all in k_bucket
+        }
     }
 
 }
