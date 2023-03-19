@@ -6,7 +6,7 @@ import org.ssd.*;
 import org.ssd.p2p.Node;
 
 /**
- * Protobuf service implementation
+ * Protobuf service implementation for receiving proto messages
  */
 public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImplBase {
 

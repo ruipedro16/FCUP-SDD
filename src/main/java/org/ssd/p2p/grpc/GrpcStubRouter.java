@@ -4,10 +4,13 @@ import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import lombok.Getter;
+import org.ssd.P2PGrpcServiceGrpc;
+import org.ssd.Ping;
 import org.ssd.p2p.Node;
 import org.ssd.utils.ChannelUtils;
 import org.ssd.utils.Triple;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashMap;
 
@@ -18,10 +21,12 @@ public class GrpcStubRouter {
 
     private static GrpcStubRouter instance;
     private HashMap<ByteString, ManagedChannel> channels;
+    private final GrpcKadStubManager stubManager;
 
     public GrpcStubRouter() {
         //init the hashmap
         instance = this;
+        this.stubManager = new GrpcKadStubManager();
     }
 
     public static GrpcStubRouter getInstance() {
@@ -78,13 +83,19 @@ public class GrpcStubRouter {
 
     //replicate kademlia operations here
     public void ping(Triple<byte[], InetAddress, Integer> target, Node currentNode) {
-
+        stubManager.ping(target, currentNode, getInstance());
     }
 
-    public void store(Triple<byte[], InetAddress, Integer> target, Node currentNode, byte[] dataToStore) {//change data type
-
+    public void store(Triple<byte[], InetAddress, Integer> target, Node currentNode, byte[] ownerId, byte[] keyToStore, byte[] dataToStore) {//change data type to another triple?
+        stubManager.store(target, currentNode, keyToStore, dataToStore, ownerId, getInstance());
     }
-    //findNode
-    //findValue
+
+    public void findNode(Triple<byte[], InetAddress, Integer> target, Node currentNode) {
+        stubManager.findNode(target, currentNode, getInstance());
+    }
+
+    public void findValue(Triple<byte[], InetAddress, Integer> target, Node currentNode) {
+        stubManager.findNode(target, currentNode, getInstance());
+    }
 
 }
