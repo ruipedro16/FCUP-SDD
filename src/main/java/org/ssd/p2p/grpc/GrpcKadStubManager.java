@@ -18,7 +18,7 @@ public class GrpcKadStubManager {
 
     private static GrpcKadStubManager instance;
 
-    public GrpcKadStubManager() {
+    private GrpcKadStubManager() {
         instance = this;
     }
 

@@ -23,10 +23,10 @@ public class GrpcStubRouter {
     private HashMap<ByteString, ManagedChannel> channels;
     private final GrpcKadStubManager stubManager;
 
-    public GrpcStubRouter() {
+    private GrpcStubRouter() {
         //init the hashmap
         instance = this;
-        this.stubManager = new GrpcKadStubManager();
+        this.stubManager = GrpcKadStubManager.getInstance();
     }
 
     public static GrpcStubRouter getInstance() {
