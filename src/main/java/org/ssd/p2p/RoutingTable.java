@@ -3,7 +3,9 @@ package org.ssd.p2p;
 import lombok.Data;
 import lombok.NonNull;
 import org.ssd.constants.KademliaConstants;
+import org.ssd.utils.Triple;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -11,9 +13,8 @@ import java.util.stream.Collectors;
 
 @Data
 public class RoutingTable {
-    /*
-    protected static final int N_BUCKETS = KademliaConstants.K;
 
+    protected static final int N_BUCKETS = KademliaConstants.K;
     private final byte[] currentNodeID;
     private final List<Bucket> buckets;
 
@@ -22,23 +23,23 @@ public class RoutingTable {
         this.buckets = new ArrayList<>();
 
         for (int i = 0; i < N_BUCKETS; i++) {
-            buckets.add(new Bucket(currentNodeID, i));
+            buckets.add(i, new Bucket());
         }
     }
 
     public void insertNode(@NonNull Node node) {
         int index = Node.getBucket(currentNodeID, node.getId());
-        buckets.get(index).insertNode(node);
+        buckets.get(index).addNode(new Triple<>(node.getId(),node.getAddress(), node.getPort()));
     }
 
     public void removeNode(@NonNull Node node) {
         int index = Node.getBucket(currentNodeID, node.getId());
-        buckets.get(index).removeNode(node);
+        buckets.get(index).removeNode(new Triple<>(node.getId(),node.getAddress(), node.getPort()));
     }
 
-    public List<Node> getAllNodes() {
+    public List<Triple<byte[], InetAddress, Integer>> getAllNodes() {
         return buckets.stream()
-                .flatMap(bucket -> bucket.getNodes().stream())
+                .flatMap(bucket -> bucket.getContacts().stream())
                 .collect(Collectors.toList());
     }
 
@@ -49,7 +50,7 @@ public class RoutingTable {
         for (int i = 0; i < N_BUCKETS; i++) {
             if (!buckets.get(i).isEmpty()) {
                 sb.append("Bucket: ").append(i).append('\n');
-                for (Node n : buckets.get(i).getNodes()) {
+                for (Triple<byte[], InetAddress, Integer> n : buckets.get(i).getContacts()) {
                     sb.append(n.toString()).append('\n');
                 }
             }
@@ -57,5 +58,5 @@ public class RoutingTable {
 
         return sb.toString();
     }
-     */
+
 }

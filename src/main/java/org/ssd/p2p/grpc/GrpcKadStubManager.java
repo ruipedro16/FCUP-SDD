@@ -8,7 +8,6 @@ import org.ssd.Store;
 import org.ssd.p2p.Node;
 import org.ssd.utils.Triple;
 
-import java.io.IOException;
 import java.net.InetAddress;
 
 /**
@@ -36,6 +35,7 @@ public class GrpcKadStubManager {
             @Override
             public void onNext(Ping value) {
                 //handle ping success with lastSeen
+                currentNode.setNodeAsSeen(target);
             }
             @Override
             public void onError(Throwable t) {

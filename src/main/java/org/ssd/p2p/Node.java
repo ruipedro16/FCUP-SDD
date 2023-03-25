@@ -1,15 +1,15 @@
 package org.ssd.p2p;
 
 import lombok.Data;
-import lombok.Getter;
 import org.ssd.constants.KademliaConstants;
 
-import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import org.bouncycastle.util.encoders.Hex;
+import org.ssd.utils.Triple;
 
 import java.util.Arrays;
 
@@ -22,8 +22,8 @@ public class Node {
     private final InetAddress address;
     private long seen;
     //add k_buckets here or in helper RoutingTable
-    private List<Bucket> kBucketList;
-    // private final RoutingTable routingTable;
+    //private List<Bucket> kBucketList;
+    private RoutingTable routingTable;
 
     //add a channel manager for this node or create it here alongside the keys
 
@@ -118,6 +118,32 @@ public class Node {
      */
     public void init() {
         //todo
+    }
+
+    public void setNodeAsSeen(Triple<byte[], InetAddress, Integer> target) {
+        int kBucketIdx = getBucket(this.getId(), target.getFirst());
+        //get bucket
+        Bucket bucket = this.routingTable.getBuckets().get(kBucketIdx);
+        if (bucket.getContacts() == null) {
+            bucket.setContacts(new ArrayList<Triple<byte[], InetAddress, Integer>>());
+        }
+
+        // target.setSeen(System.currentTimeMillis()); todo: either Triple becomes its own class or a node should instanced any time a contact is saved in bucket
+        //iterate through all in bucket
+        boolean exists = false;
+        for (Triple<byte[], InetAddress, Integer> t : bucket.getContacts()) {
+            if (Arrays.equals(target.getFirst(), t.getFirst())) {
+                //found
+                exists = true;
+                break;
+            }
+        }
+
+        if (exists) {
+            //move to tail of bucket
+        } else {
+            // not present, so we start the full ping process (w/ challenge)
+        }
     }
 
     public boolean ping(byte[] nodeId, InetAddress address, int port) {

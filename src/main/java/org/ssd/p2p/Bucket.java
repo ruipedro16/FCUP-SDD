@@ -22,11 +22,17 @@ public class Bucket {
      * InetAddress -> Address of the node
      * Integer     -> port
      */
-    private final List<Triple<byte[], InetAddress, Integer>> contacts;
+    private List<Triple<byte[], InetAddress, Integer>> contacts;
+
+    public Bucket() {
+        //todo
+    }
 
     public boolean isFull() {
         return this.contacts.size() == KademliaConstants.K;
     }
+
+    public boolean isEmpty() { return this.contacts.size() == 0; }
 
     public int size() {
         return this.contacts.size();
@@ -55,4 +61,10 @@ public class Bucket {
 
         return found;
     }
+
+
+    public void removeNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
+        this.contacts.remove(node);
+    }
+
 }
