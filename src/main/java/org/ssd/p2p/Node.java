@@ -5,7 +5,6 @@ import org.ssd.constants.KademliaConstants;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import org.bouncycastle.util.encoders.Hex;
@@ -125,22 +124,25 @@ public class Node {
         //get bucket
         Bucket bucket = this.routingTable.getBuckets().get(kBucketIdx);
         if (bucket.getContacts() == null) {
-            bucket.setContacts(new ArrayList<Triple<byte[], InetAddress, Integer>>());
+            bucket.setContacts(new ArrayList<>());
         }
 
-        // target.setSeen(System.currentTimeMillis()); todo: either Triple becomes its own class or a node should instanced any time a contact is saved in bucket
+        target.setSeen(System.currentTimeMillis()); //todo: either Triple becomes its own class or a node should instanced any time a contact is saved in bucket
         //iterate through all in bucket
-        boolean exists = false;
+        boolean exists = false; int tripleIdx = 0;
         for (Triple<byte[], InetAddress, Integer> t : bucket.getContacts()) {
             if (Arrays.equals(target.getFirst(), t.getFirst())) {
                 //found
                 exists = true;
                 break;
             }
+            tripleIdx++;
         }
 
         if (exists) {
             //move to tail of bucket
+            Triple<byte[], InetAddress, Integer> toMove = bucket.getContacts().remove(tripleIdx);
+            bucket.getContacts().add(toMove);
         } else {
             // not present, so we start the full ping process (w/ challenge)
         }
