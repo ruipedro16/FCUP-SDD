@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.bouncycastle.util.encoders.Hex;
+import org.ssd.p2p.grpc.GrpcKadStubManager;
+import org.ssd.p2p.grpc.GrpcStubRouter;
 import org.ssd.utils.Triple;
 
 import java.util.Arrays;
@@ -20,11 +22,7 @@ public class Node {
     private final int port;
     private final InetAddress address;
     private long seen;
-    //add k_buckets here or in helper RoutingTable
-    //private List<Bucket> kBucketList;
     private RoutingTable routingTable;
-
-    //add a channel manager for this node or create it here alongside the keys
 
     /**
      * Node constructor
@@ -32,11 +30,11 @@ public class Node {
      * @param id   node id
      * @param port node port
      */
-    public Node(byte[] id, int port /*add key or channel manager here*/) {
+    public Node(byte[] id, int port, GrpcStubRouter stubRouter, GrpcKadStubManager kadStubManager) {
         this.id = id;
         this.port = port;
         //init k_buckets
-        // this.routingTable = new RoutingTable(id); // initializes the routingtable & k buckets
+        this.routingTable = new RoutingTable(id, stubRouter, kadStubManager); // initializes the routing table & k buckets
         //init the rest
         this.address = null; // todo: change this
     }
@@ -46,12 +44,12 @@ public class Node {
      *
      * @param port node port
      */
-    public Node(int port) {
+    public Node(int port, GrpcStubRouter stubRouter, GrpcKadStubManager kadStubManager) {
         byte[] genId = new byte[KademliaConstants.B];
         random.nextBytes(genId);
         this.id = genId;
         this.port = port;
-        // this.routingTable = new RoutingTable(genId); // initializes the routingtable & k buckets
+        this.routingTable = new RoutingTable(genId, stubRouter, kadStubManager); // initializes the routing table & k buckets
         this.address = null; // todo: change this
     }
 
@@ -119,6 +117,11 @@ public class Node {
         //todo
     }
 
+    /**
+     * Set a node triple address as seen after. for example, a ping
+     * @param target
+     */
+    // TODO: Use routing table methods instead of adds, getters and remove here
     public void setNodeAsSeen(Triple<byte[], InetAddress, Integer> target) {
         int kBucketIdx = getBucket(this.getId(), target.getFirst());
         //get bucket
@@ -127,7 +130,7 @@ public class Node {
             bucket.setContacts(new ArrayList<>());
         }
 
-        target.setSeen(System.currentTimeMillis()); //todo: either Triple becomes its own class or a node should instanced any time a contact is saved in bucket
+        target.setSeen(System.currentTimeMillis());
         //iterate through all in bucket
         boolean exists = false; int tripleIdx = 0;
         for (Triple<byte[], InetAddress, Integer> t : bucket.getContacts()) {
@@ -141,10 +144,23 @@ public class Node {
 
         if (exists) {
             //move to tail of bucket
-            Triple<byte[], InetAddress, Integer> toMove = bucket.getContacts().remove(tripleIdx);
-            bucket.getContacts().add(toMove);
+            Triple<byte[], InetAddress, Integer> toMove = bucket.getContacts().remove(tripleIdx);//todo: use routing table methods
+            bucket.getContacts().add(toMove);//todo: use routing table methods
         } else {
-            // not present, so we start the full ping process (w/ challenge)
+            // challenge to prevent sybil
+            //todo
+
+            if (bucket.getContacts().size() <= KademliaConstants.K) {
+                //add if has space
+                bucket.getContacts().add(target);//todo: use routing table methods
+            } else {
+                //if size exceeds
+                //ping least recently seen (the bucket is ordered from oldest to most recent), the head of bucket
+                Triple<byte[], InetAddress, Integer> headContact = bucket.getContacts().get(0);
+                this.routingTable.getKadStubRouter().ping(headContact, this, this.routingTable.getStubRouter());
+                //if it is alive, discard this target
+                //else remove head and add target to the end
+            }
         }
     }
 

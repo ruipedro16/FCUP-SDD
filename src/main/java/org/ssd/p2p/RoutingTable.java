@@ -3,6 +3,8 @@ package org.ssd.p2p;
 import lombok.Data;
 import lombok.NonNull;
 import org.ssd.constants.KademliaConstants;
+import org.ssd.p2p.grpc.GrpcKadStubManager;
+import org.ssd.p2p.grpc.GrpcStubRouter;
 import org.ssd.utils.Triple;
 
 import java.net.InetAddress;
@@ -17,9 +19,13 @@ public class RoutingTable {
     protected static final int N_BUCKETS = KademliaConstants.K;
     private final byte[] currentNodeID;
     private final List<Bucket> buckets;
+    private final GrpcStubRouter stubRouter;
+    private final GrpcKadStubManager kadStubRouter;
 
-    public RoutingTable(byte[] currentNodeID) {
+    public RoutingTable(byte[] currentNodeID, GrpcStubRouter stubRouter, GrpcKadStubManager kadStubRouter) {
         this.currentNodeID = currentNodeID;
+        this.stubRouter = stubRouter;
+        this.kadStubRouter = kadStubRouter;
         this.buckets = new ArrayList<>();
 
         for (int i = 0; i < N_BUCKETS; i++) {

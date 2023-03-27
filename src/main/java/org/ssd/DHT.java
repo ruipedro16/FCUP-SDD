@@ -11,6 +11,7 @@ import org.ssd.ledger.blockchain.PoWBlockchain;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.grpc.GrpcServer;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -31,7 +32,7 @@ public class DHT {
     private InetAddress bootstrapNodeAddress;
 
 
-    public DHT(InetAddress bootstrapNodeAddress, Consensus consensus) {
+    public DHT(InetAddress bootstrapNodeAddress, Consensus consensus) throws IOException {
         switch (consensus) {
             case PoW -> this.blockchain = new PoWBlockchain();
             case PoS -> this.blockchain = new PoSBlockchain();

@@ -1,10 +1,10 @@
 package org.ssd.utils;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 @Data
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class Triple <F, S, T>{
     private long seen;
     private final F first;
