@@ -38,8 +38,11 @@ public class Bucket {
         return this.contacts.size();
     }
 
-    public void addNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
-        this.contacts.add(node);
+    public boolean addNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
+        if (this.getContacts().size() < KademliaConstants.K) {
+            return this.contacts.add(node);
+        }
+        return false;
     }
 
     public boolean containsNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
@@ -62,9 +65,22 @@ public class Bucket {
         return found;
     }
 
-
-    public void removeNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
-        this.contacts.remove(node);
+    public boolean removeNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
+        return this.getContacts().remove(node);
     }
 
+    public Triple<byte[], InetAddress, Integer> removeNodeById(int i) {
+        return this.getContacts().remove(i);
+    }
+
+    public boolean moveIdxToTail(int i) {
+        Triple<byte[], InetAddress, Integer> toMove = this.removeNodeById(i);
+        return this.addNode(toMove);
+    }
+
+    public boolean moveToTail(Triple<byte[], InetAddress, Integer> node) {
+        boolean res = this.removeNode(node);
+        if (res) return this.addNode(node);
+        return false;
+    }
 }

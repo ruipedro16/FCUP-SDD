@@ -131,7 +131,7 @@ public class Node {
         }
 
         target.setSeen(System.currentTimeMillis());
-        //iterate through all in bucket
+        //iterate through all in bucket// TODO: use containsNode but with a idx returnable
         boolean exists = false; int tripleIdx = 0;
         for (Triple<byte[], InetAddress, Integer> t : bucket.getContacts()) {
             if (Arrays.equals(target.getFirst(), t.getFirst())) {
@@ -144,8 +144,7 @@ public class Node {
 
         if (exists) {
             //move to tail of bucket
-            Triple<byte[], InetAddress, Integer> toMove = bucket.getContacts().remove(tripleIdx);//todo: use routing table methods
-            bucket.getContacts().add(toMove);//todo: use routing table methods
+            bucket.moveIdxToTail(tripleIdx);
         } else {
             // challenge to prevent sybil
             //todo
