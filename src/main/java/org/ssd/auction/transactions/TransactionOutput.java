@@ -38,4 +38,13 @@ public class TransactionOutput {
     public boolean isMine(@NonNull PublicKey publicKey) {
         return this.recipient.equals(publicKey);
     }
+
+    public byte[] getBytes() {
+        return Arrays.concatenate(
+                this.ID,
+                this.recipient.getEncoded(),
+                Utils.toByteArray(this.amount),
+                this.parentTransactionID
+        );
+    }
 }

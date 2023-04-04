@@ -18,7 +18,7 @@ public class CryptoUtils {
         }
     }
 
-    public static byte[] generateSignature(PrivateKey privateKey, byte[] data) throws NoSuchAlgorithmException {
+    public static byte[] generateSignature(PrivateKey privateKey, byte[] data)  {
         try {
             Signature sig = Signature.getInstance("SHA256withRSA");
             sig.initSign(privateKey);
