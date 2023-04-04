@@ -4,7 +4,7 @@ public class BlockchainConstants {
     /*
      * Number of leading zeros => PoW
      */
-    public static final int PREFIX_LENGTH = 4;
+    public static final int MINING_DIFFICULTY = 3;
 
     /*
      * Minimum and maximum number of transactions in the block

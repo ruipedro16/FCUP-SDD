@@ -6,16 +6,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ssd.auction.AuctionsService;
 import org.ssd.ledger.Wallet;
-import org.ssd.ledger.blockchain.Blockchain;
+import org.ssd.ledger.block.Blockchain;
 import org.ssd.ledger.Consensus;
-import org.ssd.ledger.blockchain.PoSBlockchain;
-import org.ssd.ledger.blockchain.PoWBlockchain;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.grpc.GrpcServer;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Queue;
 
 @NoArgsConstructor
 public class DHT {
@@ -30,7 +29,7 @@ public class DHT {
     private GrpcServer server;
 
     @Getter
-    private Blockchain blockchain;
+    private static Blockchain blockchain;
     //auctions
     private AuctionsService auctionsService;
     private InetAddress bootstrapNodeAddress;
@@ -39,10 +38,12 @@ public class DHT {
     private Wallet wallet;
 
     public DHT(InetAddress bootstrapNodeAddress, Consensus consensus) throws IOException {
+        /*
         switch (consensus) {
             case PoW -> this.blockchain = new PoWBlockchain();
             case PoS -> this.blockchain = new PoSBlockchain();
         }
+        */
 
         this.server = new GrpcServer();
         //if node id is provided at startup then use a different init
@@ -51,6 +52,10 @@ public class DHT {
         this.auctionsService = new AuctionsService(this.node);
         //add option for bootstrap
         this.bootstrapNodeAddress = bootstrapNodeAddress;
+
+
+        // Blockchain
+        this.wallet = new Wallet();
     }
 
     /*

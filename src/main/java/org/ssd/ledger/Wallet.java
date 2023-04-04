@@ -2,6 +2,7 @@ package org.ssd.ledger;
 
 import lombok.Data;
 import org.bouncycastle.util.encoders.Hex;
+import org.ssd.DHT;
 import org.ssd.ledger.transactions.TransactionOutput;
 import org.ssd.utils.CryptoUtils;
 
@@ -13,14 +14,14 @@ import java.util.Map;
 
 @Data
 public class Wallet {
-    private byte[] id;
+    private byte[] id; // Hash of the public key
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
     /**
      * Unspent transactions
      */
-    private Map<String, TransactionOutput> UTXOs;
+    private Map<byte[], TransactionOutput> UTXOs;
 
     public Wallet() {
         KeyPair keyPair = CryptoUtils.generateKeyPair();
@@ -31,10 +32,20 @@ public class Wallet {
     }
 
     /*
-     * TODO: 
+     * Iterate over the unspent transactions of the blockchain
+     * See if they belong to me
+     * If so, add them to the UTXOs
+     * Return the sum of my UTXos
      */
     public double getBalance() {
-        return 0f;
+        return DHT.getBlockchain().getUTXOs().values()
+                .stream()
+                .filter(utxo -> utxo.isMine(this.publicKey))
+                .mapToDouble(utxo -> {
+                    this.UTXOs.put(utxo.getID(), utxo); // add to the list of UTXOs
+                    return utxo.getAmount();
+                })
+                .sum();
     }
 
     @Override

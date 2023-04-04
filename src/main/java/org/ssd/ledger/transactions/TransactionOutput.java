@@ -31,7 +31,6 @@ public class TransactionOutput {
     /**
      * Checks whether the specified public key matches the recipient of this transaction output.
      *
-     * @param publicKey the public key to check against the recipient of this transaction output
      * @return true if the specified public key matches the recipient of this transaction output, false otherwise
      * @throws NullPointerException if the specified public key is null
      */
