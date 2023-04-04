@@ -1,9 +1,11 @@
 package org.ssd;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ssd.auction.AuctionsService;
+import org.ssd.ledger.Wallet;
 import org.ssd.ledger.blockchain.Blockchain;
 import org.ssd.ledger.Consensus;
 import org.ssd.ledger.blockchain.PoSBlockchain;
@@ -26,11 +28,15 @@ public class DHT {
     private Node node;
     //server
     private GrpcServer server;
-    private Blockchain blockchain; // TODO: nao e preciso ter a blockchain toda => Merkle tree
+
+    @Getter
+    private Blockchain blockchain;
     //auctions
     private AuctionsService auctionsService;
     private InetAddress bootstrapNodeAddress;
 
+    @Getter
+    private Wallet wallet;
 
     public DHT(InetAddress bootstrapNodeAddress, Consensus consensus) throws IOException {
         switch (consensus) {

@@ -1,0 +1,48 @@
+package org.ssd.ledger.block;
+
+import lombok.Data;
+import lombok.NonNull;
+import org.ssd.ledger.transactions.Transaction;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+@Data
+public class Block implements Cloneable {
+    private final BlockHeader header;
+    private final List<Transaction> transactions;
+
+    public Block(byte[] previousHash) {
+        this.header = new BlockHeader(previousHash);
+        this.transactions = new ArrayList<>();
+    }
+
+    public byte[] getBlockHash() {
+        return this.header.getHash();
+    }
+
+    public void addTransactions(@NonNull LinkedList<Transaction> transactions) {
+        transactions.forEach(transaction -> {
+            if (transaction == null) {
+                System.out.println("Transaction failed to process. Ignored.");
+                return;
+            }
+
+            if (header.getPreviousHash() != null) { // the hash of the genesis block is `null`
+                if ((!transaction.verifySignature())) {
+                    System.out.println("Transaction Signature failed to verify. Ignored.");
+                    return;
+                }
+            }
+
+            transactions.add(transaction);
+            System.out.println("Transaction Successfully added to the block");
+        });
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+}

@@ -9,6 +9,16 @@ public class CryptoUtils {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    public static KeyPair generateKeyPair() {
+        try {
+            KeyPairGenerator keygen = KeyPairGenerator.getInstance("RSA");
+            keygen.initialize(2048, new SecureRandom());
+            return keygen.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static byte[] hash(byte[] data) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

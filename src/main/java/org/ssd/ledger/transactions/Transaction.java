@@ -1,4 +1,4 @@
-package org.ssd.auction.transactions;
+package org.ssd.ledger.transactions;
 
 import lombok.Data;
 import lombok.NonNull;
@@ -11,6 +11,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -82,12 +83,23 @@ public class Transaction implements Serializable {
         return CryptoUtils.verifySignature(this.sender, this.signature, data);
     }
 
+    /*
+     * Calculate the total amount of inputs for a transaction by iterating over the list of inputs and adding the amounts
+     * of their unspent transaction outputs.
+     */
+    public double getInputsAmount() {
+        return this.txInputs
+                .stream()
+                .filter(Objects::nonNull)
+                .map(TransactionInput::getUnspentTxOutput)
+                .mapToDouble(TransactionOutput::getAmount)
+                .sum();
+    }
+
     public double getOutputsAmount() {
         return this.txOutputs
                 .stream()
                 .mapToDouble(TransactionOutput::getAmount)
                 .sum();
     }
-
-
 }

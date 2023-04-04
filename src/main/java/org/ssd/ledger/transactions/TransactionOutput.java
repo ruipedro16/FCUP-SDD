@@ -1,4 +1,4 @@
-package org.ssd.auction.transactions;
+package org.ssd.ledger.transactions;
 
 import lombok.Data;
 import lombok.NonNull;
