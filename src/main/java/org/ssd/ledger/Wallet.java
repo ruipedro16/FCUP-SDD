@@ -12,6 +12,10 @@ import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+ * TODO: add function to create transactions
+ */
+
 @Data
 public class Wallet {
     private byte[] id; // Hash of the public key

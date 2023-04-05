@@ -8,6 +8,8 @@ import org.ssd.auction.AuctionsService;
 import org.ssd.ledger.Wallet;
 import org.ssd.ledger.block.Blockchain;
 import org.ssd.ledger.Consensus;
+import org.ssd.ledger.mining.MiningManager;
+import org.ssd.ledger.staking.StakingManager;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.grpc.GrpcServer;
 
@@ -28,23 +30,20 @@ public class DHT {
     //server
     private GrpcServer server;
 
-    @Getter
-    private static Blockchain blockchain;
     //auctions
     private AuctionsService auctionsService;
     private InetAddress bootstrapNodeAddress;
 
     @Getter
-    private Wallet wallet;
+    private static Blockchain blockchain;
+
+    private static MiningManager miningManager;
+    private static StakingManager stakingManager;
+
+    @Getter
+    private static Wallet wallet;
 
     public DHT(InetAddress bootstrapNodeAddress, Consensus consensus) throws IOException {
-        /*
-        switch (consensus) {
-            case PoW -> this.blockchain = new PoWBlockchain();
-            case PoS -> this.blockchain = new PoSBlockchain();
-        }
-        */
-
         this.server = new GrpcServer();
         //if node id is provided at startup then use a different init
         this.node = this.server.autoInit(PORT); //defaults
@@ -55,7 +54,19 @@ public class DHT {
 
 
         // Blockchain
-        this.wallet = new Wallet();
+
+        switch (consensus) {
+            case PoW -> {
+                DHT.stakingManager = null;
+                DHT.miningManager = new MiningManager(DHT.blockchain);
+            }
+            case PoS -> {
+                DHT.stakingManager = new StakingManager();
+                DHT.miningManager = null;
+            }
+        }
+
+        DHT.wallet = new Wallet();
     }
 
     /*
