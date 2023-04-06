@@ -10,7 +10,7 @@ import java.util.Random;
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.p2p.grpc.GrpcKadStubManager;
 import org.ssd.p2p.grpc.GrpcStubRouter;
-import org.ssd.utils.Triple;
+import org.ssd.utils.NodeContact;
 
 import java.util.Arrays;
 
@@ -122,8 +122,8 @@ public class Node {
      * @param target
      */
     // TODO: Use routing table methods instead of adds, getters and remove here
-    public void setNodeAsSeen(Triple<byte[], InetAddress, Integer> target) {
-        int kBucketIdx = getBucket(this.getId(), target.getFirst());
+    public void setNodeAsSeen(NodeContact target) {
+        int kBucketIdx = getBucket(this.getId(), target.getId());
         //get bucket
         Bucket bucket = this.routingTable.getBuckets().get(kBucketIdx);
         if (bucket.getContacts() == null) {
@@ -133,8 +133,8 @@ public class Node {
         target.setSeen(System.currentTimeMillis());
         //iterate through all in bucket// TODO: use containsNode but with a idx returnable
         boolean exists = false; int tripleIdx = 0;
-        for (Triple<byte[], InetAddress, Integer> t : bucket.getContacts()) {
-            if (Arrays.equals(target.getFirst(), t.getFirst())) {
+        for (NodeContact t : bucket.getContacts()) {
+            if (Arrays.equals(target.getId(), t.getId())) {
                 //found
                 exists = true;
                 break;
@@ -155,7 +155,7 @@ public class Node {
             } else {
                 //if size exceeds
                 //ping least recently seen (the bucket is ordered from oldest to most recent), the head of bucket
-                Triple<byte[], InetAddress, Integer> headContact = bucket.getContacts().get(0);
+                NodeContact headContact = bucket.getContacts().get(0);
                 this.routingTable.getKadStubRouter().ping(headContact, this, this.routingTable.getStubRouter());
                 //if it is alive, discard this target
                 //else remove head and add target to the end

@@ -9,7 +9,7 @@ public class BlockchainConstants {
     /*
      * Minimum and maximum number of transactions in the block
      */
-    public static final int MAX_N_TRANSACTIONS = 3;
     public static final int MIN_N_TRANSACTIONS = 1;
+    public static final int MAX_N_TRANSACTIONS = 3;
 
 }

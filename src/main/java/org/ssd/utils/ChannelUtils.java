@@ -64,8 +64,8 @@ public class ChannelUtils {
      * @param target  Address
      * @return ManagedChannel Object to give to Stubs
      */
-    public static ManagedChannel initUnsecureChannel(Triple<byte[], InetAddress, Integer> target) {
-        return ManagedChannelBuilder.forAddress(target.getSecond().getHostAddress(), target.getThird())
+    public static ManagedChannel initUnsecureChannel(NodeContact target) {
+        return ManagedChannelBuilder.forAddress(target.getAddress().getHostAddress(), target.getPort())
                 //change this to TLS
                 .usePlaintext()
                 .build();
@@ -75,11 +75,11 @@ public class ChannelUtils {
      * Initialize a TLS secured channel for a specific address and port
      * @return Managed Channel with creds
      */
-    public static ManagedChannel initSecureChannel(Triple<byte[], InetAddress, Integer> target, String cert) throws IOException, CertificateException {
+    public static ManagedChannel initSecureChannel(NodeContact target, String cert) throws IOException, CertificateException {
         X509Certificate serverCertificate = readCertificate(cert);
         SslContext ctx = GrpcSslContexts.forClient().trustManager(serverCertificate).build();
 
-        return NettyChannelBuilder.forAddress(target.getSecond().getHostAddress(), target.getThird())
+        return NettyChannelBuilder.forAddress(target.getAddress().getHostAddress(), target.getPort())
                 .overrideAuthority("SSD")
                 .sslContext(ctx)
                 .build();
@@ -93,7 +93,7 @@ public class ChannelUtils {
      * @param clientPrivateKeyFile    Client's Private Key
      * @return Managed Channel with creds
      */
-    public static ManagedChannel initMutualSecureChannel(Triple<byte[], InetAddress, Integer> target, File trustCertCollectionFile, File clientCertChainFile, File clientPrivateKeyFile) throws IOException {
+    public static ManagedChannel initMutualSecureChannel(NodeContact target, File trustCertCollectionFile, File clientCertChainFile, File clientPrivateKeyFile) throws IOException {
         //TODO
         TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
         if (trustCertCollectionFile != null && clientCertChainFile != null && clientPrivateKeyFile != null) {
@@ -101,7 +101,7 @@ public class ChannelUtils {
             tlsBuilder.trustManager(trustCertCollectionFile);
         }
 
-        return Grpc.newChannelBuilderForAddress(target.getSecond().getHostAddress(), target.getThird(), tlsBuilder.build())
+        return Grpc.newChannelBuilderForAddress(target.getAddress().getHostAddress(), target.getPort(), tlsBuilder.build())
                 .build();
     }
 

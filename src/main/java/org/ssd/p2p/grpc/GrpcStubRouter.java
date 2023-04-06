@@ -2,15 +2,10 @@ package org.ssd.p2p.grpc;
 
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import lombok.Getter;
-import org.ssd.P2PGrpcServiceGrpc;
-import org.ssd.Ping;
 import org.ssd.p2p.Node;
 import org.ssd.utils.ChannelUtils;
-import org.ssd.utils.Triple;
+import org.ssd.utils.NodeContact;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashMap;
 
@@ -36,9 +31,9 @@ public class GrpcStubRouter {
         return instance;
     }
 
-    public ManagedChannel initChannel(Triple<byte[], InetAddress, Integer> target) {
+    public ManagedChannel initChannel(NodeContact target) {
         //verify if channel exists
-        ManagedChannel channel = getChannel(target.getFirst());
+        ManagedChannel channel = getChannel(target.getId());
             if (channel == null || channel.isTerminated() || channel.isShutdown()) {
                 //init
                 ManagedChannel created = ChannelUtils.initUnsecureChannel(target);//init ChannelUtils later on Main for provider
@@ -51,13 +46,13 @@ public class GrpcStubRouter {
             return null;
     }
 
-    public void shutdownChannel(Triple<byte[], InetAddress, Integer> target) {
-        ManagedChannel channel = getChannel(target.getFirst());
+    public void shutdownChannel(NodeContact target) {
+        ManagedChannel channel = getChannel(target.getId());
         if (channel.isShutdown() || channel.isTerminated()) {
             return;
         }
         channel.shutdown();
-        this.channels.remove(ByteString.copyFrom(target.getFirst()));
+        this.channels.remove(ByteString.copyFrom(target.getId()));
     }
 
     /**
@@ -77,24 +72,24 @@ public class GrpcStubRouter {
         return null;// not found
     }
 
-    public void saveChannel(Triple<byte[], InetAddress, Integer> target, ManagedChannel channel) {
-        this.channels.put(ByteString.copyFrom(target.getFirst()), channel);
+    public void saveChannel(NodeContact target, ManagedChannel channel) {
+        this.channels.put(ByteString.copyFrom(target.getId()), channel);
     }
 
     //replicate kademlia operations here
-    public void ping(Triple<byte[], InetAddress, Integer> target, Node currentNode) {
+    public void ping(NodeContact target, Node currentNode) {
         stubManager.ping(target, currentNode, getInstance());
     }
 
-    public void store(Triple<byte[], InetAddress, Integer> target, Node currentNode, byte[] ownerId, byte[] keyToStore, byte[] dataToStore) {//change data type to another triple?
+    public void store(NodeContact target, Node currentNode, byte[] ownerId, byte[] keyToStore, byte[] dataToStore) {//change data type to another triple?
         stubManager.store(target, currentNode, keyToStore, dataToStore, ownerId, getInstance());
     }
 
-    public void findNode(Triple<byte[], InetAddress, Integer> target, Node currentNode) {
+    public void findNode(NodeContact target, Node currentNode) {
         stubManager.findNode(target, currentNode, getInstance());
     }
 
-    public void findValue(Triple<byte[], InetAddress, Integer> target, Node currentNode) {
+    public void findValue(NodeContact target, Node currentNode) {
         stubManager.findNode(target, currentNode, getInstance());
     }
 

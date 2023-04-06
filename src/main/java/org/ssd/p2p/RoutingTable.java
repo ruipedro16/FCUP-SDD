@@ -5,11 +5,9 @@ import lombok.NonNull;
 import org.ssd.constants.KademliaConstants;
 import org.ssd.p2p.grpc.GrpcKadStubManager;
 import org.ssd.p2p.grpc.GrpcStubRouter;
-import org.ssd.utils.Triple;
+import org.ssd.utils.NodeContact;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,15 +33,15 @@ public class RoutingTable {
 
     public void insertNode(@NonNull Node node) {
         int index = Node.getBucket(currentNodeID, node.getId());
-        buckets.get(index).addNode(new Triple<>(node.getId(),node.getAddress(), node.getPort()));
+        buckets.get(index).addNode(new NodeContact(node.getId(),node.getAddress(), node.getPort()));
     }
 
     public void removeNode(@NonNull Node node) {
         int index = Node.getBucket(currentNodeID, node.getId());
-        buckets.get(index).removeNode(new Triple<>(node.getId(),node.getAddress(), node.getPort()));
+        buckets.get(index).removeNode(new NodeContact(node.getId(),node.getAddress(), node.getPort()));
     }
 
-    public List<Triple<byte[], InetAddress, Integer>> getAllNodes() {
+    public List<NodeContact> getAllNodes() {
         return buckets.stream()
                 .flatMap(bucket -> bucket.getContacts().stream())
                 .collect(Collectors.toList());
@@ -56,7 +54,7 @@ public class RoutingTable {
         for (int i = 0; i < N_BUCKETS; i++) {
             if (!buckets.get(i).isEmpty()) {
                 sb.append("Bucket: ").append(i).append('\n');
-                for (Triple<byte[], InetAddress, Integer> n : buckets.get(i).getContacts()) {
+                for (NodeContact n : buckets.get(i).getContacts()) {
                     sb.append(n.toString()).append('\n');
                 }
             }

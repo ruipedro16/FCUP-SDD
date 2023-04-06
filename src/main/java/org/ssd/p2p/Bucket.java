@@ -5,7 +5,7 @@ import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ssd.constants.KademliaConstants;
-import org.ssd.utils.Triple;
+import org.ssd.utils.NodeContact;
 
 import java.net.InetAddress;
 import java.util.Arrays;
@@ -22,7 +22,7 @@ public class Bucket {
      * InetAddress -> Address of the node
      * Integer     -> port
      */
-    private List<Triple<byte[], InetAddress, Integer>> contacts;
+    private List<NodeContact> contacts;
 
     public Bucket() {
         //todo
@@ -38,20 +38,20 @@ public class Bucket {
         return this.contacts.size();
     }
 
-    public boolean addNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
+    public boolean addNode(@NonNull NodeContact node) {
         if (this.getContacts().size() < KademliaConstants.K) {
             return this.contacts.add(node);
         }
         return false;
     }
 
-    public boolean containsNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
+    public boolean containsNode(@NonNull NodeContact node) {
         boolean found = false;
 
-        Triple<byte[], InetAddress, Integer> tmp = null;
+        NodeContact tmp = null;
 
-        for (Triple<byte[], InetAddress, Integer> n : this.contacts) {
-            if (Arrays.equals(n.getFirst(), node.getFirst())) { // compare the IDs of the nodes
+        for (NodeContact n : this.contacts) {
+            if (Arrays.equals(n.getId(), node.getId())) { // compare the IDs of the nodes
                 tmp = n;
                 found = true;
             }
@@ -65,20 +65,20 @@ public class Bucket {
         return found;
     }
 
-    public boolean removeNode(@NonNull Triple<byte[], InetAddress, Integer> node) {
+    public boolean removeNode(@NonNull NodeContact node) {
         return this.getContacts().remove(node);
     }
 
-    public Triple<byte[], InetAddress, Integer> removeNodeById(int i) {
+    public NodeContact removeNodeById(int i) {
         return this.getContacts().remove(i);
     }
 
     public boolean moveIdxToTail(int i) {
-        Triple<byte[], InetAddress, Integer> toMove = this.removeNodeById(i);
+        NodeContact toMove = this.removeNodeById(i);
         return this.addNode(toMove);
     }
 
-    public boolean moveToTail(Triple<byte[], InetAddress, Integer> node) {
+    public boolean moveToTail(NodeContact node) {
         boolean res = this.removeNode(node);
         if (res) return this.addNode(node);
         return false;

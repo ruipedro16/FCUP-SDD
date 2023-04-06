@@ -6,7 +6,7 @@ import org.ssd.P2PGrpcServiceGrpc;
 import org.ssd.Ping;
 import org.ssd.Store;
 import org.ssd.p2p.Node;
-import org.ssd.utils.Triple;
+import org.ssd.utils.NodeContact;
 
 import java.net.InetAddress;
 
@@ -28,7 +28,7 @@ public class GrpcKadStubManager {
         return instance;
     }
 
-    public void ping(Triple<byte[], InetAddress, Integer> target, Node currentNode, GrpcStubRouter originRouter) {
+    public void ping(NodeContact target, Node currentNode, GrpcStubRouter originRouter) {
         P2PGrpcServiceGrpc.P2PGrpcServiceStub stub = P2PGrpcServiceGrpc.newStub(originRouter.initChannel(target));
         Ping pingOp = Ping.newBuilder().setNodeId(ByteString.copyFrom(currentNode.getId())).build();
         stub.ping(pingOp, new StreamObserver<Ping>() {
@@ -44,12 +44,12 @@ public class GrpcKadStubManager {
             }
             @Override
             public void onCompleted() {
-                System.out.println("Finished ping for [" + ByteString.copyFrom(target.getFirst()) + "]\n");
+                System.out.println("Finished ping for [" + ByteString.copyFrom(target.getId()) + "]\n");
             }
         });
     }
 
-    public void store(Triple<byte[], InetAddress, Integer> target, Node currentNode, byte[] dataOwner, byte[] keyToStore, byte[] dataToStore, GrpcStubRouter originRouter) {
+    public void store(NodeContact target, Node currentNode, byte[] dataOwner, byte[] keyToStore, byte[] dataToStore, GrpcStubRouter originRouter) {
         P2PGrpcServiceGrpc.P2PGrpcServiceStub stub = P2PGrpcServiceGrpc.newStub(originRouter.initChannel(target));
         Store storeOp = Store.newBuilder()
                 .setReqNodeId(ByteString.copyFrom(currentNode.getId()))
@@ -74,12 +74,12 @@ public class GrpcKadStubManager {
         });
     }
 
-    public void findNode(Triple<byte[], InetAddress, Integer> target, Node currentNode, GrpcStubRouter originRouter) {
+    public void findNode(NodeContact target, Node currentNode, GrpcStubRouter originRouter) {
         P2PGrpcServiceGrpc.P2PGrpcServiceStub stub = P2PGrpcServiceGrpc.newStub(originRouter.initChannel(target));
 
     }
 
-    public void findValue(Triple<byte[], InetAddress, Integer> target, Node currentNode, GrpcStubRouter originRouter) {
+    public void findValue(NodeContact target, Node currentNode, GrpcStubRouter originRouter) {
         P2PGrpcServiceGrpc.P2PGrpcServiceStub stub = P2PGrpcServiceGrpc.newStub(originRouter.initChannel(target));
 
     }

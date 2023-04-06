@@ -1,10 +1,14 @@
 package org.ssd.auction;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import org.ssd.p2p.Node;
 
 import java.util.*;
 
+@Getter
+@Setter
 public class AuctionsService {
 
     private final Node node;
