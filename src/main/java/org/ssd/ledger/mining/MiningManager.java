@@ -9,6 +9,7 @@ import org.ssd.ledger.transactions.Transaction;
 import org.ssd.ledger.transactions.TransactionPool;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -51,12 +52,31 @@ public class MiningManager {
      @param nTransactions The number of new transactions in the pool.
      */
     private void handleNewTransaction(int nTransactions) {
+        if (transactionPool.getPoolSize() >= BlockchainConstants.MIN_N_TRANSACTIONS && !this.running) {
+            shutDownMinerWorker();
 
+            System.out.println("Enough transactions in pool, starting to mine.");
+            this.running = true;
+
+            int n = Math.min(transactionPool.getPoolSize(), BlockchainConstants.MAX_N_TRANSACTIONS);
+            LinkedList<Transaction> newTransactions = transactionPool.getTransactions(n);
+
+            Block blockToMine = null;
+            if (this.blockchain.getLastBlock() == null) { // If the blockchain is empty, we mine the genesis block
+                blockToMine = new Block(null); // the hash of the genesis block is set to null
+            } else {
+                blockToMine = new Block(this.blockchain.getLastBlock().getHeader().getHash());
+            }
+
+            blockToMine.addTransactions(newTransactions);
+            this.miningWorker = new MiningWorker(this, blockToMine);
+            this.miningWorker.start();
+        }
     }
 
     public void shutDownMinerWorker() {
-        if (miningWorker != null) {
-            miningWorker.interrupt();
+        if (this.miningWorker != null) {
+            this.miningWorker.interrupt();
         }
 
         this.running = false;

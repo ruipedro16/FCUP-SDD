@@ -1,17 +1,72 @@
 package org.ssd.auction;
 
+import lombok.NonNull;
 import org.ssd.p2p.Node;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class AuctionsService {
 
-    private Node node;
-    private ArrayList<Auction> thisNodeAuctions;
+    private final Node node;
+    private final ArrayList<Auction> thisNodeAuctions;
+
+    /*
+     * Key      Auction ID
+     * Value:   Subscribers (wallet ID or node ID?) of the subscribers of that auction
+     */
+    private final Map<byte[], Set<byte[]>> subscribers;
+
+    /*
+     * Auctions that haven't been closed yet
+     */
+    private final Map<byte[], Auction> runningAuctions;
 
     public AuctionsService(Node node) {
         this.node = node;
         this.thisNodeAuctions = new ArrayList<>();
+        this.subscribers = new HashMap<>();
+        this.runningAuctions = new HashMap<>();
     }
 
+    public void subscribeAuction(byte[] subscriberID, byte[] auctionID) {
+        if (subscriberID == null || auctionID == null) {
+            throw new NullPointerException();
+        }
+
+        if (!subscribers.containsKey(auctionID)) {
+            subscribers.put(auctionID, new HashSet<>());
+        }
+
+        subscribers.get(auctionID).add(subscriberID);
+    }
+
+    public void removeSubscriber(byte[] subscriberID, byte[] auctionID) {
+        if (subscriberID == null || auctionID == null) {
+            throw new NullPointerException();
+        }
+
+        Set<byte[]> subscribers = this.subscribers.get(auctionID);
+        subscribers.remove(subscriberID);
+    }
+
+    public Auction getAuction(byte[] auctionID) {
+        if (auctionID == null) {
+            throw new NullPointerException();
+        }
+
+        return this.runningAuctions.get(auctionID);
+    }
+
+    public void closeAuction(byte [] auctionID) {
+        if (auctionID == null) {
+            throw new NullPointerException();
+        }
+
+        this.runningAuctions.remove(auctionID);
+    }
+
+    public void startAuction(@NonNull Item auctionedItem) {
+        Auction newAuction = new Auction(auctionedItem);
+        this.runningAuctions.put(newAuction.getAuctionID(), newAuction);
+    }
 }
