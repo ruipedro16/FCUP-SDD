@@ -49,7 +49,7 @@ public class MiningManager {
     /**
      * Handles a new transaction from the transaction pool.
      *
-     @param nTransactions The number of new transactions in the pool.
+     * @param nTransactions The number of new transactions in the pool.
      */
     private void handleNewTransaction(int nTransactions) {
         if (transactionPool.getPoolSize() >= BlockchainConstants.MIN_N_TRANSACTIONS && !this.running) {
@@ -61,15 +61,7 @@ public class MiningManager {
             int n = Math.min(transactionPool.getPoolSize(), BlockchainConstants.MAX_N_TRANSACTIONS);
             LinkedList<Transaction> newTransactions = transactionPool.getTransactions(n);
 
-            Block blockToMine = null;
-
-            // TODO: verificar isto; this.blockchain.getLastBlock() == null é sempre falso
-            if (this.blockchain.getLastBlock() == null) { // If the blockchain is empty, we mine the genesis block
-                blockToMine = new Block(null); // the hash of the genesis block is set to null
-            } else {
-                blockToMine = new Block(this.blockchain.getLastBlock().getHeader().getHash());
-            }
-
+            Block blockToMine = new Block(this.blockchain.getLastBlock().getHeader().getHash());
             blockToMine.addTransactions(newTransactions);
             this.miningWorker = new MiningWorker(this, blockToMine);
             this.miningWorker.start();
