@@ -18,22 +18,21 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-@NoArgsConstructor
 public class DHT {
-    private static final Logger logger = LogManager.getLogger(DHT.class);
-
     //default port, use 80 for now
     public static final int PORT = 80; // TODO: Remove this: port is set in args[1]
 
     //node
-    private Node node;
+    private static Node node;
+
     //server
-    private GrpcServer server;
+    @Getter
+    private static GrpcServer server;
 
     //auctions
     @Getter
     private static AuctionsService auctionsService;
-    private InetAddress bootstrapNodeAddress;
+    // private InetAddress bootstrapNodeAddress; TODO: Nao é preciso: basta estarno construtor
 
     @Getter
     private static Blockchain blockchain;
@@ -48,20 +47,17 @@ public class DHT {
     private static Wallet wallet;
 
     public DHT(@NonNull InetAddress bootstrapNodeAddress, @NonNull Consensus consensus) throws IOException {
-        this.server = new GrpcServer();
+        DHT.server = new GrpcServer();
         //if node id is provided at startup then use a different init
-        this.node = this.server.autoInit(PORT); //defaults
+        DHT.node = DHT.server.autoInit(PORT); //defaults
 
         //  this.auctionsService = new AuctionsService(this.node); // Moved to initAuctionService
         //add option for bootstrap
-        this.bootstrapNodeAddress = bootstrapNodeAddress;
-
+        // this.bootstrapNodeAddress = bootstrapNodeAddress;
 
         initBlockchain(consensus);
         initAuctionService();
-
         DHT.wallet = new Wallet();
-
         demoTransactions();
     }
 
@@ -86,8 +82,7 @@ public class DHT {
 
     private void initAuctionService() {
         // TODO:
-        DHT.auctionsService = new AuctionsService(this.node); // ???
-
+        DHT.auctionsService = new AuctionsService(DHT.node); // ???
         System.out.println("Initialized the AuctionService");
     }
 
@@ -97,12 +92,14 @@ public class DHT {
 
     /*
      * args[0]: Address of one of the bootstrap nodes
-     * args[1]: Consensus mechanism: PoW or PoS
+     * args[1]: Port
+     * args[2]: Consensus mechanism: PoW or PoS
      *
-     * Convêm haver > 1 bootstrap nodes para evitar CPoF
+     * There should be > 1 bootstrap node to avoid a CPoF
      */
     public static void main(String[] args) throws Exception {
         if (args.length != 3) {
+            System.err.println("Invalid number of arguments\n\n");
             System.err.println("Usage:\nargs[0]: Address of a bootstrap node\nargs[1]: Port\nargs[2]: Consensus mechanism: PoW or PoS");
             System.exit(1);
             return;
@@ -128,7 +125,7 @@ public class DHT {
         switch (args[2]) {
             case "PoW" -> consensus = Consensus.PoW;
             case "PoS" -> consensus = Consensus.PoS;
-            default -> throw new IllegalArgumentException();
+            default -> throw new IllegalArgumentException("Invalid consensus mechanism: " + args[2]);
         }
 
         DHT dht = new DHT(bootstrapNodeAddress, consensus);

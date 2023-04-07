@@ -7,17 +7,17 @@ DHT_Kademlia + Blockchain + Auctions
 
 ### Ledger
 
-- [ ] PoW Blockchain
+- [X] PoW Blockchain
 - [ ] PoS Blockchain
-- [ ] Transactions
-- [ ] MiningWorker (PoW)
-- [ ] Validator (PoS)
+- [X] Transactions
+- [X] MiningWorker (PoW)
+- [X] Validator (PoS)
 
 ### Kademlia
 
 - [X] ID generation (resistant to sybil attacks)
-- [ ] K Buckets
-- [ ] Routing Table
+- [X] K Buckets
+- [X] Routing Table
 
 - [X] Ping
 - [ ] Find Node
