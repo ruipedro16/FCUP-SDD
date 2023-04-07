@@ -75,7 +75,7 @@ public class DHT {
             }
 
             case PoS -> {
-                DHT.stakingManager = new StakingManager();
+                DHT.stakingManager = new StakingManager(DHT.blockchain);
                 DHT.miningManager = null;
             }
         }

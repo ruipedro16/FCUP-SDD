@@ -34,11 +34,14 @@ public class GrpcKadStubManager {
                 //handle ping success with lastSeen
                 currentNode.setNodeAsSeen(target);
             }
+
             @Override
             public void onError(Throwable t) {
+                System.err.println("Encountered error in stream: " + t);
                 t.printStackTrace();
                 //handle onError
             }
+
             @Override
             public void onCompleted() {
                 System.out.println("Finished ping for [" + ByteString.copyFrom(target.getId()) + "]\n");
@@ -59,11 +62,14 @@ public class GrpcKadStubManager {
             public void onNext(Store value) {
                 //handle next
             }
+
             @Override
             public void onError(Throwable t) {
+                System.err.println("Encountered error in stream: " + t);
                 t.printStackTrace();
                 //handle error
             }
+
             @Override
             public void onCompleted() {
                 //handle end/completion
@@ -87,6 +93,7 @@ public class GrpcKadStubManager {
 
             @Override
             public void onError(Throwable t) {
+                System.err.println("Encountered error in stream: " + t);
                 t.printStackTrace();
             }
 
@@ -108,6 +115,7 @@ public class GrpcKadStubManager {
 
             @Override
             public void onError(Throwable t) {
+                System.err.println("Encountered error in stream: " + t);
                 t.printStackTrace();
             }
 
