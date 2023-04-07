@@ -8,7 +8,6 @@ import org.ssd.ledger.transactions.Transaction;
 import org.ssd.ledger.transactions.TransactionPool;
 
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -60,14 +59,11 @@ public class StakingManager {
             LinkedList<Transaction> newTransactions = transactionPool.getTransactions(n);
 
             // Select a validator for the block
-            PublicKey validator = selectValidator();
-
-            // TODO: verify the signature of the transactions
+            PublicKey validatorPK = selectValidator();
+            Block newBlock = new Block(this.blockchain.getLastBlock().getHeader().getHash());
+            newBlock.addTransactions(newTransactions); // transactions are verified here
+            newBlock.setValidator(validatorPK);
         }
-    }
-
-    public void shutDownStakingWorker() {
-        this.running = false;
     }
 
     /**
@@ -81,14 +77,13 @@ public class StakingManager {
 
     /**
      * Selects a validator using a proof-of-stake algorithm based on the total amount staked by each validator.
-     *
+     * <p>
      * This function randomly selects a validator from the validators map, with the probability of each validator being
      * selected proportional to their staked amount.
      *
      * @return the public key of the selected validator, or null if no validators exist
      */
     public PublicKey selectValidator() {
-
         double totalStakedAmount = getTotalStakedAmount();
 
         // If totalStakedAmount == 0, there are no validators to choose from
@@ -96,10 +91,23 @@ public class StakingManager {
             return null;
         }
 
+        // sortedValidators contains the same entries as validators, but sorted by stake (in descending order)
+        // highest stake first
+        TreeMap<PublicKey, Double> sortedValidators = new TreeMap<>(
+                new Comparator<PublicKey>() {
+                    @Override
+                    public int compare(@NonNull PublicKey publicKey1, @NonNull PublicKey publicKey2) {
+                        Double stake1 = validators.get(publicKey1);
+                        Double stake2 = validators.get(publicKey2);
+                        return stake2.compareTo(stake1); // Sort in descending order
+                    }
+                });
+        sortedValidators.putAll(validators); // Copy entries from HashMap to TreeMap
+
         // generates a random number between 0 (inclusive) and totalStakedAmount (exclusive)
         double r = Math.random() * totalStakedAmount;
         double sum = 0;
-        for (Map.Entry<PublicKey, Double> entry : validators.entrySet()) {
+        for (Map.Entry<PublicKey, Double> entry : sortedValidators.entrySet()) {
             sum += entry.getValue();
             if (r <= sum) {
                 return entry.getKey();
@@ -109,5 +117,8 @@ public class StakingManager {
         return null;
     }
 
-
+    public void notifyNewBlock(@NonNull Block block) {
+        this.blockchain.addBlock(block);
+        this.consumers.forEach(consumer -> consumer.accept(block));
+    }
 }

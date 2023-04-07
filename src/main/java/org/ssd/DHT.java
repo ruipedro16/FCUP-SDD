@@ -23,7 +23,7 @@ public class DHT {
     private static final Logger logger = LogManager.getLogger(DHT.class);
 
     //default port, use 80 for now
-    public static final int PORT = 80;
+    public static final int PORT = 80; // TODO: Remove this: port is set in args[1]
 
     //node
     private Node node;
@@ -102,8 +102,8 @@ public class DHT {
      * Convêm haver > 1 bootstrap nodes para evitar CPoF
      */
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
-            System.err.println("Usage:\nargs[0]: Address of a bootstrap node\nargs[1]: Consensus mechanism: PoW or PoS");
+        if (args.length != 3) {
+            System.err.println("Usage:\nargs[0]: Address of a bootstrap node\nargs[1]: Port\nargs[2]: Consensus mechanism: PoW or PoS");
             System.exit(1);
             return;
         }
@@ -117,7 +117,15 @@ public class DHT {
             throw new IllegalArgumentException("Invalid IP address: " + args[0], e);
         }
 
-        switch (args[1]) {
+        int port;
+        try {
+            port = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid port number: " + args[1]);
+        }
+
+
+        switch (args[2]) {
             case "PoW" -> consensus = Consensus.PoW;
             case "PoS" -> consensus = Consensus.PoS;
             default -> throw new IllegalArgumentException();

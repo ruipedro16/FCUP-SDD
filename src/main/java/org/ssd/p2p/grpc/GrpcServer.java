@@ -29,6 +29,7 @@ public class GrpcServer {
      * @param port node port
      * @return node
      */
+    /*
     public Node init(byte[] id, int port) throws IOException {
         Node node = new Node(id, port, stubRouter, kadStubRouter);
         server = ServerBuilder.forPort(port)
@@ -55,6 +56,8 @@ public class GrpcServer {
         System.out.println("Test");
         return node;
     }
+
+     */
 
     /**
      * Auto init that generates a random node id if none is provided

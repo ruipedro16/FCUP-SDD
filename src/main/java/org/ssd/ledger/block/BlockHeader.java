@@ -15,7 +15,7 @@ public class BlockHeader {
     private byte[] merkleRoot;
     private long timestamp;
     private int nonce; // this will be set in the miningworker
-    private /* final */ PublicKey validatorPK; // TODO:
+    private PublicKey validatorPK; // TODO: only in PoS, is null in PoW
 
 
     /*

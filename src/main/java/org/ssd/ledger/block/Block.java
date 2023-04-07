@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NonNull;
 import org.ssd.ledger.transactions.Transaction;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +17,10 @@ public class Block implements Cloneable {
     public Block(byte[] previousHash) {
         this.header = new BlockHeader(previousHash);
         this.transactions = new ArrayList<>();
+    }
+
+    public void setValidator(@NonNull PublicKey publicKey) {
+        this.header.setValidatorPK(publicKey);
     }
 
     public byte[] getBlockHash() {

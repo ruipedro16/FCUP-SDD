@@ -4,20 +4,20 @@ import lombok.Data;
 import org.ssd.constants.KademliaConstants;
 
 import java.net.InetAddress;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Random;
 
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.p2p.grpc.GrpcKadStubManager;
 import org.ssd.p2p.grpc.GrpcStubRouter;
+import org.ssd.utils.CryptoUtils;
 import org.ssd.utils.Pair;
 
 import java.util.Arrays;
 
 @Data
 public class Node {
-
-    private static final Random random = new Random();
     private final byte[] id;
     private final int port;
     private final InetAddress address;
@@ -25,12 +25,12 @@ public class Node {
     private RoutingTable routingTable;
     private Storage storage;
 
-    /**
+    /*
+     * This constructor will never be used because the ID needs to be generated from a challenge to prevent Sybil attacks
      * Node constructor
      *
      * @param id   node id
      * @param port node port
-     */
     public Node(byte[] id, int port, GrpcStubRouter stubRouter, GrpcKadStubManager kadStubManager) {
         this.id = id;
         this.port = port;
@@ -39,6 +39,7 @@ public class Node {
         //init the rest
         this.address = null; // todo: change this
     }
+    */
 
     /**
      * Constructor with omitted nodeId. It generates a random one.
@@ -46,12 +47,36 @@ public class Node {
      * @param port node port
      */
     public Node(int port, GrpcStubRouter stubRouter, GrpcKadStubManager kadStubManager) {
+        /*
         byte[] genId = new byte[KademliaConstants.B];
         random.nextBytes(genId);
-        this.id = genId;
+         */
+        this.id = generateID();
         this.port = port;
-        this.routingTable = new RoutingTable(genId, stubRouter, kadStubManager); // initializes the routing table & k buckets
+        this.routingTable = new RoutingTable(this.id, stubRouter, kadStubManager); // initializes the routing table & k buckets
         this.address = null; // todo: change this
+    }
+
+    /*
+     * Generates the node id by solving a challenge
+     * Similar to PoW
+     */
+    private byte[] generateID() {
+        Random random = new SecureRandom();
+        byte[] res = new byte[KademliaConstants.B];
+        random.nextBytes(res);
+
+        long nonce = 0L;
+        byte[] dataToHash = null;
+
+        String target = new String(new char[KademliaConstants.PREFIX_LENGTH]).replace('\0', '0');
+        while(!Hex.toHexString(this.id).substring(0, KademliaConstants.PREFIX_LENGTH).equals(target)) {
+            // increment the nonce
+            nonce++;
+            res = CryptoUtils.hash(dataToHash);
+        }
+
+        return res;
     }
 
     public static byte[] getDistance(byte[] id1, byte[] id2) {
