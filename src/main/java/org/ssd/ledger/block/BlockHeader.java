@@ -6,6 +6,8 @@ import lombok.Data;
 import org.bouncycastle.util.Arrays;
 import org.ssd.utils.CryptoUtils;
 
+import java.security.PublicKey;
+
 @Data
 public class BlockHeader {
     private byte[] hash;
@@ -13,12 +15,19 @@ public class BlockHeader {
     private byte[] merkleRoot;
     private long timestamp;
     private int nonce; // this will be set in the miningworker
+    private /* final */ PublicKey validatorPK; // TODO:
 
+
+    /*
+     * For PoW
+     * For PoS we will also require the Public Key of the Validator
+     */
     public BlockHeader(byte[] previousHash) {
         this.previousHash = previousHash;
         this.timestamp = System.currentTimeMillis();
         this.hash = computeHash();
     }
+
 
     public byte[] computeHash() {
         byte[] dataToHash = Arrays.concatenate(

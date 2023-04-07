@@ -67,20 +67,21 @@ public class DHT {
 
     private void initBlockchain(@NonNull Consensus consensus) {
         DHT.blockchain = new Blockchain();
+        System.out.println("Initialized the blockchain");
 
         switch (consensus) {
             case PoW -> {
                 DHT.stakingManager = null;
                 DHT.miningManager = new MiningManager(DHT.blockchain);
+                System.out.println("Initialized the Mining Manager");
             }
 
             case PoS -> {
                 DHT.stakingManager = new StakingManager(DHT.blockchain);
                 DHT.miningManager = null;
+                System.out.println("Initialized the Staking Manager");
             }
         }
-
-        System.out.println("Initialized the blockchain");
     }
 
     private void initAuctionService() {

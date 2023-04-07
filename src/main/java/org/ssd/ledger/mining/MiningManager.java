@@ -62,6 +62,8 @@ public class MiningManager {
             LinkedList<Transaction> newTransactions = transactionPool.getTransactions(n);
 
             Block blockToMine = null;
+
+            // TODO: verificar isto; this.blockchain.getLastBlock() == null é sempre falso
             if (this.blockchain.getLastBlock() == null) { // If the blockchain is empty, we mine the genesis block
                 blockToMine = new Block(null); // the hash of the genesis block is set to null
             } else {

@@ -4,6 +4,7 @@ import lombok.NonNull;
 import org.ssd.constants.BlockchainConstants;
 import org.ssd.ledger.block.Block;
 import org.ssd.ledger.block.Blockchain;
+import org.ssd.ledger.transactions.Transaction;
 import org.ssd.ledger.transactions.TransactionPool;
 
 import java.security.PublicKey;
@@ -52,7 +53,16 @@ public class StakingManager {
      */
     public void handleNewTransaction(int nTransactions) {
         if (transactionPool.getPoolSize() >= BlockchainConstants.MIN_N_TRANSACTIONS && !this.running) {
-            // TODO:
+            System.out.println("Enough transactions in pool.");
+            this.running = true;
+
+            int n = Math.min(transactionPool.getPoolSize(), BlockchainConstants.MAX_N_TRANSACTIONS);
+            LinkedList<Transaction> newTransactions = transactionPool.getTransactions(n);
+
+            // Select a validator for the block
+            PublicKey validator = selectValidator();
+
+            // TODO: verify the signature of the transactions
         }
     }
 
