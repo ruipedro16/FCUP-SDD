@@ -1,16 +1,19 @@
 package org.ssd.p2p;
 
 import lombok.Data;
+import lombok.NonNull;
 import org.ssd.constants.KademliaConstants;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.p2p.grpc.GrpcKadStubManager;
 import org.ssd.p2p.grpc.GrpcStubRouter;
 import org.ssd.utils.NodeContact;
+import org.ssd.utils.Pair;
 
 import java.util.Arrays;
 
@@ -23,6 +26,7 @@ public class Node {
     private final InetAddress address;
     private long seen;
     private RoutingTable routingTable;
+    private Storage storage;
 
     /**
      * Node constructor
@@ -118,10 +122,28 @@ public class Node {
     }
 
     /**
-     * Set a node triple address as seen after. for example, a ping
-     * @param target
+     * Private call wrapper to RPC ping
+     * @param contact contact to ping (must have nodeId, INetAddress and port at least)
      */
-    // TODO: Use routing table methods instead of adds, getters and remove here
+    private void ping(NodeContact contact) {
+        this.routingTable.getKadStubRouter().ping(contact, this, this.routingTable.getStubRouter());
+    }
+
+    /**
+     * Private call wrapper to RPC store
+     * @param target target to store data to
+     * @param dataOwnerId data owner from where data originated from
+     * @param key key of the data
+     * @param dataValue value to store
+     */
+    private void store(NodeContact target,byte[] dataOwnerId ,byte[] key,byte[] dataValue) {
+        this.routingTable.getKadStubRouter().store(target, this,dataOwnerId,key,dataValue, this.routingTable.getStubRouter());
+    }
+
+    /**
+     * Set a node triple address as seen after. for example, a ping
+     * @param target Target to set as seen by this node
+     */
     public void setNodeAsSeen(NodeContact target) {
         int kBucketIdx = getBucket(this.getId(), target.getId());
         //get bucket
@@ -131,52 +153,44 @@ public class Node {
         }
 
         target.setSeen(System.currentTimeMillis());
-        //iterate through all in bucket// TODO: use containsNode but with a idx returnable
-        boolean exists = false; int tripleIdx = 0;
-        for (NodeContact t : bucket.getContacts()) {
-            if (Arrays.equals(target.getId(), t.getId())) {
-                //found
-                exists = true;
-                break;
-            }
-            tripleIdx++;
-        }
 
-        if (exists) {
+        if (bucket.containsNode(target)) {
             //move to tail of bucket
-            bucket.moveIdxToTail(tripleIdx);
+            bucket.moveToTail(target);
         } else {
             // challenge to prevent sybil
             //todo
 
-            if (bucket.getContacts().size() <= KademliaConstants.K) {
-                //add if has space
-                bucket.getContacts().add(target);//todo: use routing table methods
+            if (!bucket.isFull()) {
+                //add if it has space
+                bucket.moveToTail(target);
             } else {
                 //if size exceeds
                 //ping least recently seen (the bucket is ordered from oldest to most recent), the head of bucket
                 NodeContact headContact = bucket.getContacts().get(0);
-                this.routingTable.getKadStubRouter().ping(headContact, this, this.routingTable.getStubRouter());
+                this.ping(headContact);
                 //if it is alive, discard this target
                 //else remove head and add target to the end
             }
         }
-    }
-
-    public boolean ping(byte[] nodeId, InetAddress address, int port) {
-        return true;
+        //place bucket in position after mutation
+        this.routingTable.putKBucketAtPosition(kBucketIdx, bucket);
     }
 
     /**
      * Store a given message to this node and propagate to nearby k nodes
-     * @param nodeId id of the node that requested the store
+     * @param dataOwnerId id of the node that requested the store
      * @param key id key for the message
      * @param value value/message to store
      */
-    public void store(byte[] nodeId, byte[] key, byte[] value) {
-        //get nearest nodes
-        if (Arrays.equals(nodeId, this.getId())) {
-            //store locally or extract this condition
+    public void storeInNode(byte[] dataOwnerId, byte[] key, byte[] value) {
+        //if the data owner is us
+        if (Arrays.equals(dataOwnerId, this.getId())) {
+            //store locally
+            this.storage.addValueToKey(new Pair<>(dataOwnerId, key), value);
+        }
+        if (this.storage.hasKey(new Pair<>(dataOwnerId, key))) {
+            this.storage.addValueToKey(new Pair<>(dataOwnerId, key), value);
         } else {
             //get best k_bucket
             //iterate through all (Bucket.containsNode)

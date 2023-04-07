@@ -30,10 +30,11 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
     @Override
     public void store(Store request, StreamObserver<Store> responseObserver) {
-        byte[] nodeId = request.getNodeId().toByteArray();
+        byte[] dataOwnerId = request.getReqNodeId().toByteArray();
+        //byte[] nodeId = request.getNodeId().toByteArray();
         byte[] key = request.getKey().toByteArray();
         byte[] value = request.getValue().toByteArray();
-        this.node.store(nodeId, key, value);
+        this.node.storeInNode(dataOwnerId, key, value);
         Store.Builder storeResponse = Store.newBuilder();
         storeResponse.setValue(request.getValue());
         responseObserver.onNext(storeResponse.build());

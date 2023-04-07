@@ -47,6 +47,11 @@ public class RoutingTable {
                 .collect(Collectors.toList());
     }
 
+    public void putKBucketAtPosition(int index, Bucket toAdd) {
+        //.set() replaces. See .add() for a different method
+        this.getBuckets().set(index, toAdd);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

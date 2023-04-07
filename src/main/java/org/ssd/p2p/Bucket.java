@@ -45,7 +45,7 @@ public class Bucket {
         return false;
     }
 
-    public boolean containsNode(@NonNull NodeContact node) {
+    public boolean containsAndMoveToTail(@NonNull NodeContact node) {
         boolean found = false;
 
         NodeContact tmp = null;
@@ -58,11 +58,53 @@ public class Bucket {
         }
 
         if (found) { // if the node is in the k bucket we remove it and re add it
-            this.contacts.remove(tmp);
-            this.contacts.add(tmp);
+            this.moveToTail(node);
         }
 
         return found;
+    }
+
+    /**
+     * Simple contains method, does not mutate array
+     * @param node node to search
+     * @return boolean
+     */
+    public boolean containsNode(@NonNull NodeContact node) {
+        boolean found = false;
+
+        NodeContact tmp = null;
+
+        for (NodeContact n : this.contacts) {
+            if (Arrays.equals(n.getId(), node.getId())) { // compare the IDs of the nodes
+                found = true;
+                break;
+            }
+        }
+
+        return found;
+    }
+
+    /**
+     * Returns index of node to search
+     * @param node node to get the index of
+     * @return -1 if it doesn't exist, any other is the index
+     */
+    public int indexOfNode(@NonNull NodeContact node) {
+        boolean exists = false; int tripleIdx = 0;
+        for (NodeContact t : getContacts()) {
+            if (Arrays.equals(node.getId(), t.getId())) {
+                //found
+                exists = true;
+                break;
+            }
+            tripleIdx++;
+        }
+
+        if (!exists) {
+            tripleIdx = -1;
+        }
+
+        return tripleIdx;
     }
 
     public boolean removeNode(@NonNull NodeContact node) {
