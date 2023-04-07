@@ -1,18 +1,15 @@
 package org.ssd.p2p;
 
 import lombok.Data;
-import lombok.NonNull;
 import org.ssd.constants.KademliaConstants;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.p2p.grpc.GrpcKadStubManager;
 import org.ssd.p2p.grpc.GrpcStubRouter;
-import org.ssd.utils.NodeContact;
 import org.ssd.utils.Pair;
 
 import java.util.Arrays;
@@ -192,6 +189,7 @@ public class Node {
         if (this.storage.hasKey(new Pair<>(dataOwnerId, key))) {
             this.storage.addValueToKey(new Pair<>(dataOwnerId, key), value);
         } else {
+            // TODO:
             //get best k_bucket
             //iterate through all (Bucket.containsNode)
             //if found -> store locally on target node

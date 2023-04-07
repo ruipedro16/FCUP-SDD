@@ -5,7 +5,6 @@ import lombok.NonNull;
 import org.ssd.constants.KademliaConstants;
 import org.ssd.p2p.grpc.GrpcKadStubManager;
 import org.ssd.p2p.grpc.GrpcStubRouter;
-import org.ssd.utils.NodeContact;
 
 import java.util.ArrayList;
 import java.util.List;

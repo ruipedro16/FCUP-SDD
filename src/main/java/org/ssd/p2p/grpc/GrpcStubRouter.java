@@ -4,9 +4,8 @@ import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import org.ssd.p2p.Node;
 import org.ssd.utils.ChannelUtils;
-import org.ssd.utils.NodeContact;
+import org.ssd.p2p.NodeContact;
 
-import java.net.InetAddress;
 import java.util.HashMap;
 
 /**

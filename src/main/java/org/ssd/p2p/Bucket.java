@@ -5,9 +5,7 @@ import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ssd.constants.KademliaConstants;
-import org.ssd.utils.NodeContact;
 
-import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
 

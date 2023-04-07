@@ -1,4 +1,4 @@
-package org.ssd.utils;
+package org.ssd.p2p;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
