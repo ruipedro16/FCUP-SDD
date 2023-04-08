@@ -3,6 +3,7 @@ package org.ssd.p2p.grpc;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import lombok.NonNull;
+import org.bouncycastle.util.encoders.Hex;
 import org.ssd.*;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.NodeContact;
@@ -25,7 +26,7 @@ public class GrpcKadStubManager {
         return instance;
     }
 
-    public void ping(@NonNull NodeContact target, @NonNull Node currentNode, GrpcStubRouter originRouter) {
+    public void ping(@NonNull NodeContact target, @NonNull Node currentNode, @NonNull GrpcStubRouter originRouter) {
         P2PGrpcServiceGrpc.P2PGrpcServiceStub stub = P2PGrpcServiceGrpc.newStub(originRouter.initChannel(target));
         Ping pingOp = Ping.newBuilder().setNodeId(ByteString.copyFrom(currentNode.getId())).build();
         stub.ping(pingOp, new StreamObserver<Ping>() {
@@ -49,7 +50,8 @@ public class GrpcKadStubManager {
         });
     }
 
-    public void store(@NonNull NodeContact target, @NonNull Node currentNode, byte[] dataOwner, byte[] keyToStore, byte[] dataToStore, GrpcStubRouter originRouter) {
+    public void store(@NonNull NodeContact target, @NonNull Node currentNode, byte[] dataOwner, byte[] keyToStore, byte[] dataToStore,
+                      @NonNull GrpcStubRouter originRouter) {
         P2PGrpcServiceGrpc.P2PGrpcServiceStub stub = P2PGrpcServiceGrpc.newStub(originRouter.initChannel(target));
         Store storeOp = Store.newBuilder()
                 .setReqNodeId(ByteString.copyFrom(currentNode.getId()))
@@ -61,6 +63,8 @@ public class GrpcKadStubManager {
             @Override
             public void onNext(Store value) {
                 //handle next
+                System.out.println("Store request sent to [" + Hex.toHexString(target.getId()) + "]");
+                currentNode.storeInNode(dataOwner, keyToStore, dataToStore);
             }
 
             @Override
@@ -77,7 +81,7 @@ public class GrpcKadStubManager {
         });
     }
 
-    public void findNode(@NonNull NodeContact target, @NonNull Node currentNode, GrpcStubRouter originRouter) {
+    public void findNode(@NonNull NodeContact target, @NonNull Node currentNode, @NonNull GrpcStubRouter originRouter) {
         P2PGrpcServiceGrpc.P2PGrpcServiceStub stub = P2PGrpcServiceGrpc.newStub(originRouter.initChannel(target));
         FindNodeRequest request = FindNodeRequest.newBuilder()
                 .setReqNodeId(ByteString.copyFrom(currentNode.getId()))
@@ -104,7 +108,7 @@ public class GrpcKadStubManager {
         });
     }
 
-    public void findValue(@NonNull NodeContact target, @NonNull Node currentNode, GrpcStubRouter originRouter) {
+    public void findValue(@NonNull NodeContact target, @NonNull Node currentNode, @NonNull GrpcStubRouter originRouter) {
         P2PGrpcServiceGrpc.P2PGrpcServiceStub stub = P2PGrpcServiceGrpc.newStub(originRouter.initChannel(target));
         FindValueRequest request = null; // todo: change this
         stub.findValue(request, new StreamObserver<FindValueResponse>() {
