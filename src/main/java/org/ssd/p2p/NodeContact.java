@@ -1,15 +1,25 @@
 package org.ssd.p2p;
 
 import lombok.Data;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.net.InetAddress;
 
 @Data
-@RequiredArgsConstructor
 public class NodeContact{
     private long seen;
-    private final byte[] id;
+    private byte[] id;
     private final InetAddress address;
-    private final int port;
+    private int port;
+
+    public NodeContact(byte[] id, @NonNull InetAddress address, int port) {
+        this.id = id;
+        this.address = address;
+        this.port = port;
+    }
+
+    public NodeContact(@NonNull InetAddress address) {
+        this.address = address;
+    }
 }

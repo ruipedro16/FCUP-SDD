@@ -6,24 +6,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ssd.constants.KademliaConstants;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
 @Data
 public class Bucket {
-    private static final Logger logger = LogManager.getLogger(Bucket.class);
-
-    /*
-     * Contains information about each node
-     * byte[]      -> Node ID
-     * InetAddress -> Address of the node
-     * Integer     -> port
-     */
     private List<NodeContact> contacts;
 
     public Bucket() {
-        //todo
+        this.contacts = new ArrayList<>();
     }
 
     public boolean isFull() {
@@ -118,9 +111,11 @@ public class Bucket {
         return this.addNode(toMove);
     }
 
-    public boolean moveToTail(NodeContact node) {
+    public boolean moveToTail(@NonNull NodeContact node) {
         boolean res = this.removeNode(node);
-        if (res) return this.addNode(node);
+        if (res) {
+            return this.addNode(node);
+        }
         return false;
     }
 }

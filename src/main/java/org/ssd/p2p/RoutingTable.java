@@ -14,12 +14,13 @@ import java.util.stream.Collectors;
 public class RoutingTable {
 
     protected static final int N_BUCKETS = KademliaConstants.K;
+
     private final byte[] currentNodeID;
     private final List<Bucket> buckets;
-    private final GrpcStubRouter stubRouter;
-    private final GrpcKadStubManager kadStubRouter;
+    private final GrpcStubRouter stubRouter; // used to manage the gRPC connections to other nodes in the network
+    private final GrpcKadStubManager kadStubRouter; // used to manage the gRPC connections to other nodes in the network
 
-    public RoutingTable(byte[] currentNodeID, GrpcStubRouter stubRouter, GrpcKadStubManager kadStubRouter) {
+    public RoutingTable(byte[] currentNodeID, @NonNull GrpcStubRouter stubRouter, @NonNull GrpcKadStubManager kadStubRouter) {
         this.currentNodeID = currentNodeID;
         this.stubRouter = stubRouter;
         this.kadStubRouter = kadStubRouter;
@@ -30,14 +31,23 @@ public class RoutingTable {
         }
     }
 
+    public Bucket getBucket(int index) {
+        return this.buckets.get(index);
+    }
+
     public void insertNode(@NonNull Node node) {
         int index = Node.getBucket(currentNodeID, node.getId());
-        buckets.get(index).addNode(new NodeContact(node.getId(),node.getAddress(), node.getPort()));
+        buckets.get(index).addNode(new NodeContact(node.getId(), node.getAddress(), node.getPort()));
+    }
+
+    public void insertNode(@NonNull NodeContact node) {
+        int index = Node.getBucket(currentNodeID, node.getId());
+        buckets.get(index).addNode(new NodeContact(node.getId(), node.getAddress(), node.getPort()));
     }
 
     public void removeNode(@NonNull Node node) {
         int index = Node.getBucket(currentNodeID, node.getId());
-        buckets.get(index).removeNode(new NodeContact(node.getId(),node.getAddress(), node.getPort()));
+        buckets.get(index).removeNode(new NodeContact(node.getId(), node.getAddress(), node.getPort()));
     }
 
     public List<NodeContact> getAllNodes() {
@@ -46,7 +56,7 @@ public class RoutingTable {
                 .collect(Collectors.toList());
     }
 
-    public void putKBucketAtPosition(int index, Bucket toAdd) {
+    public void putKBucketAtPosition(int index, @NonNull Bucket toAdd) {
         //.set() replaces. See .add() for a different method
         this.getBuckets().set(index, toAdd);
     }
@@ -63,8 +73,6 @@ public class RoutingTable {
                 }
             }
         }
-
         return sb.toString();
     }
-
 }

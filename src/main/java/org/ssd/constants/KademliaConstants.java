@@ -1,8 +1,15 @@
 package org.ssd.constants;
 
+import org.ssd.utils.CryptoUtils;
+
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class KademliaConstants {
+    public static final int DEFAULT_PORT = 8080;
+
+    public static final byte[] DEFAULT_NODE_ID = CryptoUtils.hash("BOOTSTRAP".getBytes(StandardCharsets.UTF_8));
+
     /**
      * Number of leading zeros in the ID of the node
      * Ensures resistance against Sybil attacks

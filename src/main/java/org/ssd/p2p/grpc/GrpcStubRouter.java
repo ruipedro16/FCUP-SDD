@@ -2,6 +2,7 @@ package org.ssd.p2p.grpc;
 
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
+import lombok.NonNull;
 import org.ssd.p2p.Node;
 import org.ssd.utils.ChannelUtils;
 import org.ssd.p2p.NodeContact;
@@ -84,7 +85,7 @@ public class GrpcStubRouter {
         stubManager.store(target, currentNode, keyToStore, dataToStore, ownerId, getInstance());
     }
 
-    public void findNode(NodeContact target, Node currentNode) {
+    public void findNode(@NonNull NodeContact target, @NonNull Node currentNode) {
         stubManager.findNode(target, currentNode, getInstance());
     }
 

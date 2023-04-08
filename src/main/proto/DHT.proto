@@ -49,12 +49,16 @@ message FindNodeResponse {
 }
 
 message FindValueRequest {
-  // todo
+  bytes reqNodeId = 1;
+  uint32 reqNodePort = 2;
+  bytes key = 3;
 }
 
 message FindValueResponse {
-  // todo
+  bytes value = 1;
+  bytes ownerId = 2;
 }
+
 
 message Message {
   bytes senderID = 1;

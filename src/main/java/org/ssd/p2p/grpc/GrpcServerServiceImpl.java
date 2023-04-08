@@ -2,20 +2,24 @@ package org.ssd.p2p.grpc;
 
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
+import lombok.NonNull;
 import org.ssd.*;
 import org.ssd.p2p.Node;
+import org.ssd.p2p.NodeContact;
+
+import java.util.List;
 
 /**
  * Protobuf service implementation for receiving proto messages
  */
 public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImplBase {
 
-    private Node node;
+    private final Node node;
 
     //add message subscribers
 
     // todo
-    public GrpcServerServiceImpl(Node node) {
+    public GrpcServerServiceImpl(@NonNull Node node) {
         this.node = node;
     }
 
@@ -31,7 +35,6 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
     @Override
     public void store(Store request, StreamObserver<Store> responseObserver) {
         byte[] dataOwnerId = request.getReqNodeId().toByteArray();
-        //byte[] nodeId = request.getNodeId().toByteArray();
         byte[] key = request.getKey().toByteArray();
         byte[] value = request.getValue().toByteArray();
         this.node.storeInNode(dataOwnerId, key, value);
@@ -41,9 +44,22 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
         responseObserver.onCompleted();
     }
 
+    // TODO: nao sei se isto esta bem (?)
     @Override
     public void findNode(FindNodeRequest request, StreamObserver<FindNodeResponse> responseObserver) {
-        //find node in routing table, add this.node.findNodes
+        byte[] dataOwnerId = request.getReqNodeId().toByteArray();
+        byte[] key = request.getNodeId().toByteArray();
+        List<NodeContact> closestNodes = this.node.findClosestNodes(key);
+
+        FindNodeResponse.Builder responseBuilder = FindNodeResponse.newBuilder();
+        for (NodeContact node : closestNodes) {
+            responseBuilder.setNodeId(ByteString.copyFrom(node.getId()));
+            responseBuilder.setAddress(node.getAddress().getHostAddress());
+            responseBuilder.setNodePort(node.getPort());
+            responseBuilder.setLastSeenTime(node.getSeen());
+            responseObserver.onNext(responseBuilder.build());
+            responseBuilder.clear();
+        }
         responseObserver.onCompleted();
     }
 
