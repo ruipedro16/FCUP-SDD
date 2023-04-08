@@ -25,7 +25,7 @@ public class Transaction implements Serializable {
     private final List<TransactionInput> txInputs;
     private final List<TransactionOutput> txOutputs;
 
-    public Transaction(@NonNull PublicKey sender, @NonNull PublicKey recipient, double amount, @NonNull List<TransactionInput> txInputs) {
+    public Transaction(@NonNull PublicKey sender, @NonNull PublicKey recipient, double amount, List<TransactionInput> txInputs) {
         this.sender = sender;
         this.recipient = recipient;
         this.amount = amount;

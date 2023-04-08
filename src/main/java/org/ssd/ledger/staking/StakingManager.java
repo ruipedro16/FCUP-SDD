@@ -22,7 +22,7 @@ public class StakingManager {
     /**
      * A map of public keys of validators to their respective stake amount.
      */
-    private final Map<PublicKey, Double> validators; // TODO: Double ou Long ?
+    private final Map<PublicKey, Double> validators;
     private boolean running;
 
     public StakingManager(@NonNull Blockchain blockchain) {

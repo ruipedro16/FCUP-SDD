@@ -1,7 +1,10 @@
 package org.ssd.p2p;
 
+import com.google.common.primitives.Longs;
 import lombok.Data;
 import lombok.NonNull;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.constants.KademliaConstants;
 import org.ssd.p2p.grpc.GrpcKadStubManager;
@@ -10,9 +13,15 @@ import org.ssd.utils.CryptoUtils;
 import org.ssd.utils.Pair;
 import org.ssd.utils.Utils;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
-import java.util.*;
+import java.security.Security;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Data
 public class Node {
@@ -33,10 +42,18 @@ public class Node {
         byte[] genId = new byte[KademliaConstants.B];
         random.nextBytes(genId);
          */
-        this.id = generateID();
         this.port = port;
+        InetAddress tmp = null;
+        try {
+            tmp = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        assert tmp != null;
+        this.address = tmp;
+        this.id = generateID();
         this.routingTable = new RoutingTable(this.id, stubRouter, kadStubManager); // initializes the routing table & k buckets
-        this.address = null; // todo: change this
     }
 
     /*
@@ -44,21 +61,54 @@ public class Node {
      * Similar to PoW
      */
     private byte[] generateID() {
-        Random random = new SecureRandom();
         byte[] res = new byte[KademliaConstants.B];
-        random.nextBytes(res);
-
+        new SecureRandom().nextBytes(res);
         long nonce = 0L;
-        byte[] dataToHash = null;
 
         String target = new String(new char[KademliaConstants.PREFIX_LENGTH]).replace('\0', '0');
-        while (!Hex.toHexString(this.id).substring(0, KademliaConstants.PREFIX_LENGTH).equals(target)) {
-            // increment the nonce
+        do {
             nonce++;
+            byte[] dataToHash = Arrays.concatenate(
+                    Longs.toByteArray(nonce),
+                    this.address.getAddress(),
+                    Utils.toByteArray(this.port)
+            );
             res = CryptoUtils.hash(dataToHash);
-        }
 
+        } while (!Hex.toHexString(res).substring(0, KademliaConstants.PREFIX_LENGTH).equals(target));
         return res;
+    }
+
+    public void joinNetwork(@NonNull NodeContact bootstrapNodeContact) throws IOException {
+        // Ping the bootstrap node to make sure it's up
+
+
+        // Add the bootstrap node to our routing table
+        this.routingTable.insertNode(bootstrapNodeContact);
+
+        // Find nodes in the network to populate our routing table
+
+        /*
+         * Schedule regular maintenance tasks
+         */
+        ScheduledExecutorService maintenanceScheduler = Executors.newScheduledThreadPool(1);
+        /*
+        maintenanceScheduler.scheduleAtFixedRate(this::pingRandomNode, 0, PING_INTERVAL, TimeUnit.SECONDS);
+        maintenanceScheduler.scheduleAtFixedRate(this::republishValues, 0, REPUBLISH_INTERVAL, TimeUnit.SECONDS);
+        maintenanceScheduler.scheduleAtFixedRate(this::refreshBucket, 0, REFRESH_INTERVAL, TimeUnit.SECONDS);
+        */
+    }
+
+    private void pingRandomNode() {
+
+    }
+
+    private void republishValues() {
+
+    }
+
+    private void refreshBucket() {
+
     }
 
     /*
@@ -113,13 +163,6 @@ public class Node {
     }
 
     /**
-     * Function receives the necessary info to place this node into a kademlia network
-     */
-    public void init() {
-        //todo
-    }
-
-    /**
      * Private call wrapper to RPC ping
      *
      * @param contact contact to ping (must have nodeId, INetAddress and port at least)
@@ -149,7 +192,7 @@ public class Node {
      *
      * @param target Target to set as seen by this node
      */
-    public void setNodeAsSeen(NodeContact target) {
+    public void setNodeAsSeen(@NonNull NodeContact target) {
         int kBucketIdx = getBucket(this.getId(), target.getId());
         //get bucket
         Bucket bucket = this.routingTable.getBuckets().get(kBucketIdx);
@@ -189,7 +232,7 @@ public class Node {
      */
     public void storeInNode(byte[] dataOwnerId, byte[] key, byte[] value) {
         //if the data owner is us, store locally
-        if (Arrays.equals(dataOwnerId, this.getId())) {
+        if (java.util.Arrays.equals(dataOwnerId, this.getId())) {
             this.storage.addValueToKey(new Pair<>(dataOwnerId, key), value);
         }
 

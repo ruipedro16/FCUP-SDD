@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class RoutingTable {
 
     protected static final int N_BUCKETS = KademliaConstants.K;
+
     private final byte[] currentNodeID;
     private final List<Bucket> buckets;
     private final GrpcStubRouter stubRouter; // used to manage the gRPC connections to other nodes in the network
@@ -30,7 +31,16 @@ public class RoutingTable {
         }
     }
 
+    public Bucket getBucket(int index) {
+        return this.buckets.get(index);
+    }
+
     public void insertNode(@NonNull Node node) {
+        int index = Node.getBucket(currentNodeID, node.getId());
+        buckets.get(index).addNode(new NodeContact(node.getId(), node.getAddress(), node.getPort()));
+    }
+
+    public void insertNode(@NonNull NodeContact node) {
         int index = Node.getBucket(currentNodeID, node.getId());
         buckets.get(index).addNode(new NodeContact(node.getId(), node.getAddress(), node.getPort()));
     }
@@ -63,8 +73,6 @@ public class RoutingTable {
                 }
             }
         }
-
         return sb.toString();
     }
-
 }
