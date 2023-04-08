@@ -21,7 +21,7 @@ public class CryptoUtils {
 
     public static byte[] hash(byte[] data) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
             return digest.digest(data);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);

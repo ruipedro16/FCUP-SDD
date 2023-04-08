@@ -8,13 +8,11 @@ import org.ssd.p2p.grpc.GrpcKadStubManager;
 import org.ssd.p2p.grpc.GrpcStubRouter;
 import org.ssd.utils.CryptoUtils;
 import org.ssd.utils.Pair;
+import org.ssd.utils.Utils;
 
 import java.net.InetAddress;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Data
 public class Node {
@@ -30,7 +28,7 @@ public class Node {
      *
      * @param port node port
      */
-    public Node(int port, GrpcStubRouter stubRouter, GrpcKadStubManager kadStubManager) {
+    public Node(int port, @NonNull GrpcStubRouter stubRouter, @NonNull GrpcKadStubManager kadStubManager) {
         /*
         byte[] genId = new byte[KademliaConstants.B];
         random.nextBytes(genId);
@@ -63,21 +61,6 @@ public class Node {
         return res;
     }
 
-    public static byte[] getDistance(byte[] id1, byte[] id2) {
-        if (id1.length != KademliaConstants.B || id2.length != KademliaConstants.B) {
-            throw new IllegalArgumentException();
-        }
-
-        byte[] res = new byte[id1.length];
-
-        for (int i = 0; i < id1.length; i++) {
-            res[i] = (byte) (id1[i] ^ id2[i]);
-        }
-
-        return res;
-    }
-
-
     /*
      * Counts the number of 0s in the beginning of a byte sequence
      *
@@ -105,6 +88,20 @@ public class Node {
             pref = extras;
         }
         return pref;
+    }
+
+    public static byte[] getDistance(byte[] id1, byte[] id2) {
+        if (id1 == null || id2 == null || id1.length != KademliaConstants.B || id2.length != KademliaConstants.B) {
+            throw new IllegalArgumentException();
+        }
+
+        byte[] res = new byte[id1.length];
+
+        for (int i = 0; i < id1.length; i++) {
+            res[i] = (byte) (id1[i] ^ id2[i]);
+        }
+
+        return res;
     }
 
     /*
@@ -225,16 +222,55 @@ public class Node {
 
     }
 
+    /**
+     * Find the K nodes in the network that are closest to a given key
+     *
+     * @param key
+     * @return
+     */
     public List<NodeContact> findClosestNodes(byte[] key) {
         if (key == null) {
             throw new IllegalArgumentException();
         }
 
         List<NodeContact> closestNodes = new ArrayList<>();
-        int kBucketIdx = getBucket(this.getId(), key);
+        int kBucketIdx = getBucket(this.getId(), key); // index of the Kademlia bucket that contains the key
 
         Bucket kBucket = this.routingTable.getBuckets().get(kBucketIdx);
-        // TODO:
+        if (kBucket.getContacts() != null) {
+            closestNodes.addAll(kBucket.getContacts());
+        }
+
+        // Iterate through the buckets to the left and right of the key's bucket, adding the contacts from those buckets
+        // to the closestNodes list as well, until the list contains K nodes or there are no more buckets to add.
+        for (int i = 1; closestNodes.size() < KademliaConstants.K && (kBucketIdx - i >= 0 || kBucketIdx + i < KademliaConstants.B); i++) {
+            if (kBucketIdx - i >= 0) {
+                Bucket leftBucket = this.routingTable.getBuckets().get(kBucketIdx - i);
+                if (leftBucket.getContacts() != null) {
+                    closestNodes.addAll(leftBucket.getContacts());
+                }
+            }
+
+            if (kBucketIdx + i < KademliaConstants.B) {
+                Bucket rightBucket = this.routingTable.getBuckets().get(kBucketIdx + i);
+                if (rightBucket.getContacts() != null) {
+                    closestNodes.addAll(rightBucket.getContacts());
+                }
+            }
+        }
+
+        // sorted by distance from the key
+        closestNodes.sort(new NodeContactDistanceComparator(key));
+
+        // Iterate through the closestNodes list and call findNode on each node, except for the current node. This is
+        // to update the current node's routing table with the most up-to-date information about the network.
+        closestNodes = closestNodes.subList(0, Math.min(KademliaConstants.K, closestNodes.size()));
+        for (NodeContact node : closestNodes) {
+            if (!java.util.Arrays.equals(node.getId(), this.getId())) {
+                this.routingTable.getKadStubRouter().findNode(node, this, this.routingTable.getStubRouter());
+            }
+        }
+
         return closestNodes;
     }
 }

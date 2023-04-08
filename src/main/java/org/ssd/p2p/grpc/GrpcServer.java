@@ -24,42 +24,6 @@ public class GrpcServer {
     }
 
     /**
-     * Initializes the node
-     * @param id node id
-     * @param port node port
-     * @return node
-     */
-    /*
-    public Node init(byte[] id, int port) throws IOException {
-        Node node = new Node(id, port, stubRouter, kadStubRouter);
-        server = ServerBuilder.forPort(port)
-                .addService(protoServerService)
-                .build();
-        server.start();
-
-        logger.info("gRPC server running on port " + port);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.info("Shutting down gRPC server");
-
-            try {
-                if (server != null) {
-                    server.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            logger.info("gRPC server shut down");
-        }));
-
-        System.out.println("Test");
-        return node;
-    }
-
-     */
-
-    /**
      * Auto init that generates a random node id if none is provided
      * @param port node port
      * @return node
