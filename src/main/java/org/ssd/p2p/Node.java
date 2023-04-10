@@ -3,21 +3,20 @@ package org.ssd.p2p;
 import com.google.common.primitives.Longs;
 import lombok.Data;
 import lombok.NonNull;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.constants.KademliaConstants;
 import org.ssd.p2p.grpc.GrpcKadStubManager;
 import org.ssd.p2p.grpc.GrpcStubRouter;
+import org.ssd.p2p.storage.Storage;
+import org.ssd.p2p.storage.StorageWithHeaderData;
 import org.ssd.utils.CryptoUtils;
-import org.ssd.utils.Pair;
 import org.ssd.utils.Utils;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -172,18 +171,6 @@ public class Node {
     }
 
     /**
-     * Private call wrapper to RPC store
-     *
-     * @param target      target to store data to
-     * @param dataOwnerId data owner from where data originated from
-     * @param key         key of the data
-     * @param dataValue   value to store
-     */
-    private void store(NodeContact target, byte[] dataOwnerId, byte[] key, byte[] dataValue) {
-        this.routingTable.getKadStubRouter().store(target, this, dataOwnerId, key, dataValue, this.routingTable.getStubRouter());
-    }
-
-    /**
      * Set a node triple address as seen after. for example, a ping
      * <p>
      * updates the routing table of the node to indicate that it has seen a particular node.
@@ -233,34 +220,7 @@ public class Node {
     public void storeInNode(byte[] dataOwnerId, byte[] key, byte[] value) {
         //if the data owner is us, store locally
         if (java.util.Arrays.equals(dataOwnerId, this.getId())) {
-            this.storage.addValueToKey(new Pair<>(dataOwnerId, key), value);
-        }
-
-        if (this.storage.hasKey(new Pair<>(dataOwnerId, key))) {
-            this.storage.addValueToKey(new Pair<>(dataOwnerId, key), value);
-        } else {
-            // get the best k-bucket for the given key
-            int kBucketIdx = getBucket(this.getId(), key); // get the best k-bucket for the given key
-            Bucket bucket = this.routingTable.getBuckets().get(kBucketIdx);
-
-            // Iterate through all nodes and check if any node in the k-bucket contains the key
-            boolean found = false;
-            for (NodeContact contact : bucket.getContacts()) {
-                // check if the contact contains the key
-                // this.routingTable.getKadStubRouter().findValue(contact, key, this.getRoutingTable().getStubRouter());
-                if (this.storage.hasKey(new Pair<>(dataOwnerId, key))) {
-                    // if found, store the message locally on the contact node and propagate it to nearby nodes
-                    this.routingTable.getKadStubRouter().store(contact, this, dataOwnerId, key, value, this.routingTable.getStubRouter());
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                // if not found, send a FIND_NODE message to all nodes in the k-bucket
-                bucket.getContacts()
-                        .forEach(contact -> routingTable.getKadStubRouter().findNode(contact, this, this.routingTable.getStubRouter()));
-            }
+            this.storage.addValueToKey(key, new StorageWithHeaderData(dataOwnerId, value));
         }
 
     }
@@ -268,8 +228,6 @@ public class Node {
     /**
      * Find the K nodes in the network that are closest to a given key
      *
-     * @param key
-     * @return
      */
     public List<NodeContact> findClosestNodes(byte[] key) {
         if (key == null) {
