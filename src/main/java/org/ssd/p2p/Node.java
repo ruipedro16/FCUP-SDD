@@ -37,10 +37,6 @@ public class Node {
      * @param port node port
      */
     public Node(int port, @NonNull GrpcStubRouter stubRouter, @NonNull GrpcKadStubManager kadStubManager) {
-        /*
-        byte[] genId = new byte[KademliaConstants.B];
-        random.nextBytes(genId);
-         */
         this.port = port;
         InetAddress tmp = null;
         try {
@@ -53,6 +49,28 @@ public class Node {
         this.address = tmp;
         this.id = generateID();
         this.routingTable = new RoutingTable(this.id, stubRouter, kadStubManager); // initializes the routing table & k buckets
+    }
+
+    /**
+     * Does not generate a new id => used for the bootstrap node where the ID is known
+     */
+    public Node(byte[] id, int port, @NonNull GrpcStubRouter stubRouter, @NonNull GrpcKadStubManager kadStubManager) {
+        this.port = port;
+        InetAddress tmp = null;
+        try {
+            tmp = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        assert tmp != null;
+        this.address = tmp;
+        this.id = id;
+        this.routingTable = new RoutingTable(this.id, stubRouter, kadStubManager); // initializes the routing table & k buckets
+    }
+
+    public GrpcStubRouter getStubRouter() {
+        return this.routingTable.getStubRouter();
     }
 
     /*
@@ -166,7 +184,7 @@ public class Node {
      *
      * @param contact contact to ping (must have nodeId, INetAddress and port at least)
      */
-    private void ping(@NonNull NodeContact contact) {
+    public void ping(@NonNull NodeContact contact) {
         this.routingTable.getKadStubRouter().ping(contact, this, this.routingTable.getStubRouter());
     }
 

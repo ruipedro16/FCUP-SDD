@@ -1,5 +1,6 @@
 package org.ssd.p2p.remote;
 
+import lombok.AllArgsConstructor;
 import org.ssd.p2p.Bucket;
 import org.ssd.p2p.KadAction;
 import org.ssd.p2p.Node;

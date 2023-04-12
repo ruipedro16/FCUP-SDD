@@ -2,8 +2,6 @@ package org.ssd.p2p;
 
 import lombok.Data;
 import lombok.NonNull;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.ssd.constants.KademliaConstants;
 
 import java.util.ArrayList;
@@ -23,7 +21,9 @@ public class Bucket {
         return this.contacts.size() == KademliaConstants.K;
     }
 
-    public boolean isEmpty() { return this.contacts.size() == 0; }
+    public boolean isEmpty() {
+        return this.contacts.size() == 0;
+    }
 
     public int size() {
         return this.contacts.size();
@@ -57,6 +57,7 @@ public class Bucket {
 
     /**
      * Simple contains method, does not mutate array
+     *
      * @param node node to search
      * @return boolean
      */
@@ -77,11 +78,13 @@ public class Bucket {
 
     /**
      * Returns index of node to search
+     *
      * @param node node to get the index of
      * @return -1 if it doesn't exist, any other is the index
      */
     public int indexOfNode(@NonNull NodeContact node) {
-        boolean exists = false; int tripleIdx = 0;
+        boolean exists = false;
+        int tripleIdx = 0;
         for (NodeContact t : getContacts()) {
             if (Arrays.equals(node.getId(), t.getId())) {
                 //found

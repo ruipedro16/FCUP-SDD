@@ -73,15 +73,13 @@ public class Wallet {
         }
 
         // Create a new transaction object and sign it
-        Transaction newTransaction = new Transaction(this.publicKey, recipient, amount, txInputs);
+        Transaction newTransaction = new Transaction(this.publicKey, recipient, amount, txInputs); // the ID is set in the constructor
         newTransaction.generateSignature(this.privateKey);
 
         /*
          * Update the UTXO lists to reflect the spent outputs and new outputs.
          */
         txInputs.forEach(t -> UTXOs.remove(t.getTxOutputID())); // removes the spent UTXOs from the sender's UTXO list
-
-        newTransaction.setId(Transaction.computeTransactionID(newTransaction));
 
         // Set the new UTXOs for the resulting transaction for the recipient
         newTransaction.getTxOutputs().add(new TransactionOutput(newTransaction.getRecipient(), amount, newTransaction.getId()));

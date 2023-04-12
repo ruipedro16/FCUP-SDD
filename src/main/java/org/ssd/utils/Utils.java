@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
-    public static byte[] toByteArray(List<byte[]> bytes) {
+    public static byte[] toByteArray(@NonNull List<byte[]> bytes) {
         int totalLength = 0;
         for (byte[] array : bytes) {
             totalLength += array.length;

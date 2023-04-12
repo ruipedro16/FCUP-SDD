@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 @Data
 public class Transaction implements Serializable {
-    private byte[] id;
-    private PublicKey sender;
-    private PublicKey recipient;
-    private double amount;
+    private final byte[] id;
+    private final PublicKey sender;
+    private final PublicKey recipient;
+    private final double amount;
     private byte[] signature;
 
     private final List<TransactionInput> txInputs;

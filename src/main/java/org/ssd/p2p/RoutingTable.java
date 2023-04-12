@@ -57,22 +57,16 @@ public class RoutingTable {
     }
 
     public void putKBucketAtPosition(int index, @NonNull Bucket toAdd) {
-        //.set() replaces. See .add() for a different method
+        //NOTE: .set() replaces. See .add() for a different method
         this.getBuckets().set(index, toAdd);
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < N_BUCKETS; i++) {
-            if (!buckets.get(i).isEmpty()) {
-                sb.append("Bucket: ").append(i).append('\n');
-                for (NodeContact n : buckets.get(i).getContacts()) {
-                    sb.append(n.toString()).append('\n');
-                }
-            }
+    public List<NodeContact> getKClosestNodes(byte[] targetID) {
+        if (targetID == null) {
+            throw new IllegalArgumentException();
         }
-        return sb.toString();
+        
+        // TODO:
+        return null;
     }
 }

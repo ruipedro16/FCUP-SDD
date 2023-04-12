@@ -51,7 +51,7 @@ public class DHT {
 
     public DHT(@NonNull NodeContact bootstrapContact, @NonNull Consensus consensus) throws IOException {
         DHT.server = new GrpcServer();
-        DHT.node = DHT.server.autoInit(PORT); // the node should be inserted in the network here
+        // DHT.node = DHT.server.autoInit(PORT); // the node should be inserted in the network here
         initBlockchain(consensus);
         initAuctionService();
         DHT.wallet = new Wallet();
