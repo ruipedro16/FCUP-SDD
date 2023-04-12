@@ -28,6 +28,8 @@ dependencies {
     //Gradle gives error without this dependency
     // https://mavenlibs.com/maven/dependency/javax.annotation/javax.annotation-api
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    testImplementation 'junit:junit:4.13.1'
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
 
     // Netty
     // https://mavenlibs.com/maven/dependency/io.grpc/grpc-netty-shaded

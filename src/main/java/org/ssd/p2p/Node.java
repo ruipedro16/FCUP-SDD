@@ -130,32 +130,29 @@ public class Node {
 
     /*
      * Counts the number of 0s in the beginning of a byte sequence
-     *
-     * Probably wrong
      */
-    public static int getPrefixLength(byte[] seq) {
-        int pref = 0;
-        if (seq.length == 0) {
-            return pref;
+    public static int getPrefixLength(byte[] bytes) {
+        if (bytes == null) {
+            throw new IllegalArgumentException();
         }
 
-        byte b = seq[0];
-        if (b == 0) {
-            pref = 8;
-        } else {
-            int extras = 0;
-            for (int i = 7; i >= 0; i--) {
-                boolean a = (b & (1 << i)) == 0;
-                if (a) {
-                    extras++;
-                } else {
-                    break;
+        int prefixLength = 0;
+        for (byte b : bytes) {
+            if (b == (byte) 0) {
+                prefixLength += 8;
+            } else {
+                int mask = 0x80;
+                while ((b & mask) == 0) {
+                    prefixLength++;
+                    mask >>>= 1;
                 }
+                break;
             }
-            pref = extras;
         }
-        return pref;
+        return prefixLength;
     }
+
+
 
     public static byte[] getDistance(byte[] id1, byte[] id2) {
         if (id1 == null || id2 == null || id1.length != KademliaConstants.B || id2.length != KademliaConstants.B) {
