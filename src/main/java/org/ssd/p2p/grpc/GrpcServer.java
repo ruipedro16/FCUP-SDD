@@ -22,29 +22,23 @@ public class GrpcServer {
         if (id == null) {
             throw new IllegalArgumentException();
         }
-        /*
         Node node = new Node(id, port, stubRouter, kadStubRouter);
         this.server = ServerBuilder.forPort(port)
                 .addService(new GrpcServerServiceImpl(node))
                 .build();
         this.server.start();
-        System.out.println("gRPC server running on port " + port);
+        System.out.printf("gRPC server running on %s on port %2d%n", node.getAddress().getHostAddress() , this.server.getPort());
         return node;
-         */
-        return null;
     }
 
     public Node initRegularNode(int port) throws IOException {
-        /*
         Node node = new Node(port, stubRouter, kadStubRouter);
         this.server = ServerBuilder.forPort(port)
                 .addService(new GrpcServerServiceImpl(node))
                 .build();
         this.server.start();
-        System.out.println("gRPC server running on port " + port);
+        System.out.printf("gRPC server running on %s on port %2d%n", node.getAddress().getHostAddress() , this.server.getPort());
         return node;
-         */
-        return null;
     }
 
     public void shutdown() throws InterruptedException {

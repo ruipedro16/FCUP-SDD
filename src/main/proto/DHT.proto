@@ -55,8 +55,11 @@ message FindValueRequest {
 }
 
 message FindValueResponse {
-  bytes value = 1;
-  bytes ownerId = 2;
+  bytes key = 1;
+  bytes value = 2;
+  bytes nodeId = 3;
+  string address = 4;
+  uint32 port = 5;
 }
 
 

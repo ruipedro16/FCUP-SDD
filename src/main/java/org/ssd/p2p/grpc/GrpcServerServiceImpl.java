@@ -45,28 +45,41 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
         responseObserver.onCompleted();
     }
 
-    // TODO: nao sei se isto esta bem (?)
     @Override
     public void findNode(FindNodeRequest request, StreamObserver<FindNodeResponse> responseObserver) {
         byte[] dataOwnerId = request.getReqNodeId().toByteArray();
         byte[] key = request.getNodeId().toByteArray();
         List<NodeContact> closestNodes = this.node.findClosestNodes(key);
 
-        FindNodeResponse.Builder responseBuilder = FindNodeResponse.newBuilder();
         for (NodeContact node : closestNodes) {
+            FindNodeResponse.Builder responseBuilder = FindNodeResponse.newBuilder();//rpc expects a stream of unary messages
             responseBuilder.setNodeId(ByteString.copyFrom(node.getId()));
             responseBuilder.setAddress(node.getAddress().getHostAddress());
             responseBuilder.setNodePort(node.getPort());
             responseBuilder.setLastSeenTime(node.getSeen());
             responseObserver.onNext(responseBuilder.build());
-            responseBuilder.clear();
         }
         responseObserver.onCompleted();
     }
 
     @Override
     public void findValue(FindValueRequest request, StreamObserver<FindValueResponse> responseObserver) {
-        super.findValue(request, responseObserver);
+        byte[] key = request.getKey().toByteArray();
+        //is the value on current node
+        byte[] entry = this.node.getStorage().getValue(key).getValue();
+        if (entry != null) {
+            FindValueResponse.Builder responseBuilder = FindValueResponse.newBuilder();
+            responseBuilder.setKey(request.getKey());
+            responseBuilder.setValue(ByteString.copyFrom(entry));
+        } else {//if it's not on this node, then return possible closest nodes
+            List<NodeContact> closestNodes = this.node.findClosestNodes(key);
+            for (NodeContact node : closestNodes) {
+                FindValueResponse.Builder responseBuilder = FindValueResponse.newBuilder();
+                responseBuilder.setKey(ByteString.copyFrom(node.getId()));
+                responseObserver.onNext(responseBuilder.build());
+            }
+        }
+        responseObserver.onCompleted();
     }
 
     @Override
