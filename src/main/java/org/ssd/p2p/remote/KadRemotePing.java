@@ -1,30 +1,40 @@
 package org.ssd.p2p.remote;
 
-import lombok.AllArgsConstructor;
-import org.ssd.p2p.KadAction;
+import lombok.Getter;
+import lombok.NonNull;
 import org.ssd.p2p.Node;
-import org.ssd.p2p.NodeContact;
+import org.ssd.p2p.routing.NodeContact;
 
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Remote call to ping node
- */
-@AllArgsConstructor
 public class KadRemotePing implements KadAction {
+    @Getter
     private final Node currentNode;
-    private final byte[] targetNodeID;
+    private final byte[] targetID;
+
+    public KadRemotePing(@NonNull Node currentNode, byte[] targetID) {
+        this.currentNode = currentNode;
+        this.targetID = targetID;
+    }
 
     @Override
     public void trigger() {
-        List<NodeContact> kClosestNodes = currentNode.getRoutingTable().getKClosestNodes(targetNodeID);
+        List<NodeContact> closestNodes = this.currentNode.getRoutingTable().getKClosestNodes(this.targetID);
+        closestNodes.stream()
+                .filter(contact -> Arrays.equals(contact.getId(), targetID))
+                .findFirst()
+                .ifPresent(contact -> this.currentNode.getClientManager().ping(contact, this));
 
-        for (NodeContact targetContact : kClosestNodes) {
-            if (Arrays.equals(targetContact.getId(), targetNodeID)) {
-                currentNode.getStubRouter().ping(targetContact, currentNode);
-                return;
-            }
-        }
+    }
+
+    @Override
+    public void onSuccess(@NonNull NodeContact nodeContact) {
+        this.currentNode.getRoutingTable().addContact(nodeContact);
+    }
+
+    @Override
+    public void onFailure(@NonNull NodeContact nodeContact) {
+        this.currentNode.getRoutingTable().warnUnresponsiveContact(nodeContact);
     }
 }

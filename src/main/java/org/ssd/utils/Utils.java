@@ -4,6 +4,8 @@ import lombok.NonNull;
 import org.bouncycastle.util.Arrays;
 import org.ssd.ledger.transactions.Transaction;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,5 +54,33 @@ public class Utils {
         }
 
         return treeLayer.get(0);
+    }
+
+    public static InetAddress getLocalHostAddress() {
+        InetAddress address = null;
+
+        try {
+            address = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+
+        return address;
+    }
+
+    public static String getLocalHostStringAddress(@NonNull InetAddress address) {
+        return address.getHostAddress();
+    }
+
+    public static InetAddress getAddressFromString(@NonNull String address) {
+        InetAddress res = null;
+
+        try {
+            res = InetAddress.getByName(address);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+
+        return res;
     }
 }

@@ -1,94 +1,164 @@
 package org.ssd.p2p.grpc;
 
-import com.google.protobuf.ByteString;
-
+import com.google.protobuf.GeneratedMessageV3;
+import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 import lombok.NonNull;
+import org.bouncycastle.util.encoders.Hex;
 import org.ssd.*;
 import org.ssd.p2p.Node;
-import org.ssd.p2p.NodeContact;
+import org.ssd.p2p.routing.NodeContact;
+import org.ssd.p2p.remote.KadRemoteBroadcast;
+import org.ssd.p2p.storage.StoredData;
+import org.ssd.utils.Pair;
+import org.ssd.utils.Utils;
+import org.ssd.utils.gRPCUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
-/**
- * Protobuf service implementation for receiving proto messages
- */
 public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImplBase {
+    private final Node currentNode;
+    private final List<BiConsumer<NodeContact, byte[]>> messageConsumers;
 
-    private final Node node;
+    public GrpcServerServiceImpl(@NonNull Node currentNode) {
+        this.currentNode = currentNode;
+        this.messageConsumers = new ArrayList<>();
+    }
 
-    //add message subscribers
+    public void registerMessageConsumer(@NonNull BiConsumer<NodeContact, byte[]> consumer) {
+        this.messageConsumers.add(consumer);
+    }
 
-    // todo
-    public GrpcServerServiceImpl(@NonNull Node node) {
-        this.node = node;
+    /**
+     * Asynchronously handles the specified Protobuf message. If the message is a ProtoNodeContact message,
+     * creates a new NodeContact object from the message fields and adds it to the current node's routing table.
+     *
+     * @param msg the Protobuf message to handle
+     * @throws NullPointerException if msg is null
+     */
+    private void handleProtoNodeContactMsg(@NonNull GeneratedMessageV3 msg) {
+        CompletableFuture.runAsync(() -> {
+            if (msg instanceof ProtoNodeContact) {
+                NodeContact incomingContact = new NodeContact(Utils.getAddressFromString(((ProtoNodeContact) msg).getNodeIpAddress()),
+                        ((ProtoNodeContact) msg).getNodePort(), ((ProtoNodeContact) msg).getNodeId().toByteArray(), System.currentTimeMillis());
+
+                this.currentNode.getRoutingTable().addContact(incomingContact);
+            }
+        });
     }
 
     @Override
-    public void ping(Ping request, StreamObserver<Ping> responseObserver) {
-        Ping.Builder pingResponse = Ping.newBuilder();
-        pingResponse.setNodeId(ByteString.copyFrom(this.node.getId()));
-        pingResponse.setReqNodePort(this.node.getPort()); // return this node's port unless we want to return another message
-        responseObserver.onNext(pingResponse.build());
+    public void ping(ProtoNodeContact request, StreamObserver<ProtoNodeContact> responseObserver) {
+        handleProtoNodeContactMsg(request);
+        ProtoNodeContact response = gRPCUtils.toGRPC(this.currentNode.getCurrentNode());
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void store(Store request, StreamObserver<Store> responseObserver) {
-        byte[] dataOwnerId = request.getReqNodeId().toByteArray();
+    public void store(ProtoContent request, StreamObserver<ProtoContent> responseObserver) {
+        handleProtoNodeContactMsg(request.getSendingNode());
+
         byte[] key = request.getKey().toByteArray();
         byte[] value = request.getValue().toByteArray();
-        this.node.storeInNode(dataOwnerId, key, value);
-        Store.Builder storeResponse = Store.newBuilder();
-        storeResponse.setValue(request.getValue());
-        responseObserver.onNext(storeResponse.build());
+        this.currentNode.getDht().store(key, value, request.getOriginalPublisherId().toByteArray());
+
+        ProtoContent response = ProtoContent.newBuilder()
+                .setSendingNode(gRPCUtils.toGRPC(this.currentNode.getCurrentNode()))
+                .setKey(request.getKey())
+                .setValue(request.getValue())
+                .build();
+
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void findNode(FindNodeRequest request, StreamObserver<FindNodeResponse> responseObserver) {
-        byte[] dataOwnerId = request.getReqNodeId().toByteArray();
-        byte[] key = request.getNodeId().toByteArray();
-        List<NodeContact> closestNodes = this.node.findClosestNodes(key);
+    public void findNode(ProtoTargetContact request, StreamObserver<ProtoFindNodeResponse> responseObserver) {
+        System.out.println("Find Node request from " + Hex.toHexString(request.getSendingNode().getNodeId().toByteArray()));
+        handleProtoNodeContactMsg(request.getSendingNode());
 
-        for (NodeContact node : closestNodes) {
-            FindNodeResponse.Builder responseBuilder = FindNodeResponse.newBuilder();//rpc expects a stream of unary messages
-            responseBuilder.setNodeId(ByteString.copyFrom(node.getId()));
-            responseBuilder.setAddress(node.getAddress().getHostAddress());
-            responseBuilder.setNodePort(node.getPort());
-            responseBuilder.setLastSeenTime(node.getSeen());
-            responseObserver.onNext(responseBuilder.build());
+        byte[] targetID = request.getTarget().toByteArray();
+        List<NodeContact> contactList = this.currentNode.getRoutingTable().getKClosestNodes(targetID);
+        ProtoFindNodeResponse response = ProtoFindNodeResponse.newBuilder()
+                .setSendingNode(gRPCUtils.toGRPC(this.currentNode.getCurrentNode()))
+                .setFoundNodes(gRPCUtils.toGRPC(contactList))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void findValue(ProtoTargetContact request, StreamObserver<ProtoFindValueResponse> responseObserver) {
+        handleProtoNodeContactMsg(request.getSendingNode());
+
+        byte[] targetID = request.getTarget().toByteArray();
+        boolean found = this.currentNode.getDht().containsKey(targetID);
+        if (found) {
+            StoredData data = this.currentNode.getDht().get(targetID);
+
+            ProtoFindValueResponse response = ProtoFindValueResponse.newBuilder()
+                    .setSendingNode(gRPCUtils.toGRPC(this.currentNode.getCurrentNode()))
+                    .setDataType(DataType.FOUND_VALUE)
+                    .setFoundValue(gRPCUtils.toGRPC(data))
+                    .build();
+
+            responseObserver.onNext(response);
+        } else {
+            // TODO: [DOC] Ask the K closest Nodes
+            List<NodeContact> kClosest = this.currentNode.getRoutingTable().getKClosestNodes(targetID);
+
+            ProtoFindValueResponse response = ProtoFindValueResponse.newBuilder()
+                    .setSendingNode(gRPCUtils.toGRPC(this.currentNode.getCurrentNode()))
+                    .setDataType(DataType.FOUND_NODES)
+                    .setFoundNodes(gRPCUtils.toGRPC(kClosest))
+                    .build();
+
+            responseObserver.onNext(response);
         }
+
         responseObserver.onCompleted();
     }
 
     @Override
-    public void findValue(FindValueRequest request, StreamObserver<FindValueResponse> responseObserver) {
-        byte[] key = request.getKey().toByteArray();
-        //is the value on current node
-        byte[] entry = this.node.getStorage().getValue(key).getValue();
-        if (entry != null) {
-            FindValueResponse.Builder responseBuilder = FindValueResponse.newBuilder();
-            responseBuilder.setKey(request.getKey());
-            responseBuilder.setValue(ByteString.copyFrom(entry));
-        } else {//if it's not on this node, then return possible closest nodes
-            List<NodeContact> closestNodes = this.node.findClosestNodes(key);
-            for (NodeContact node : closestNodes) {
-                FindValueResponse.Builder responseBuilder = FindValueResponse.newBuilder();
-                responseBuilder.setKey(ByteString.copyFrom(node.getId()));
-                responseObserver.onNext(responseBuilder.build());
-            }
+    public void sendMessage(ProtoMessage request, StreamObserver<ProtoMessageResponse> responseObserver) {
+        handleProtoNodeContactMsg(request.getSendingNode());
+
+        NodeContact nodeContact = gRPCUtils.fromGRPC(request.getSendingNode());
+        byte[] msgBytes = request.getMessage().toByteArray();
+
+        ProtoMessageResponse response = ProtoMessageResponse.newBuilder()
+                .setSendingNode(gRPCUtils.toGRPC(this.currentNode.getCurrentNode()))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+
+        this.messageConsumers.forEach(consumer -> consumer.accept(nodeContact, msgBytes));
+    }
+
+    @Override
+    public void broadcastMessage(ProtoBroadcastMessage request, StreamObserver<ProtoNodeContact> responseObserver) {
+        handleProtoNodeContactMsg(request.getSendingNode());
+
+        ProtoNodeContact response = gRPCUtils.toGRPC(this.currentNode.getCurrentNode());
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+
+        Pair<byte[], byte[]> msgIdPair = gRPCUtils.fromGRPC(request);
+        byte[] msgID = msgIdPair.getFirst();
+        byte[] msg = msgIdPair.getSecond();
+
+        if (this.currentNode.addToSeenMessages(msgID)) {
+            new KadRemoteBroadcast(this.currentNode, request.getDepth(), msgID, msg);
+            NodeContact contact = gRPCUtils.fromGRPC(request.getSendingNode());
+            Context.current().fork().run(() -> this.messageConsumers.forEach(consumer -> consumer.accept(contact, msg)));
+
         }
-        responseObserver.onCompleted();
-    }
-
-    @Override
-    public void broadcastMessage(Message request, StreamObserver<Empty> responseObserver) {
-        super.broadcastMessage(request, responseObserver);
-    }
-
-    @Override
-    public void sendMessage(Message request, StreamObserver<Empty> responseObserver) {
-        super.sendMessage(request, responseObserver);
     }
 }

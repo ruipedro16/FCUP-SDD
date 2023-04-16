@@ -1,54 +1,45 @@
 package org.ssd.p2p.remote;
 
-import lombok.AllArgsConstructor;
-import org.ssd.p2p.Bucket;
-import org.ssd.p2p.KadAction;
+import lombok.Getter;
+import lombok.NonNull;
 import org.ssd.p2p.Node;
-import org.ssd.p2p.NodeContact;
-import org.ssd.p2p.remote.message.StoreMessage;
+import org.ssd.p2p.routing.NodeContact;
+import org.ssd.p2p.storage.StoredData;
 
-/**
- * Action meant to be instanced when a message should be emitted to the dht.
- * (ex: Auction start or generic data needed to be stored on the dht network)
- */
+import java.util.Arrays;
+import java.util.List;
+
 public class KadRemoteStore implements KadAction {
+    @Getter
+    private final Node currentNode;
 
-    private final Node ourNode;
-    private final StoreMessage msg;
+    @Getter
+    private final StoredData data;
 
-    public KadRemoteStore(Node node, StoreMessage msgToStore) {
-        //add content to a message for the store
-        this.ourNode = node;
-        this.msg = msgToStore;
+    public KadRemoteStore(@NonNull Node currentNode, @NonNull StoredData data) {
+        this.currentNode = currentNode;
+        this.data = data;
     }
 
-    /**
-     *
-     */
     @Override
     public void trigger() {
-        //k-closest nodes //todo: should we use the known ones or create a list after attempting a lookup/ping?
-        //add message locally
-        this.ourNode.storeInNode(msg.getDataOwnerId(), msg.getKey(), msg.getValue());
+        this.currentNode.getDht().store(this.data);
 
-        // Iterate through all nodes
-        for (NodeContact contact : this.ourNode.findClosestNodes(msg.getKey())) {
-            // propagate it to nearby nodes
-            this.store(contact, msg.getDataOwnerId(), msg.getKey(), msg.getValue());
-        }
-
+        KadRemoteFindNode lookUpAction = new KadRemoteFindNode(this.currentNode, this.data.getKey());
+        lookUpAction.trigger();
+        List<NodeContact> nextContacts = lookUpAction.getKClosestResponded();
+        nextContacts.stream()
+                .filter(contact -> !Arrays.equals(contact.getId(), this.currentNode.getCurrentNode().getId()))
+                .forEach(contact -> this.currentNode.getClientManager().store(contact, this));
     }
 
-    /**
-     * Private call wrapper to RPC store
-     *
-     * @param target      target to store data to
-     * @param dataOwnerId data owner from where data originated from
-     * @param key         key of the data
-     * @param dataValue   value to store
-     */
-    private void store(NodeContact target, byte[] dataOwnerId, byte[] key, byte[] dataValue) {
-        this.ourNode.getRoutingTable().getKadStubRouter().store(target, this.ourNode, dataOwnerId, key, dataValue, this.ourNode.getRoutingTable().getStubRouter());
+    @Override
+    public void onSuccess(@NonNull NodeContact nodeContact) {
+        this.currentNode.getRoutingTable().addContact(nodeContact);
     }
 
+    @Override
+    public void onFailure(@NonNull NodeContact nodeContact) {
+        this.currentNode.getRoutingTable().warnUnresponsiveContact(nodeContact);
+    }
 }

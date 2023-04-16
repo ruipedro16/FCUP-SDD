@@ -6,9 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class KademliaConstants {
-    public static final int DEFAULT_PORT = 8080;
+    public static final int BOOTSTRAP_NODE_PORT = 8080;
 
-    public static final byte[] DEFAULT_NODE_ID = CryptoUtils.hash("BOOTSTRAP".getBytes(StandardCharsets.UTF_8));
+    public static final byte[] BOOTSTRAP_NODE_ID = "BOOTSTRAP".getBytes(StandardCharsets.UTF_8);
 
     /**
      * Number of leading zeros in the ID of the node
@@ -18,10 +18,17 @@ public class KademliaConstants {
 
     /**
      * B : size in bits of the key
-     * K : maximum number of contacts stored in a Kbucket
+     * K : maximum number of contacts stored in a K-Bucket
      * alpha : degree of parallelism in network calls
      */
     public static final int B = 160, K = 20, ALPHA = 3;
+
+    public static final int STALENESS_LIMIT = 5;
+
+    /**
+     * Maximum number of nodes to broadcast to
+     */
+    public static final int MAX_BROADCAST_PER_DEPTH = 3;
 
     /**
      * Kademlia time constants in ms

@@ -1,139 +1,79 @@
 package org.ssd.p2p;
 
+import com.google.common.math.BigIntegerMath;
 import com.google.common.primitives.Longs;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.constants.KademliaConstants;
-import org.ssd.p2p.grpc.GrpcKadStubManager;
-import org.ssd.p2p.grpc.GrpcStubRouter;
-import org.ssd.p2p.storage.Storage;
-import org.ssd.p2p.storage.StorageWithHeaderData;
+import org.ssd.p2p.grpc.KadClientManager;
+import org.ssd.p2p.grpc.KadServer;
+import org.ssd.p2p.remote.KadRemoteFindNode;
+import org.ssd.p2p.routing.NodeContact;
+import org.ssd.p2p.routing.RoutingTable;
+import org.ssd.p2p.storage.KadDHT;
 import org.ssd.utils.CryptoUtils;
 import org.ssd.utils.Utils;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
-@Data
+@Getter
 public class Node {
-    private final byte[] id;
-    private final int port;
-    private final InetAddress address;
-    private long seen;
-    private RoutingTable routingTable;
-    private Storage storage;
+    private final NodeContact currentNode;
+    private final KadServer server;
+    private final KadClientManager clientManager;
+    private final RoutingTable routingTable;
+    private final KadDHT dht;
+    /**
+     * List of the IDs of the messages that this node has seen
+     */
+    private final List<byte[]> seenMessages;
+
+    public Node(byte[] nodeID, int port) {
+        if (nodeID == null) {
+            System.out.println("Generating node ID...");
+            nodeID = generateNodeID(port);
+            System.out.println("Generated node ID: " + Hex.toHexString(nodeID));
+        }
+
+        this.currentNode = new NodeContact(Utils.getLocalHostAddress(), port, nodeID, System.currentTimeMillis());
+
+        this.server = new KadServer();
+        new Thread(() -> {
+            try {
+                this.server.start(this, port);
+                this.server.awaitTermination();
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+        this.clientManager = new KadClientManager();
+        this.routingTable = new RoutingTable(this.currentNode);
+        this.dht = new KadDHT();
+        this.seenMessages = new ArrayList<>();
+    }
+
+    public static Node bootstrapNode() {
+        return new Node(KademliaConstants.BOOTSTRAP_NODE_ID, KademliaConstants.BOOTSTRAP_NODE_PORT);
+    }
 
     /**
-     * Constructor with omitted nodeId. It generates a random one.
+     * Returns the number of leading zeros in a byte array.
      *
-     * @param port node port
-     */
-    public Node(int port, @NonNull GrpcStubRouter stubRouter, @NonNull GrpcKadStubManager kadStubManager) {
-        this.port = port;
-        InetAddress tmp = null;
-        try {
-            tmp = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-
-        assert tmp != null;
-        this.address = tmp;
-        this.id = generateID();
-        this.routingTable = new RoutingTable(this.id, stubRouter, kadStubManager); // initializes the routing table & k buckets
-    }
-
-    /**
-     * Does not generate a new id => used for the bootstrap node where the ID is known
-     */
-    public Node(byte[] id, int port, @NonNull GrpcStubRouter stubRouter, @NonNull GrpcKadStubManager kadStubManager) {
-        this.port = port;
-        InetAddress tmp = null;
-        try {
-            tmp = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-
-        assert tmp != null;
-        this.address = tmp;
-        this.id = id;
-        this.routingTable = new RoutingTable(this.id, stubRouter, kadStubManager); // initializes the routing table & k buckets
-    }
-
-    public GrpcStubRouter getStubRouter() {
-        return this.routingTable.getStubRouter();
-    }
-
-    /*
-     * Generates the node id by solving a challenge
-     * Similar to PoW
-     */
-    private byte[] generateID() {
-        byte[] res = new byte[KademliaConstants.B];
-        new SecureRandom().nextBytes(res);
-        long nonce = 0L;
-
-        String target = new String(new char[KademliaConstants.PREFIX_LENGTH]).replace('\0', '0');
-        do {
-            nonce++;
-            byte[] dataToHash = Arrays.concatenate(
-                    Longs.toByteArray(nonce),
-                    this.address.getAddress(),
-                    Utils.toByteArray(this.port)
-            );
-            res = CryptoUtils.hash(dataToHash);
-
-        } while (!Hex.toHexString(res).substring(0, KademliaConstants.PREFIX_LENGTH).equals(target));
-        return res;
-    }
-
-    public void joinNetwork(@NonNull NodeContact bootstrapNodeContact) throws IOException {
-        // Ping the bootstrap node to make sure it's up
-
-
-        // Add the bootstrap node to our routing table
-        this.routingTable.insertNode(bootstrapNodeContact);
-
-        // Find nodes in the network to populate our routing table
-
-        /*
-         * Schedule regular maintenance tasks
-         */
-        ScheduledExecutorService maintenanceScheduler = Executors.newScheduledThreadPool(1);
-        /*
-        maintenanceScheduler.scheduleAtFixedRate(this::pingRandomNode, 0, PING_INTERVAL, TimeUnit.SECONDS);
-        maintenanceScheduler.scheduleAtFixedRate(this::republishValues, 0, REPUBLISH_INTERVAL, TimeUnit.SECONDS);
-        maintenanceScheduler.scheduleAtFixedRate(this::refreshBucket, 0, REFRESH_INTERVAL, TimeUnit.SECONDS);
-        */
-    }
-
-    private void pingRandomNode() {
-
-    }
-
-    private void republishValues() {
-
-    }
-
-    private void refreshBucket() {
-
-    }
-
-    /*
-     * Counts the number of 0s in the beginning of a byte sequence
+     * @param bytes the byte array to count the number of leading zeros in
+     * @return the number of leading zeros in the byte array
+     * @throws IllegalArgumentException if the input byte array is null
      */
     public static int getPrefixLength(byte[] bytes) {
         if (bytes == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Byte array cannot be null");
         }
 
         int prefixLength = 0;
@@ -152,141 +92,87 @@ public class Node {
         return prefixLength;
     }
 
-
-
-    public static byte[] getDistance(byte[] id1, byte[] id2) {
-        if (id1 == null || id2 == null || id1.length != KademliaConstants.B || id2.length != KademliaConstants.B) {
+    /**
+     * Calculates the XOR distance between two byte arrays of the same length.
+     *
+     * @param id1 the first byte array
+     * @param id2 the second byte array
+     * @return the XOR distance between id1 and id2
+     * @throws IllegalArgumentException if either id1 or id2 is null, or if their length is not equal to KademliaConstants.B
+     */
+    public static BigInteger getDistance(byte[] id1, byte[] id2) {
+        if (id1 == null || id2 == null /* || id1.length != KademliaConstants.B || id2.length != KademliaConstants.B */ ) {
             throw new IllegalArgumentException();
         }
 
-        byte[] res = new byte[id1.length];
+        BigInteger b1 = new BigInteger(1, id1);
+        BigInteger b2 = new BigInteger(1, id2);
 
-        for (int i = 0; i < id1.length; i++) {
-            res[i] = (byte) (id1[i] ^ id2[i]);
+        return b1.xor(b2);
+    }
+
+    /**
+     * Determine the appropriate bucket for the other node in the routing table.
+     *
+     * @param currentNodeId the ID of the current node
+     * @param other         the ID of the other node
+     * @return the number of leading zeros in the binary representation of the distance
+     * between the two nodes, which is used to determine the appropriate bucket for the other node
+     * @throws IllegalArgumentException if either the current node ID or the other node ID is null
+     */
+    public static int getBucket(byte[] currentNodeId, byte[] other) {
+        if (currentNodeId == null || other == null) {
+            throw new IllegalArgumentException("ID parameter cannot be null");
         }
 
+        BigInteger distance = getDistance(currentNodeId, other);
+
+        return distance.equals(BigInteger.ZERO) ? 0 : BigIntegerMath.log2(distance, RoundingMode.DOWN);
+    }
+
+    private byte[] generateNodeID(int port) {
+        byte[] res = new byte[KademliaConstants.B];
+        new SecureRandom().nextBytes(res);
+        long nonce = 0L;
+        InetAddress currentAddress = Utils.getLocalHostAddress();
+
+        String target = new String(new char[KademliaConstants.PREFIX_LENGTH]).replace('\0', '0');
+        while (!Hex.toHexString(res).substring(0, KademliaConstants.PREFIX_LENGTH).equals(target)) {
+            nonce++;
+            byte[] dataToHash = Arrays.concatenate(
+                    Longs.toByteArray(nonce),
+                    currentAddress.getAddress(),
+                    Utils.toByteArray(port)
+            );
+            res = CryptoUtils.hash(dataToHash);
+
+        }
         return res;
     }
 
-    /*
-     * Given two node IDs,
+    /**
+     * Join the network by adding the bootstrap node to the routing table and looking up itself
+     *
+     * @param nodeContact
      */
-    public static int getBucket(byte[] currentNodeId, byte[] other) {
-        byte[] distance = getDistance(currentNodeId, other);
-        return getPrefixLength(distance);
+    public void joinNetwork(@NonNull NodeContact nodeContact) {
+        this.routingTable.addContact(nodeContact);
+        new KadRemoteFindNode(this, this.currentNode.getId()).trigger();
+
     }
 
-    /**
-     * Private call wrapper to RPC ping
-     *
-     * @param contact contact to ping (must have nodeId, INetAddress and port at least)
-     */
-    public void ping(@NonNull NodeContact contact) {
-        this.routingTable.getKadStubRouter().ping(contact, this, this.routingTable.getStubRouter());
-    }
-
-    /**
-     * Set a node triple address as seen after. for example, a ping
-     * <p>
-     * updates the routing table of the node to indicate that it has seen a particular node.
-     * It either moves the node to the end of its corresponding bucket (if it is already in the bucket), or adds it to
-     * the bucket (if the bucket is not full) or pings the head of the bucket (if the bucket is full).
-     *
-     * @param target Target to set as seen by this node
-     */
-    public void setNodeAsSeen(@NonNull NodeContact target) {
-        int kBucketIdx = getBucket(this.getId(), target.getId());
-        //get bucket
-        Bucket bucket = this.routingTable.getBuckets().get(kBucketIdx);
-        if (bucket.getContacts() == null) {
-            bucket.setContacts(new ArrayList<>());
+    public boolean addToSeenMessages(byte[] messageId) {
+        if (messageId == null) {
+            throw new IllegalArgumentException("ID of the message cannot be null");
         }
 
-        target.setSeen(System.currentTimeMillis());
+        boolean messageExists = seenMessages.stream().anyMatch(m -> java.util.Arrays.equals(m, messageId));
 
-        if (bucket.containsNode(target)) {
-            bucket.moveToTail(target); //move to tail of bucket
+        if (messageExists) {
+            return false;
         } else {
-            // challenge to prevent sybil
-            //todo
-
-            if (!bucket.isFull()) {
-                bucket.moveToTail(target); //add if it has space
-            } else {
-                //if size exceeds
-                //ping least recently seen (the bucket is ordered from oldest to most recent), the head of bucket
-                NodeContact headContact = bucket.getContacts().get(0);
-                this.ping(headContact);
-                //if it is alive, discard this target
-                //else remove head and add target to the end
-            }
+            seenMessages.add(messageId);
+            return true;
         }
-        //place bucket in position after mutation
-        this.routingTable.putKBucketAtPosition(kBucketIdx, bucket);
-    }
-
-    /**
-     * Store a given message to this node and propagate to nearby k nodes
-     *
-     * @param dataOwnerId id of the node that requested the store
-     * @param key         id key for the message
-     * @param value       value/message to store
-     */
-    public void storeInNode(byte[] dataOwnerId, byte[] key, byte[] value) {
-        //if the data owner is us, store locally
-        if (java.util.Arrays.equals(dataOwnerId, this.getId())) {
-            this.storage.addValueToKey(key, new StorageWithHeaderData(dataOwnerId, value));
-        }
-
-    }
-
-    /**
-     * Find the K nodes in the network that are closest to a given key
-     *
-     */
-    public List<NodeContact> findClosestNodes(byte[] key) {
-        if (key == null) {
-            throw new IllegalArgumentException();
-        }
-
-        List<NodeContact> closestNodes = new ArrayList<>();
-        int kBucketIdx = getBucket(this.getId(), key); // index of the Kademlia bucket that contains the key
-
-        Bucket kBucket = this.routingTable.getBuckets().get(kBucketIdx);
-        if (kBucket.getContacts() != null) {
-            closestNodes.addAll(kBucket.getContacts());
-        }
-
-        // Iterate through the buckets to the left and right of the key's bucket, adding the contacts from those buckets
-        // to the closestNodes list as well, until the list contains K nodes or there are no more buckets to add.
-        for (int i = 1; closestNodes.size() < KademliaConstants.K && (kBucketIdx - i >= 0 || kBucketIdx + i < KademliaConstants.B); i++) {
-            if (kBucketIdx - i >= 0) {
-                Bucket leftBucket = this.routingTable.getBuckets().get(kBucketIdx - i);
-                if (leftBucket.getContacts() != null) {
-                    closestNodes.addAll(leftBucket.getContacts());
-                }
-            }
-
-            if (kBucketIdx + i < KademliaConstants.B) {
-                Bucket rightBucket = this.routingTable.getBuckets().get(kBucketIdx + i);
-                if (rightBucket.getContacts() != null) {
-                    closestNodes.addAll(rightBucket.getContacts());
-                }
-            }
-        }
-
-        // sorted by distance from the key
-        closestNodes.sort(new NodeContactDistanceComparator(key));
-
-        // Iterate through the closestNodes list and call findNode on each node, except for the current node. This is
-        // to update the current node's routing table with the most up-to-date information about the network.
-        closestNodes = closestNodes.subList(0, Math.min(KademliaConstants.K, closestNodes.size()));
-        for (NodeContact node : closestNodes) {
-            if (!java.util.Arrays.equals(node.getId(), this.getId())) {
-                this.routingTable.getKadStubRouter().findNode(node, this, this.routingTable.getStubRouter());
-            }
-        }
-
-        return closestNodes;
     }
 }

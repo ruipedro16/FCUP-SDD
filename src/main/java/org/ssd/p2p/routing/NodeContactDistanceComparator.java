@@ -1,6 +1,6 @@
-package org.ssd.p2p;
+package org.ssd.p2p.routing;
 
-import org.ssd.utils.Utils;
+import org.ssd.p2p.Node;
 
 import java.math.BigInteger;
 import java.util.Comparator;
@@ -17,8 +17,8 @@ public class NodeContactDistanceComparator implements Comparator<NodeContact> {
 
     @Override
     public int compare(NodeContact n1, NodeContact n2) {
-        byte[] distance1 = Node.getDistance(n1.getId(), key);
-        byte[] distance2 = Node.getDistance(n2.getId(), key);
-        return new BigInteger(distance1).compareTo(new BigInteger(distance2));
+        BigInteger distance1 = Node.getDistance(n1.getId(), key);
+        BigInteger distance2 = Node.getDistance(n2.getId(), key);
+        return distance1.compareTo(distance2);
     }
 }

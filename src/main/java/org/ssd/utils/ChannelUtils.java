@@ -28,7 +28,7 @@ import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.pkcs.jcajce.JcePKCSPBEInputDecryptorProviderBuilder;
 import org.bouncycastle.pkcs.jcajce.JcePKCSPBEOutputEncryptorBuilder;
-import org.ssd.p2p.NodeContact;
+import org.ssd.p2p.routing.NodeContact;
 
 import javax.net.ssl.SSLException;
 import java.io.*;

@@ -5,66 +5,69 @@ option java_package = "org.ssd";
 option java_outer_classname = "DHTService";
 
 service P2PGrpcService {
-  // Kademlia messages
-  rpc ping(Ping) returns (Ping) {}
-  rpc store(Store) returns (Store) {}
-  rpc findNode(FindNodeRequest) returns (stream FindNodeResponse) {}
-  rpc findValue(FindValueRequest) returns (stream FindValueResponse) {}
-
-  // todo: rpc to join the network
-
-  // send message
-  rpc broadcastMessage(Message) returns (Empty) {} // todo
-  rpc sendMessage(Message) returns (Empty) {} // todo
-  // etc
+  rpc ping(ProtoNodeContact) returns (ProtoNodeContact) {}
+  rpc store(ProtoContent) returns (ProtoContent){}
+  rpc findNode(ProtoTargetContact) returns (ProtoFindNodeResponse){}
+  rpc findValue(ProtoTargetContact) returns (ProtoFindValueResponse){}
+  rpc sendMessage(ProtoMessage) returns (ProtoMessageResponse) {}
+  rpc broadcastMessage(ProtoBroadcastMessage) returns (ProtoNodeContact) {}
 }
 
-message Empty {
-}
 
-message Ping {
-  bytes nodeId = 1;
-  int32 reqNodePort = 2;
-}
-
-message Store {
-  bytes reqNodeId = 1;
-  int32 reqNodePort = 2;
-  bytes nodeId = 3; //add to Contact message?
-  bytes key = 4; //add to Contact message?
-  bytes value = 5; //add to Contact message?
-}
-
-message FindNodeRequest {
-  bytes reqNodeId = 1;
-  int32 reqNodePort = 2;
+// Refactor to ProtoNodeContact
+message ProtoNodeContact {
+  string nodeIpAddress = 1;
+  uint32 nodePort = 2;
   bytes nodeId = 3;
 }
 
-message FindNodeResponse {
-  bytes nodeId = 1;
-  string address = 2;
-  int32 nodePort = 3;
-  uint64 lastSeenTime = 4;
-}
-
-message FindValueRequest {
-  bytes reqNodeId = 1;
-  uint32 reqNodePort = 2;
+message ProtoContent {
+  ProtoNodeContact sendingNode = 1;
+  bytes originalPublisherId = 2;
   bytes key = 3;
+  bytes value = 4;
 }
 
-message FindValueResponse {
-  bytes key = 1;
-  bytes value = 2;
-  bytes nodeId = 3;
-  string address = 4;
-  uint32 port = 5;
+// Refactor to ProtoNodeContactList
+message ProtoNodeContactList {
+  repeated ProtoNodeContact nodes = 1;
 }
 
+message ProtoTargetContact {
+  ProtoNodeContact sendingNode = 1;
+  bytes target = 2;
+}
 
-message Message {
-  bytes senderID = 1;
-  int32 senderPort = 2;
-  bytes message = 3;
+message ProtoFindNodeResponse {
+  ProtoNodeContact sendingNode = 1;
+  ProtoNodeContactList foundNodes = 2;
+}
+
+enum DataType {
+  FOUND_VALUE = 0;
+  FOUND_NODES = 1;
+}
+
+message ProtoFindValueResponse {
+  ProtoNodeContact sendingNode = 1;
+  DataType dataType = 2;
+  ProtoContent foundValue = 3;
+  ProtoNodeContactList foundNodes = 4;
+}
+
+message ProtoMessage {
+  ProtoNodeContact sendingNode = 1;
+  bytes message = 2;
+}
+
+message ProtoMessageResponse {
+  ProtoNodeContact sendingNode = 1;
+  bytes messageResponse = 2;
+}
+
+message ProtoBroadcastMessage {
+  ProtoNodeContact sendingNode = 1;
+  int32 depth = 2;
+  bytes messageId = 3;
+  bytes message = 4;
 }
