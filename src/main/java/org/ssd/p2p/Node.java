@@ -69,7 +69,6 @@ public class Node {
      * @throws IllegalArgumentException if either id1 or id2 is null, or if their length is not equal to KademliaConstants.B
      */
     public static BigInteger getDistance(byte[] id1, byte[] id2) {
-        // TODO:
         if (id1 == null || id2 == null || id1.length != id2.length) {
             throw new IllegalArgumentException();
         }
@@ -78,29 +77,6 @@ public class Node {
         BigInteger b2 = new BigInteger(1, id2);
 
         return b1.xor(b2);
-    }
-
-    /**
-     * Determine the appropriate bucket for the other node in the routing table.
-     *
-     * @param currentNodeId the ID of the current node
-     * @param other         the ID of the other node
-     * @return the number of leading zeros in the binary representation of the distance
-     * between the two nodes, which is used to determine the appropriate bucket for the other node
-     * @throws IllegalArgumentException if either the current node ID or the other node ID is null
-     */
-    public static int getBucket(byte[] currentNodeId, byte[] other) {
-        if (currentNodeId == null || other == null) {
-            throw new IllegalArgumentException("ID parameter cannot be null");
-        }
-
-        BigInteger distance = getDistance(currentNodeId, other);
-
-        if (distance.equals(BigInteger.ZERO)) {
-            return 0;
-        } else {
-            return BigIntegerMath.log2(distance, RoundingMode.DOWN);
-        }
     }
 
     private byte[] generateNodeID(int port) {

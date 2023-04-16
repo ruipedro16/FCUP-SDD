@@ -39,15 +39,24 @@ public class KadClientManager {
 
     public ManagedChannel getChannel(@NonNull NodeContact nodeContact) {
         byte[] nodeId = nodeContact.getId();
+        ManagedChannel channel = null;
 
-        if (channels.containsKey(nodeId)) {
-            ManagedChannel channelValue = this.channels.get(nodeId);
-            if (channelValue.isTerminated() || channelValue.isShutdown()) {
-                return null; //found but not available
+        if (this.channels.containsValue(nodeId)) {
+            channel = this.channels.get(nodeId);
+            if (channel.isTerminated() || channel.isShutdown()) {
+                channel = null;
             }
-            return channelValue; //found
         }
-        return null; // not found
+
+        if (channel == null) {
+            channel = ManagedChannelBuilder.forAddress(nodeContact.getAddress().getHostAddress(), nodeContact.getPort())
+                    .usePlaintext()
+                    .build();
+
+            this.channels.put(nodeId, channel);
+        }
+
+        return channel;
     }
 
     public void saveChannel(@NonNull NodeContact target, @NonNull ManagedChannel channel) {
@@ -79,14 +88,12 @@ public class KadClientManager {
         this.channels.remove(target.getId());
     }
 
-    private P2PGrpcServiceGrpc.P2PGrpcServiceStub initStub(@NonNull NodeContact nodeContact) {
-        ManagedChannel channel = getChannel(nodeContact);
-        return P2PGrpcServiceGrpc.newStub(channel);
-    }
-
     private P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub initBlockingStub(@NonNull NodeContact nodeContact) {
         ManagedChannel channel = getChannel(nodeContact);
-        return P2PGrpcServiceGrpc.newBlockingStub(channel);
+        if (channel != null) {
+            return P2PGrpcServiceGrpc.newBlockingStub(channel);
+        }
+        return null;
     }
 
     public void ping(@NonNull NodeContact recipient, @NonNull KadRemotePing pingAction) {

@@ -1,10 +1,12 @@
 package org.ssd.p2p.routing;
 
+import com.google.common.math.BigIntegerMath;
 import lombok.Data;
 import lombok.NonNull;
 import org.ssd.constants.KademliaConstants;
-import org.ssd.p2p.Node;
 
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -19,28 +21,47 @@ public class RoutingTable {
     public RoutingTable(@NonNull NodeContact currentNode) {
         this.currentNode = currentNode;
         this.buckets = new ArrayList<>();
-        for (int i = 0; i < KademliaConstants.K; i++) {
+        for (int i = 0; i < KademliaConstants.B; i++) {
             this.buckets.add(i, new Bucket());
         }
         this.addContact(currentNode);
     }
 
     private int getBucketIndex(@NonNull NodeContact nodeContact) {
-        return Node.getBucket(this.currentNode.getId(), nodeContact.getId());
+        byte[] targetID = nodeContact.getId();
+
+        // Compute the XOR distance
+        BigInteger b1 = new BigInteger(1, this.currentNode.getId());
+        BigInteger b2 = new BigInteger(1, targetID);
+        BigInteger distance = b1.xor(b2);
+
+        if (distance.equals(BigInteger.ZERO)) {
+            return 0;
+        } else {
+            return BigIntegerMath.log2(distance, RoundingMode.DOWN);
+        }
+    }
+
+    private int getBucketIndex(byte[] targetID) {
+        if (targetID == null) {
+            throw new IllegalArgumentException();
+        }
+
+        // Compute the XOR distance
+        BigInteger b1 = new BigInteger(1, this.currentNode.getId());
+        BigInteger b2 = new BigInteger(1, targetID);
+        BigInteger distance = b1.xor(b2);
+
+        if (distance.equals(BigInteger.ZERO)) {
+            return 0;
+        } else {
+            return BigIntegerMath.log2(distance, RoundingMode.DOWN);
+        }
     }
 
     public synchronized void addContact(@NonNull NodeContact contact) {
         int bucketIndex = getBucketIndex(contact);
-        System.out.println(bucketIndex);
-        assert bucketIndex >= 0 && bucketIndex <= KademliaConstants.K;
         this.buckets.get(bucketIndex).insertContact(contact);
-    }
-
-    public Bucket getBucketAtIndex(int index) {
-        if (index < 0 || index >= KademliaConstants.K) {
-            throw new IndexOutOfBoundsException();
-        }
-        return this.buckets.get(index);
     }
 
     public List<NodeContact> getAllNodes() {
@@ -64,9 +85,8 @@ public class RoutingTable {
 
         Set<NodeContact> sortedContacts = new TreeSet<>(new NodeContactDistanceComparator(targetID));
         sortedContacts.addAll(this.getAllNodes()); // TODO: remove this
-        int bucketIndex = Node.getBucket(this.currentNode.getId(), targetID);
+        int bucketIndex = getBucketIndex(targetID);
 
-        /*
         for (int i = 0; i < KademliaConstants.B; i++) {
             boolean lookBefore = bucketIndex - i >= 0;
             boolean lookAfter = bucketIndex + i < KademliaConstants.B;
@@ -86,7 +106,7 @@ public class RoutingTable {
                 break;
             }
         }
-        */
+
         return sortedContacts.stream()
                 .limit(n)
                 .collect(Collectors.toList());

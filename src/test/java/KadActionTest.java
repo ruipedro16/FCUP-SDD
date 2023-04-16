@@ -2,6 +2,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
 import org.ssd.constants.KademliaConstants;
 import org.ssd.p2p.Node;
+import org.ssd.p2p.remote.KadRemotePing;
 import org.ssd.p2p.routing.NodeContact;
 
 import java.net.InetAddress;
@@ -16,5 +17,11 @@ public class KadActionTest {
 
         NodeContact node2Contact = new NodeContact(InetAddress.getLocalHost(), 5005, node2.getCurrentNode().getId(), System.currentTimeMillis());
         node1.joinNetwork(node2Contact);
+
+        new KadRemotePing(node1, node2.getCurrentNode().getId()).trigger();
+        new KadRemotePing(node2, node1.getCurrentNode().getId()).trigger();
+
+        System.out.println("Routing Table for Node 2:");
+        System.out.println(node2.getRoutingTable());
     }
 }
