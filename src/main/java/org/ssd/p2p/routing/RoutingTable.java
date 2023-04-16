@@ -31,6 +31,8 @@ public class RoutingTable {
 
     public synchronized void addContact(@NonNull NodeContact contact) {
         int bucketIndex = getBucketIndex(contact);
+        System.out.println(bucketIndex);
+        assert bucketIndex >= 0 && bucketIndex <= KademliaConstants.K;
         this.buckets.get(bucketIndex).insertContact(contact);
     }
 
@@ -58,15 +60,13 @@ public class RoutingTable {
             throw new IllegalArgumentException();
         }
 
-        /*
-         * TODO: Index out of bounds here (?)
-         */
-
         int n = KademliaConstants.K;
 
         Set<NodeContact> sortedContacts = new TreeSet<>(new NodeContactDistanceComparator(targetID));
+        sortedContacts.addAll(this.getAllNodes()); // TODO: remove this
         int bucketIndex = Node.getBucket(this.currentNode.getId(), targetID);
 
+        /*
         for (int i = 0; i < KademliaConstants.B; i++) {
             boolean lookBefore = bucketIndex - i >= 0;
             boolean lookAfter = bucketIndex + i < KademliaConstants.B;
@@ -86,7 +86,7 @@ public class RoutingTable {
                 break;
             }
         }
-
+        */
         return sortedContacts.stream()
                 .limit(n)
                 .collect(Collectors.toList());

@@ -12,19 +12,8 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KadRemoteBroadcast implements KadAction {
-    @Getter
-    private final Node currentNode;
-
-    @Getter
-    private final int depth;
-
-    @Getter
-    private final byte[] messageID;
-
-    @Getter
-    private final byte[] message;
-
+public record KadRemoteBroadcast(@Getter Node currentNode, @Getter int depth, @Getter byte[] messageID,
+                                 @Getter byte[] message) implements KadAction {
     public KadRemoteBroadcast(@NonNull Node currentNode, int depth, byte[] messageID, byte[] message) {
         if (messageID == null) {
             throw new IllegalArgumentException();

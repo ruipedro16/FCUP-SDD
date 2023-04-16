@@ -60,38 +60,6 @@ public class Node {
         this.seenMessages = new ArrayList<>();
     }
 
-    public static Node bootstrapNode() {
-        return new Node(KademliaConstants.BOOTSTRAP_NODE_ID, KademliaConstants.BOOTSTRAP_NODE_PORT);
-    }
-
-    /**
-     * Returns the number of leading zeros in a byte array.
-     *
-     * @param bytes the byte array to count the number of leading zeros in
-     * @return the number of leading zeros in the byte array
-     * @throws IllegalArgumentException if the input byte array is null
-     */
-    public static int getPrefixLength(byte[] bytes) {
-        if (bytes == null) {
-            throw new IllegalArgumentException("Byte array cannot be null");
-        }
-
-        int prefixLength = 0;
-        for (byte b : bytes) {
-            if (b == (byte) 0) {
-                prefixLength += 8;
-            } else {
-                int mask = 0x80;
-                while ((b & mask) == 0) {
-                    prefixLength++;
-                    mask >>>= 1;
-                }
-                break;
-            }
-        }
-        return prefixLength;
-    }
-
     /**
      * Calculates the XOR distance between two byte arrays of the same length.
      *
@@ -101,7 +69,8 @@ public class Node {
      * @throws IllegalArgumentException if either id1 or id2 is null, or if their length is not equal to KademliaConstants.B
      */
     public static BigInteger getDistance(byte[] id1, byte[] id2) {
-        if (id1 == null || id2 == null /* || id1.length != KademliaConstants.B || id2.length != KademliaConstants.B */ ) {
+        // TODO:
+        if (id1 == null || id2 == null || id1.length != id2.length) {
             throw new IllegalArgumentException();
         }
 
@@ -127,7 +96,11 @@ public class Node {
 
         BigInteger distance = getDistance(currentNodeId, other);
 
-        return distance.equals(BigInteger.ZERO) ? 0 : BigIntegerMath.log2(distance, RoundingMode.DOWN);
+        if (distance.equals(BigInteger.ZERO)) {
+            return 0;
+        } else {
+            return BigIntegerMath.log2(distance, RoundingMode.DOWN);
+        }
     }
 
     private byte[] generateNodeID(int port) {

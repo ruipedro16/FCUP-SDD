@@ -9,13 +9,7 @@ import org.ssd.p2p.storage.StoredData;
 import java.util.Arrays;
 import java.util.List;
 
-public class KadRemoteStore implements KadAction {
-    @Getter
-    private final Node currentNode;
-
-    @Getter
-    private final StoredData data;
-
+public record KadRemoteStore(@Getter Node currentNode, @Getter StoredData data) implements KadAction {
     public KadRemoteStore(@NonNull Node currentNode, @NonNull StoredData data) {
         this.currentNode = currentNode;
         this.data = data;

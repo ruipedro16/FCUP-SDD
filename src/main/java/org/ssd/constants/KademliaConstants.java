@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class KademliaConstants {
     public static final int BOOTSTRAP_NODE_PORT = 8080;
 
-    public static final byte[] BOOTSTRAP_NODE_ID = "BOOTSTRAP".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] BOOTSTRAP_NODE_ID = CryptoUtils.hash("BOOTSTRAP".getBytes(StandardCharsets.UTF_8));
 
     /**
      * Number of leading zeros in the ID of the node

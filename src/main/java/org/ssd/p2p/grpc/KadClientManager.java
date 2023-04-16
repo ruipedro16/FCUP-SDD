@@ -104,8 +104,8 @@ public class KadClientManager {
     }
 
     public void store(@NonNull NodeContact recipient, @NonNull KadRemoteStore storeAction) {
-        Node currentNode = storeAction.getCurrentNode();
-        StoredData data = storeAction.getData();
+        Node currentNode = storeAction.currentNode();
+        StoredData data = storeAction.data();
 
         P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub blockingStub = initBlockingStub(recipient);
 
@@ -172,8 +172,8 @@ public class KadClientManager {
     }
 
     public void sendMessage(@NonNull NodeContact recipient, @NonNull KadRemoteSendMessage sendMessageAction) {
-        Node currentNode = sendMessageAction.getCurrentNode();
-        byte[] message = sendMessageAction.getMessage();
+        Node currentNode = sendMessageAction.currentNode();
+        byte[] message = sendMessageAction.message();
 
         P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub blockingStub = initBlockingStub(recipient);
 
@@ -192,16 +192,16 @@ public class KadClientManager {
     }
 
     public void broadCastMessage(@NonNull NodeContact recipient, @NonNull KadRemoteBroadcast broadcastAction) {
-        Node currentNode = broadcastAction.getCurrentNode();
+        Node currentNode = broadcastAction.currentNode();
         System.out.println("Broadcasting message from node " + Hex.toHexString(currentNode.getCurrentNode().getId()));
 
         P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub blockingStub = initBlockingStub(recipient);
 
         ProtoBroadcastMessage message = ProtoBroadcastMessage.newBuilder()
                 .setSendingNode(gRPCUtils.toGRPC(currentNode.getCurrentNode()))
-                .setDepth(broadcastAction.getDepth())
-                .setMessage(ByteString.copyFrom(broadcastAction.getMessage()))
-                .setMessageId(ByteString.copyFrom(broadcastAction.getMessageID()))
+                .setDepth(broadcastAction.depth())
+                .setMessage(ByteString.copyFrom(broadcastAction.message()))
+                .setMessageId(ByteString.copyFrom(broadcastAction.messageID()))
                 .build();
 
         try {
