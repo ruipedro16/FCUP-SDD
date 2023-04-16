@@ -8,8 +8,8 @@ import lombok.NonNull;
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.*;
 import org.ssd.p2p.Node;
-import org.ssd.p2p.routing.NodeContact;
 import org.ssd.p2p.remote.*;
+import org.ssd.p2p.routing.NodeContact;
 import org.ssd.p2p.storage.StoredData;
 import org.ssd.utils.gRPCUtils;
 
@@ -24,24 +24,11 @@ public class KadClientManager {
         this.channels = new ConcurrentHashMap<>();
     }
 
-    /**
-     * Initialize an unsecure channel to a specific address and port (used for testing)
-     *
-     * @param target Address
-     * @return ManagedChannel Object to give to Stubs
-     */
-    private ManagedChannel initUnsecureChannel(@NonNull NodeContact target) {
-        return ManagedChannelBuilder
-                .forAddress(target.getAddress().getHostAddress(), target.getPort())
-                .usePlaintext()
-                .build();
-    }
-
     public ManagedChannel getChannel(@NonNull NodeContact nodeContact) {
         byte[] nodeId = nodeContact.getId();
         ManagedChannel channel = null;
 
-        if (this.channels.containsValue(nodeId)) {
+        if (this.channels.containsKey(nodeId)) {
             channel = this.channels.get(nodeId);
             if (channel.isTerminated() || channel.isShutdown()) {
                 channel = null;
@@ -49,7 +36,10 @@ public class KadClientManager {
         }
 
         if (channel == null) {
-            channel = ManagedChannelBuilder.forAddress(nodeContact.getAddress().getHostAddress(), nodeContact.getPort())
+            String address = nodeContact.getAddress().getHostAddress();
+            int port = nodeContact.getPort();
+
+            channel = ManagedChannelBuilder.forAddress(address, port)
                     .usePlaintext()
                     .build();
 
@@ -58,26 +48,6 @@ public class KadClientManager {
 
         return channel;
     }
-
-    public void saveChannel(@NonNull NodeContact target, @NonNull ManagedChannel channel) {
-        this.channels.put(target.getId(), channel);
-    }
-
-    public ManagedChannel initChannel(@NonNull NodeContact target) {
-        // verify if channel exists
-        ManagedChannel channel = getChannel(target);
-        if (channel == null || channel.isTerminated() || channel.isShutdown()) {
-            // init
-            ManagedChannel created = initUnsecureChannel(target);
-            // save connection to router's list
-            saveChannel(target, created);
-            return created;
-        } else if (!channel.isShutdown() && !channel.isTerminated()) {
-            return channel;
-        }
-        return null;
-    }
-
 
     public void shutdownChannel(@NonNull NodeContact target) {
         ManagedChannel channel = getChannel(target);
@@ -90,10 +60,7 @@ public class KadClientManager {
 
     private P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub initBlockingStub(@NonNull NodeContact nodeContact) {
         ManagedChannel channel = getChannel(nodeContact);
-        if (channel != null) {
-            return P2PGrpcServiceGrpc.newBlockingStub(channel);
-        }
-        return null;
+        return P2PGrpcServiceGrpc.newBlockingStub(channel);
     }
 
     public void ping(@NonNull NodeContact recipient, @NonNull KadRemotePing pingAction) {
@@ -185,7 +152,7 @@ public class KadClientManager {
         P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub blockingStub = initBlockingStub(recipient);
 
         ProtoMessage protoMessage = ProtoMessage.newBuilder()
-                .setSendingNode(gRPCUtils.toGRPC( currentNode.getCurrentNode()))
+                .setSendingNode(gRPCUtils.toGRPC(currentNode.getCurrentNode()))
                 .setMessage(ByteString.copyFrom(message))
                 .build();
 
