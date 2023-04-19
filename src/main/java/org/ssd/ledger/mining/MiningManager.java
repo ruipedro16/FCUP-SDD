@@ -2,7 +2,10 @@ package org.ssd.ledger.mining;
 
 import lombok.Data;
 import lombok.NonNull;
+import org.ssd.DHT;
 import org.ssd.constants.BlockchainConstants;
+import org.ssd.ledger.BlockchainManager;
+import org.ssd.ledger.Consensus;
 import org.ssd.ledger.block.Block;
 import org.ssd.ledger.block.Blockchain;
 import org.ssd.ledger.transactions.Transaction;
@@ -20,7 +23,7 @@ import java.util.function.Consumer;
  */
 
 @Data
-public class MiningManager {
+public class MiningManager implements BlockchainManager {
     private final Blockchain blockchain;
     private final TransactionPool transactionPool;
     private MiningWorker miningWorker;
@@ -32,6 +35,8 @@ public class MiningManager {
     private final List<Consumer<Block>> consumers;
 
     public MiningManager(@NonNull Blockchain blockchain) {
+        assert DHT.getConsensus().equals(Consensus.PoW);
+
         this.blockchain = blockchain;
         this.transactionPool = blockchain.getTransactionPool();
 
@@ -76,7 +81,7 @@ public class MiningManager {
         this.running = false;
     }
 
-    public void notifyMinedBlock(@NonNull Block block) {
+    public void notifyNewBlock(@NonNull Block block) {
         this.blockchain.addBlock(block);
         this.consumers.forEach(consumer -> consumer.accept(block));
     }

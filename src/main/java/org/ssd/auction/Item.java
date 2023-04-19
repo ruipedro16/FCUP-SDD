@@ -9,6 +9,14 @@ import java.io.Serializable;
 public class Item implements Serializable {
     private final byte[] itemID;
 
+    public Item(byte[] itemID) {
+        if (itemID == null) {
+            throw new IllegalArgumentException();
+        }
+
+        this.itemID = itemID;
+    }
+
     @Override
     public String toString() {
         return Hex.toHexString(this.itemID);

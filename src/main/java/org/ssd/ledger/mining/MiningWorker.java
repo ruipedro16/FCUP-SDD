@@ -42,7 +42,7 @@ public class MiningWorker extends Thread {
 
         // Proof of work
         String target = new String(new char[BlockchainConstants.MINING_DIFFICULTY]).replace('\0', '0');
-        while(!Hex.toHexString(this.block.getBlockHash()).substring(0, BlockchainConstants.MINING_DIFFICULTY).equals(target)) {
+        while (!Hex.toHexString(this.block.getBlockHash()).substring(0, BlockchainConstants.MINING_DIFFICULTY).equals(target)) {
             if (isInterrupted()) {
                 break;
             }
@@ -59,7 +59,7 @@ public class MiningWorker extends Thread {
 
         if (!isInterrupted()) {
             System.out.println("Block mined: " + Hex.toHexString(block.getBlockHash()));
-            this.miningManager.notifyMinedBlock(block);
+            this.miningManager.notifyNewBlock(block);
         }
     }
 }

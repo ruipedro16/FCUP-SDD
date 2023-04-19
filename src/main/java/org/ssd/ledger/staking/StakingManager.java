@@ -1,7 +1,10 @@
 package org.ssd.ledger.staking;
 
 import lombok.NonNull;
+import org.ssd.DHT;
 import org.ssd.constants.BlockchainConstants;
+import org.ssd.ledger.BlockchainManager;
+import org.ssd.ledger.Consensus;
 import org.ssd.ledger.block.Block;
 import org.ssd.ledger.block.Blockchain;
 import org.ssd.ledger.transactions.Transaction;
@@ -14,7 +17,7 @@ import java.util.function.Consumer;
 /**
  * cf. MiningManager => Same but for PoS
  */
-public class StakingManager {
+public class StakingManager implements BlockchainManager {
     private final Blockchain blockchain;
     private final TransactionPool transactionPool;
     private final List<Consumer<Block>> consumers;
@@ -26,6 +29,8 @@ public class StakingManager {
     private boolean running;
 
     public StakingManager(@NonNull Blockchain blockchain) {
+        assert DHT.getConsensus().equals(Consensus.PoS);
+
         this.blockchain = blockchain;
         this.transactionPool = blockchain.getTransactionPool();
         this.consumers = new ArrayList<>();
@@ -50,7 +55,7 @@ public class StakingManager {
      *
      * @param nTransactions The number of new transactions in the pool.
      */
-    public void handleNewTransaction(int nTransactions) {
+    private void handleNewTransaction(int nTransactions) {
         if (transactionPool.getPoolSize() >= BlockchainConstants.MIN_N_TRANSACTIONS && !this.running) {
             System.out.println("Enough transactions in pool.");
             this.running = true;
