@@ -70,7 +70,7 @@ public class AuctionsService {
     }
 
     public void startAuction(@NonNull Item auctionedItem) {
-        Auction newAuction = new Auction(auctionedItem);
+        Auction newAuction = new Auction(auctionedItem, 0);//TODO: specify timeout or make it a default
         this.runningAuctions.put(newAuction.getAuctionID(), newAuction);
     }
 }
