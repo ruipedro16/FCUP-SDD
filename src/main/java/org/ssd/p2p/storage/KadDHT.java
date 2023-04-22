@@ -91,7 +91,7 @@ public class KadDHT implements Map<byte[], StoreData> {
 
     @Override
     public Set<Entry<byte[], StoreData>> entrySet() {
-        return this.entrySet();
+        return this.storedDataMap.entrySet();
     }
 
     @Override

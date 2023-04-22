@@ -88,7 +88,7 @@ public class KadRemoteFindNode implements KadAction {
     }
 
     @Override
-    public void onSuccess(@NonNull NodeContact nodeContact, List<NodeContact> nodeContacts) {
+    public void onSuccess(@NonNull NodeContact nodeContact, @NonNull List<NodeContact> nodeContacts) {
         this.pendingResponsesMap.remove(nodeContact);
         this.actionStatusMap.put(nodeContact, KadActionStatus.RESPONDED);
         this.currentNode.getRoutingTable().addContact(nodeContact);
