@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.util.Arrays;
 
 @Getter
-public class StoredData {
+public class StoreData {
     private final byte[] key;
     private byte[] value;
 
@@ -14,7 +14,7 @@ public class StoredData {
     private long lastRepublish;
     private long lastUpdate;
 
-    public StoredData(byte[] key, byte[] value, byte[] originalPublisherID) {
+    public StoreData(byte[] key, byte[] value, byte[] originalPublisherID) {
         if (key == null || originalPublisherID == null) {
             throw new IllegalArgumentException();
         }
@@ -47,7 +47,7 @@ public class StoredData {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        StoredData that = (StoredData) o;
+        StoreData that = (StoreData) o;
         return Arrays.equals(this.key, that.key);
     }
 }

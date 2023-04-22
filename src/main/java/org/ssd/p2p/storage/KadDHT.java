@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class KadDHT implements Map<byte[], StoredData> {
-    private final Map<byte[], StoredData> storedDataMap;
+public class KadDHT implements Map<byte[], StoreData> {
+    private final Map<byte[], StoreData> storedDataMap;
 
     public KadDHT() {
         this.storedDataMap = new ConcurrentHashMap<>(); // thread-safe without the need for explicit synchronization
     }
 
-    public void store(@NonNull StoredData data) {
+    public void store(@NonNull StoreData data) {
         byte[] key = data.getKey();
         byte[] value = data.getValue();
         byte[] originalPublisherId = data.getOriginalPublisherID();
@@ -30,7 +30,7 @@ public class KadDHT implements Map<byte[], StoredData> {
             return v;
         });
 
-        this.storedDataMap.computeIfAbsent(key, k -> new StoredData(key, value, originalPublisherID));
+        this.storedDataMap.computeIfAbsent(key, k -> new StoreData(key, value, originalPublisherID));
     }
 
     @Override
@@ -54,23 +54,23 @@ public class KadDHT implements Map<byte[], StoredData> {
     }
 
     @Override
-    public StoredData get(Object key) {
+    public StoreData get(Object key) {
         return this.storedDataMap.get(key);
 
     }
 
     @Override
-    public StoredData put(byte[] key, StoredData value) {
+    public StoreData put(byte[] key, StoreData value) {
         return this.storedDataMap.put(key, value);
     }
 
     @Override
-    public StoredData remove(Object key) {
+    public StoreData remove(Object key) {
         return this.storedDataMap.remove(key);
     }
 
     @Override
-    public void putAll(Map<? extends byte[], ? extends StoredData> m) {
+    public void putAll(Map<? extends byte[], ? extends StoreData> m) {
         this.storedDataMap.putAll(m);
     }
 
@@ -85,12 +85,12 @@ public class KadDHT implements Map<byte[], StoredData> {
     }
 
     @Override
-    public Collection<StoredData> values() {
+    public Collection<StoreData> values() {
         return this.storedDataMap.values();
     }
 
     @Override
-    public Set<Entry<byte[], StoredData>> entrySet() {
+    public Set<Entry<byte[], StoreData>> entrySet() {
         return this.entrySet();
     }
 

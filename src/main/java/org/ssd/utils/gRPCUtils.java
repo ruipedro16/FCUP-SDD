@@ -7,7 +7,7 @@ import org.ssd.ProtoContent;
 import org.ssd.ProtoNodeContact;
 import org.ssd.ProtoNodeContactList;
 import org.ssd.p2p.routing.NodeContact;
-import org.ssd.p2p.storage.StoredData;
+import org.ssd.p2p.storage.StoreData;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +42,7 @@ public class gRPCUtils {
         return builder.build();
     }
 
-    public static ProtoContent toGRPC(@NonNull StoredData data)  {
+    public static ProtoContent toGRPC(@NonNull StoreData data)  {
         return ProtoContent.newBuilder()
                 .setKey(ByteString.copyFrom(data.getKey()))
                 .setValue(ByteString.copyFrom(data.getValue()))
@@ -54,11 +54,11 @@ public class gRPCUtils {
         return Pair.of(message.getMessageId().toByteArray(), message.getMessage().toByteArray());
     }
 
-    public static StoredData fromGRPC(@NonNull ProtoContent content) {
+    public static StoreData fromGRPC(@NonNull ProtoContent content) {
         byte[] key = content.getKey().toByteArray();
         byte[] value = content.getValue().toByteArray();
         byte[] originalPublisherID = content.getOriginalPublisherId().toByteArray();
 
-        return new StoredData(key, value, originalPublisherID);
+        return new StoreData(key, value, originalPublisherID);
     }
 }

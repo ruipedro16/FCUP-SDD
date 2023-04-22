@@ -4,13 +4,13 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.routing.NodeContact;
-import org.ssd.p2p.storage.StoredData;
+import org.ssd.p2p.storage.StoreData;
 
 import java.util.Arrays;
 import java.util.List;
 
-public record KadRemoteStore(@Getter Node currentNode, @Getter StoredData data) implements KadAction {
-    public KadRemoteStore(@NonNull Node currentNode, @NonNull StoredData data) {
+public record KadRemoteStore(@Getter Node currentNode, @Getter StoreData data) implements KadAction {
+    public KadRemoteStore(@NonNull Node currentNode, @NonNull StoreData data) {
         this.currentNode = currentNode;
         this.data = data;
     }

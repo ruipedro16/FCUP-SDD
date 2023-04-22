@@ -10,7 +10,7 @@ import org.ssd.*;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.remote.*;
 import org.ssd.p2p.routing.NodeContact;
-import org.ssd.p2p.storage.StoredData;
+import org.ssd.p2p.storage.StoreData;
 import org.ssd.utils.gRPCUtils;
 
 import java.util.List;
@@ -79,7 +79,7 @@ public class KadClientManager {
 
     public void store(@NonNull NodeContact recipient, @NonNull KadRemoteStore storeAction) {
         Node currentNode = storeAction.currentNode();
-        StoredData data = storeAction.data();
+        StoreData data = storeAction.data();
 
         P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub blockingStub = initBlockingStub(recipient);
 
@@ -134,7 +134,7 @@ public class KadClientManager {
         try {
             ProtoFindValueResponse response = blockingStub.findValue(targetContact);
             if (response.getDataType() == DataType.FOUND_VALUE) {
-                StoredData data = gRPCUtils.fromGRPC(response.getFoundValue());
+                StoreData data = gRPCUtils.fromGRPC(response.getFoundValue());
                 // contentLookupAction.onSuccess(recipient, data);
             } else {
 

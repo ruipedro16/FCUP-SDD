@@ -9,7 +9,7 @@ import org.ssd.*;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.routing.NodeContact;
 import org.ssd.p2p.remote.KadRemoteBroadcast;
-import org.ssd.p2p.storage.StoredData;
+import org.ssd.p2p.storage.StoreData;
 import org.ssd.utils.Pair;
 import org.ssd.utils.Utils;
 import org.ssd.utils.gRPCUtils;
@@ -99,7 +99,7 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
         byte[] targetID = request.getTarget().toByteArray();
         boolean found = this.currentNode.getDht().containsKey(targetID);
         if (found) {
-            StoredData data = this.currentNode.getDht().get(targetID);
+            StoreData data = this.currentNode.getDht().get(targetID);
 
             ProtoFindValueResponse response = ProtoFindValueResponse.newBuilder()
                     .setSendingNode(gRPCUtils.toGRPC(this.currentNode.getCurrentNode()))

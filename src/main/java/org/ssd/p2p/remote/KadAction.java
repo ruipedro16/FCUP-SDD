@@ -2,7 +2,7 @@ package org.ssd.p2p.remote;
 
 import lombok.NonNull;
 import org.ssd.p2p.routing.NodeContact;
-import org.ssd.p2p.storage.StoredData;
+import org.ssd.p2p.storage.StoreData;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public interface KadAction {
 
     }
 
-    default void onSuccess(@NonNull NodeContact nodeContact, @NonNull StoredData storedData) {
+    default void onSuccess(@NonNull NodeContact nodeContact, @NonNull StoreData storeData) {
     }
 
     default void onSuccess(@NonNull NodeContact nodeContact, @NonNull List<NodeContact> nodeContacts) {

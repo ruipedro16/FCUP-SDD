@@ -13,8 +13,6 @@ service P2PGrpcService {
   rpc broadcastMessage(ProtoBroadcastMessage) returns (ProtoNodeContact) {}
 }
 
-
-// Refactor to ProtoNodeContact
 message ProtoNodeContact {
   string nodeIpAddress = 1;
   uint32 nodePort = 2;
@@ -28,7 +26,6 @@ message ProtoContent {
   bytes value = 4;
 }
 
-// Refactor to ProtoNodeContactList
 message ProtoNodeContactList {
   repeated ProtoNodeContact nodes = 1;
 }

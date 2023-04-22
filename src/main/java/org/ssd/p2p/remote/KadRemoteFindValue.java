@@ -5,7 +5,7 @@ import lombok.NonNull;
 import org.ssd.constants.KademliaConstants;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.routing.NodeContact;
-import org.ssd.p2p.storage.StoredData;
+import org.ssd.p2p.storage.StoreData;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -104,19 +104,19 @@ public class KadRemoteFindValue implements KadAction {
     }
 
     @Override
-    public void onSuccess(@NonNull NodeContact nodeContact, @NonNull StoredData storedData) {
+    public void onSuccess(@NonNull NodeContact nodeContact, @NonNull StoreData storeData) {
         /*
          * Handles a found value
          */
         if (this.foundContent != null) {
             this.currentNode.getRoutingTable().addContact(nodeContact);
         } else {
-            this.foundContent = storedData.getValue();
+            this.foundContent = storeData.getValue();
             this.pendingResponsesMap.remove(nodeContact);
             this.actionStatusMap.put(nodeContact, KadActionStatus.RESPONDED);
             // TODO: Take care of consumers waiting for the value (is this done?)
             this.currentNode.getRoutingTable().addContact(nodeContact);
-            this.currentNode.getDht().store(storedData);
+            this.currentNode.getDht().store(storeData);
         }
     }
 
