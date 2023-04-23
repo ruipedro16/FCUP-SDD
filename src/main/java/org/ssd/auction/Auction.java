@@ -34,7 +34,7 @@ public class Auction {
     private byte[] generateAuctionID() {
         String itemBytes = Arrays.toString(this.getAuctionedItem().getItemID());
         String timeBytes = String.valueOf(initTime);
-        return itemBytes.concat(timeBytes).getBytes(); // TODO: restrain to a specific size maybe
+        return itemBytes.concat(timeBytes).getBytes(); // TODO: restrain to a specific size maybe -> HASH
     }
 
     public String toString() {
@@ -49,5 +49,4 @@ public class Auction {
         Date initDate = new Date(this.getInitTime());
         return String.format(s, Hex.toHexString(this.getAuctionID()), sdf.format(initDate), this.getMaxTimeoutDuration(), this.getAuctionedItem().toString());
     }
-
 }

@@ -34,7 +34,7 @@ public class AuctionsService {
 
     public void subscribeAuction(byte[] subscriberID, byte[] auctionID) {
         if (subscriberID == null || auctionID == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException();
         }
 
         if (!subscribers.containsKey(auctionID)) {
@@ -46,7 +46,7 @@ public class AuctionsService {
 
     public void removeSubscriber(byte[] subscriberID, byte[] auctionID) {
         if (subscriberID == null || auctionID == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException();
         }
 
         Set<byte[]> subscribers = this.subscribers.get(auctionID);
@@ -55,7 +55,7 @@ public class AuctionsService {
 
     public Auction getAuction(byte[] auctionID) {
         if (auctionID == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException();
         }
 
         return this.runningAuctions.get(auctionID);
@@ -63,7 +63,7 @@ public class AuctionsService {
 
     public void closeAuction(byte [] auctionID) {
         if (auctionID == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException();
         }
 
         this.runningAuctions.remove(auctionID);
