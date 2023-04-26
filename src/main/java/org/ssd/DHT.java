@@ -1,7 +1,7 @@
 package org.ssd;
 
 import lombok.Getter;
-import org.ssd.auction.AuctionsService;
+import org.ssd.auction.AuctionService;
 import org.ssd.ledger.BlockchainManager;
 import org.ssd.ledger.Consensus;
 import org.ssd.ledger.Wallet;
@@ -16,7 +16,7 @@ public class DHT {
     private static KadServer server;
 
     @Getter
-    private static AuctionsService auctionsService;
+    private static AuctionService auctionsService;
 
     @Getter
     private static Blockchain blockchain;
