@@ -3,6 +3,10 @@ package org.ssd.auction;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.ssd.DHT;
+import org.ssd.p2p.communication.AuctionMessage;
+import org.ssd.p2p.communication.BidMessage;
+import org.ssd.p2p.communication.RequestPaymentMessage;
 
 import java.util.*;
 
@@ -25,8 +29,42 @@ public class AuctionService {
         this.auctionMap.put(id, auction);
     }
 
+    public boolean containsAuction(byte[] id) {
+        if (id == null) {
+            throw new IllegalArgumentException();
+        }
+
+        return auctionMap.containsKey(id);
+    }
+
     public void addBid(@NonNull Bid bid) {
         byte[] auctionID = bid.getItemID();
         this.auctionMap.get(auctionID).placeBid(bid);
+    }
+
+    public void publishBid(@NonNull Bid bid) {
+        byte[] auctionID = bid.getItemID();
+        this.auctionMap.get(auctionID).placeBid(bid);
+        BidMessage message = new BidMessage(bid);
+        DHT.getCommunicationManager().broadcastMessage(message);
+    }
+
+    public void publishAuction(@NonNull Auction auction) {
+        RunningAuction runningAuction = new RunningAuction(auction);
+        byte[] id = auction.getAuctionID();
+        this.auctionMap.put(id, runningAuction);
+        AuctionMessage message = new AuctionMessage(runningAuction);
+        DHT.getCommunicationManager().broadcastMessage(message);
+    }
+
+    public void publishEndedAuction(@NonNull RunningAuction runningAuction) {
+        List<Bid> bids = runningAuction.getBids();
+
+        Bid highestBid = bids.stream()
+                .max(Comparator.comparing(Bid::getAmount))
+                .orElseThrow(NoSuchElementException::new);
+
+        RequestPaymentMessage message = new RequestPaymentMessage(highestBid);
+        DHT.getCommunicationManager().broadcastMessage(message);
     }
 }

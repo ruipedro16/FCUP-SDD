@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.security.PublicKey;
 
 @Data
-public class Bid implements Serializable, Comparable<Bid> {
+public class Bid implements Serializable {
     private final byte[] itemID;
     private final double amount;
     private final PublicKey buyerPK;
@@ -20,16 +20,5 @@ public class Bid implements Serializable, Comparable<Bid> {
         this.itemID = itemID;
         this.amount = amount;
         this.buyerPK = buyerPK;
-    }
-
-    @Override
-    public int compareTo(@NonNull Bid other) {
-        if (this.amount < other.amount) {
-            return -1;
-        } else if (this.amount > other.amount) {
-            return 1;
-        } else {
-            return 0;
-        }
     }
 }

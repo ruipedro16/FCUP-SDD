@@ -7,6 +7,7 @@ import org.ssd.ledger.Consensus;
 import org.ssd.ledger.Wallet;
 import org.ssd.ledger.block.Blockchain;
 import org.ssd.p2p.Node;
+import org.ssd.p2p.communication.CommunicationManager;
 import org.ssd.p2p.grpc.KadServer;
 
 public class DHT {
@@ -29,4 +30,7 @@ public class DHT {
 
     @Getter
     private static Consensus consensus;
+
+    @Getter
+    private static CommunicationManager communicationManager;
 }
