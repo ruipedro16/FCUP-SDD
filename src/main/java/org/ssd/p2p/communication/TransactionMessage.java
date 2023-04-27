@@ -6,7 +6,5 @@ import org.ssd.ledger.transactions.Transaction;
 
 @AllArgsConstructor
 @Data
-public class TransactionMessage implements Message {
-    private final MessageType messageType = MessageType.BROADCAST_TRANSACTION;
-    private final Transaction transaction;
+public record TransactionMessage(Transaction transaction) implements Message {
 }

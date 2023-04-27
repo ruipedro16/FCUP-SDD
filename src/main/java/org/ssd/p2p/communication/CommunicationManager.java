@@ -38,27 +38,27 @@ public class CommunicationManager {
 
     public void handleIncomingMessage(@NonNull Message message) {
         if (message instanceof TransactionMessage transactionMessage) { // BROADCAST_TRANSACTION
-            Transaction transaction = transactionMessage.getTransaction();
+            Transaction transaction = transactionMessage.transaction();
             System.out.println("Received a transaction");
             System.out.println("Adding transaction to the transaction pool");
             blockchain.getTransactionPool().addTransaction(transaction);
         } else if (message instanceof BlockMessage blockMessage) { // BROADCAST_BLOCK
-            Block block = blockMessage.getBlock();
+            Block block = blockMessage.block();
             System.out.println("Received block " + Hex.toHexString(block.getHeader().getHash()));
             System.out.println("Adding block to the blockchain...");
             blockchain.addBlock(block);
         } else if (message instanceof AuctionMessage auctionMessage) { // BROADCAST_AUCTION
-            RunningAuction auction = auctionMessage.getAuction();
+            RunningAuction auction = auctionMessage.auction();
             System.out.println("Received an auction");
             auctionService.addAuction(auction);
         } else if (message instanceof BidMessage bidMessage) {
-            Bid bid = bidMessage.getBid();
+            Bid bid = bidMessage.bid();
             System.out.println("Received bid");
             auctionService.addBid(bid);
         } else if (message instanceof GetRunningAuctionMessage getRunningAuctionMessage) {
             // todo: handle this in the auction service
         } else if (message instanceof RequestPaymentMessage requestPaymentMessage) {
-            Bid bid = requestPaymentMessage.getBid();
+            Bid bid = requestPaymentMessage.bid();
             if (DHT.getWallet().getPublicKey().equals(bid.getBuyerPK())) { // handle the payment if we are the bidder
                 DHT.getWallet().createTransaction(bid.getBuyerPK(), bid.getAmount());
             }
