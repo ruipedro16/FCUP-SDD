@@ -7,8 +7,6 @@ import org.bouncycastle.util.encoders.Hex;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 @Data
 public class RunningAuction implements Serializable {
@@ -32,7 +30,7 @@ public class RunningAuction implements Serializable {
         return this.bids.contains(bid);
     }
 
-    public void bid(@NonNull Bid bid) {
+    public void placeBid(@NonNull Bid bid) {
         this.bids.add(bid);
     }
 
