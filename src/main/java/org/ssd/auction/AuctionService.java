@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.ssd.DHT;
 import org.ssd.p2p.communication.AuctionMessage;
 import org.ssd.p2p.communication.BidMessage;
+import org.ssd.p2p.communication.GetRunningAuctionMessage;
 import org.ssd.p2p.communication.RequestPaymentMessage;
 
 import java.util.*;
@@ -55,6 +56,37 @@ public class AuctionService {
         this.auctionMap.put(id, runningAuction);
         AuctionMessage message = new AuctionMessage(runningAuction);
         DHT.getCommunicationManager().broadcastMessage(message);
+    }
+
+    public List<Bid> getBidsForAuction(byte[] auctionId) {
+        if (auctionId == null) {
+            throw new IllegalArgumentException();
+        }
+
+        RunningAuction auction = this.auctionMap.get(auctionId);
+        return auction == null ? null : auction.getBids();
+    }
+
+    public void getNetworkAuctions() {
+        GetRunningAuctionMessage msg = new GetRunningAuctionMessage();
+        DHT.getCommunicationManager().broadcastMessage(msg);
+    }
+
+    public Bid getLastBid(byte[] auctionId) {
+        if (auctionId == null) {
+            throw new IllegalArgumentException();
+        }
+
+        RunningAuction auction = this.auctionMap.get(auctionId);
+        return auction == null ? null : auction.getMostRecentBid();
+    }
+
+    public RunningAuction getAuctionById(byte[] id) {
+        if (id == null) {
+            throw new IllegalArgumentException();
+        }
+
+        return this.auctionMap.get(id); // may be null
     }
 
     public void publishEndedAuction(@NonNull RunningAuction runningAuction) {

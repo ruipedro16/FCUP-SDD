@@ -33,4 +33,8 @@ public class DHT {
 
     @Getter
     private static CommunicationManager communicationManager;
+
+    public static void main(String[] args) {
+
+    }
 }
