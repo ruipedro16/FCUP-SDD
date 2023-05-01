@@ -1,9 +1,11 @@
 package org.ssd.utils;
 
+import jdk.dynalink.beans.StaticClass;
 import lombok.NonNull;
 import org.bouncycastle.util.Arrays;
 import org.ssd.ledger.transactions.Transaction;
 
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -11,6 +13,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
+    public static byte[] serializeObject(@NonNull Serializable object) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(object);
+        oos.flush();
+        oos.close();
+        bos.close();
+        return bos.toByteArray();
+    }
+
     public static byte[] toByteArray(@NonNull List<byte[]> bytes) {
         int totalLength = 0;
         for (byte[] array : bytes) {
