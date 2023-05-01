@@ -1,6 +1,5 @@
 package org.ssd.p2p;
 
-import com.google.common.math.BigIntegerMath;
 import com.google.common.primitives.Longs;
 import lombok.Getter;
 import lombok.NonNull;
@@ -18,7 +17,6 @@ import org.ssd.utils.Utils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.net.InetAddress;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -80,7 +78,7 @@ public class Node {
     }
 
     private byte[] generateNodeID(int port) {
-        byte[] res = new byte[KademliaConstants.B];
+        byte[] res = new byte[KademliaConstants.B / Byte.SIZE];
         new SecureRandom().nextBytes(res);
         long nonce = 0L;
         InetAddress currentAddress = Utils.getLocalHostAddress();

@@ -1,3 +1,4 @@
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
 import org.ssd.p2p.Node;
 
@@ -17,4 +18,12 @@ public class NodeTest {
 
         assertEquals(expected, actual);
     }
+
+    @Test
+    public void testGenId() {
+        Node node1 = new Node(null, 5005);
+        System.out.println("GenID = " + Hex.toHexString(node1.getCurrentNode().getId()));
+        assertEquals(node1.getCurrentNode().getId().length, 20); //20bytes
+    }
+
 }
