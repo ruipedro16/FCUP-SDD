@@ -1,8 +1,7 @@
 package org.ssd.auction;
 
-import lombok.Getter;
+import lombok.Data;
 import lombok.NonNull;
-import lombok.Setter;
 import org.ssd.DHT;
 import org.ssd.p2p.communication.AuctionMessage;
 import org.ssd.p2p.communication.BidMessage;
@@ -11,18 +10,12 @@ import org.ssd.p2p.communication.RequestPaymentMessage;
 
 import java.util.*;
 
-@Getter
-@Setter
+@Data
 public class AuctionService {
-    private static final Scanner sc = new Scanner(System.in);
-
     private final Map<byte[], RunningAuction> auctionMap;
-
-    private Thread thread;
 
     public AuctionService() {
         this.auctionMap = new HashMap<>();
-        this.thread = null;
     }
 
     public void addAuction(@NonNull RunningAuction auction) {

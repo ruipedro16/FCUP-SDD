@@ -20,7 +20,7 @@ import java.util.*;
 
 @Data
 public class Wallet {
-    private byte[] id; // Hash of the public key
+    private byte[] id; // Hash of the public key TODO: Fix this
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
