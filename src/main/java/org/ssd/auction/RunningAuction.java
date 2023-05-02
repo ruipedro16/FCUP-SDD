@@ -6,7 +6,9 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Data
 public class RunningAuction implements Serializable {
@@ -28,6 +30,12 @@ public class RunningAuction implements Serializable {
 
     public boolean containsBid(@NonNull Bid bid) {
         return this.bids.contains(bid);
+    }
+
+    public Bid getHighestBid() {
+        return this.bids.stream()
+                .max(Comparator.comparing(Bid::getAmount))
+                .orElseThrow(NoSuchElementException::new);
     }
 
     public void placeBid(@NonNull Bid bid) {
