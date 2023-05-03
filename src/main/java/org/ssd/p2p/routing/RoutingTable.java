@@ -121,10 +121,27 @@ public class RoutingTable {
         nodeContacts.forEach(this::warnUnresponsiveContact);
     }
 
+    public String toStringOmitEmpty() {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.buckets.size(); i++) {
+            if (!this.buckets.get(i).isEmpty()) {
+                sb.append("Bucket[").append(i).append("]\n");
+                sb.append(this.buckets.get(i).toString());
+            }
+        }
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        this.buckets.forEach(sb::append);
+        for (int i = 0; i < this.buckets.size(); i++) {
+            sb.append("Bucket[").append(i).append("]\n");
+            if (!this.buckets.get(i).isEmpty()) {
+                sb.append(this.buckets.get(i).toString());
+            }
+        }
+        //this.buckets.forEach(sb::append);
         return sb.toString();
     }
 }

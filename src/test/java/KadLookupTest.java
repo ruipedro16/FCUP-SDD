@@ -1,3 +1,4 @@
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
 import org.ssd.constants.KademliaConstants;
 import org.ssd.p2p.Node;
@@ -5,7 +6,7 @@ import org.ssd.p2p.Node;
 public class KadLookupTest {
 
     @Test
-    public void testNetworkAndLookUp() {
+    public void testNetworkAndJoin() {
         //init network
         Node node1 = new Node(KademliaConstants.BOOTSTRAP_NODE_ID, KademliaConstants.BOOTSTRAP_NODE_PORT);
         Node node2 = new Node(null, 9000);
@@ -28,9 +29,7 @@ public class KadLookupTest {
         node8.joinNetwork(node6.getCurrentNode());
         node9.joinNetwork(node7.getCurrentNode());
         node10.joinNetwork(node1.getCurrentNode());
-        //TODO: Routing table toString to show the buckets better
-        System.out.println("[Node10] RoutingTable: " + node10.getRoutingTable().toString());
-
+        System.out.println("{Node10} [" + Hex.toHexString(node10.getCurrentNode().getId()) + "] RoutingTable: \n" + node10.getRoutingTable().toString());
     }
 
 }
