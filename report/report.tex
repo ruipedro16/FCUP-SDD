@@ -9,13 +9,12 @@
 \usepackage{relsize}
 \usepackage{setspace}
 \usepackage[dvipsnames]{xcolor}
-% \usepackage[printonlyused]{acronym}
-\usepackage{acronym}
+\usepackage[printonlyused]{acronym}
 
 \onehalfspacing
 
 \newcommand*\acronymname{Acronyms}
-\newcommand*\acronymbiggest{P2P}
+\newcommand*\acronymbiggest{RPC}
 
 \newcommand*\acronymfile{acros.tex}
 
@@ -80,7 +79,7 @@ In this report, we briefly describe the application we developed and discuss the
 
 \clearpage
 
-\tableofcontents
+\tableofcontents \vspace{2.5\baselineskip}
 \listoffigures
 
 \clearpage
@@ -95,7 +94,8 @@ In this report, we briefly describe the application we developed and discuss the
 
 Kademlia~\cite{maymounkov2002kademlia}
 
-This report is structured as follows: 
+This report is structured as follows: \cref{sec:reputation} discusses some challenges that come with the potential implementation
+of a reputation system.
 Finally, \cref{sec:concl} concludes the report.
 
 \section{Problem \& Proposed Solution}
@@ -116,6 +116,9 @@ Our implementation is divided in three parts:
 
 \section{Kademlia Network}\label{sec:kademlia}
 
+In addition to the four \acs{RPC} of the Kademlia protocol, we implemented two additional \acsp{RPC}:
+one to broadcast a message to all the nodes in the network, and one to 
+
 \subsection{Sybil \& Eclipse Attacks}
 
 ~\cite{pecori2016s}.
@@ -125,6 +128,27 @@ Our implementation is divided in three parts:
 Regarding \acs{PoS}, we implemented 
 
 \section{Reputation System}\label{sec:reputation}
+
+Due to time limitations, we were not able to implement a reputation system.  Regardless, our idea was to
+implement a system that allowed us to identify unreliable nodes within the network. As a consequence, these nodes 
+would be used less often for routing and would potentially be removed (\textcolor{red}{ignorados pq nao da para remover um nodo ?}) altogether from the network.
+
+To achieve this, we would compute and publish a \texttt{reputation} score to each node in the network, which would be then updated based
+on the behavious of the corresponding node -- deviating from the protocol would lead to a decrease in reputation, whereas 
+adherence to the protocol would result in an increase in reputation. While implementing such a system may seem a simple
+task,  it is by no means a trivial task due to several intricacies.
+
+For example, there is the possibility of a node accumulating excessive positive reputation, which would potentially allow 
+it to perform negative actions without any penalty. To address this issue, different approaches can be considered. We could,
+for example, implement a system where it becomes increasingly difficult to gain reputation for nodes with high and low reputation, 
+which would make it harder to accumulate reputation and more challenging to recover from negative actions. On the other
+hand, we could also cap the maximum reputation value to prevent this issue. Finally, we could implement a system where 
+the penalty for malicious actions increases with a higher reputation score. Idealy, a combination of these approaches
+should be considered.
+
+In addition, such a reputation system should balance accuracy and efficiency. In other words, it should be able to accuratly capture
+a node's behavior while maintaining low overheads in terms of computation, communication and storage. Finally, it should also
+be designed to prevent collusion.
 
 \section{Auction System}\label{sec:auction}
 
