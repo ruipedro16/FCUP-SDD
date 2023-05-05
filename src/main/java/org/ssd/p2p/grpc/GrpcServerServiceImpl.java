@@ -28,7 +28,7 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
         this.messageConsumers = new ArrayList<>();
     }
 
-    public void registerMessageConsumer(@NonNull BiConsumer<NodeContact, byte[]> consumer) {
+    public void registerMessageSubscriber(@NonNull BiConsumer<NodeContact, byte[]> consumer) {
         this.messageConsumers.add(consumer);
     }
 

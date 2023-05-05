@@ -4,16 +4,21 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import lombok.NonNull;
 import org.ssd.p2p.Node;
+import org.ssd.p2p.routing.NodeContact;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 public class KadServer implements AutoCloseable {
     private Server server;
+    private GrpcServerServiceImpl grpcServerService;
 
     public void start(@NonNull Node currentNode, int port) throws IOException {
+        this.grpcServerService = new GrpcServerServiceImpl(currentNode);
+
         this.server = ServerBuilder.forPort(port)
-                .addService(new GrpcServerServiceImpl(currentNode))
+                .addService(this.grpcServerService)
                 .build();
         this.server.start();
         System.out.println("gRPC server listening on port " + port + " ...");
@@ -34,6 +39,10 @@ public class KadServer implements AutoCloseable {
         if (this.server != null) {
             this.server.awaitTermination();
         }
+    }
+
+    public void registerMessageSubscriber(@NonNull BiConsumer<NodeContact, byte[]> consumer) {
+        this.grpcServerService.registerMessageSubscriber(consumer);
     }
 
     @Override

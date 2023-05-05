@@ -31,4 +31,19 @@ public class HexTest {
         // Test a hex string with odd number of characters
         assertThrows(DecoderException.class, () -> Hex.decode("0a1b2c3"));
     }
+
+    @Test
+    public void testEncodeDecode() {
+        // Test an empty byte array
+        byte[] input1 = new byte[] {};
+        assertArrayEquals(input1, Hex.decode(Hex.toHexString(input1)));
+
+        // Test a byte array with a single byte
+        byte[] input2 = new byte[] {1};
+        assertArrayEquals(input2, Hex.decode(Hex.toHexString(input2)));
+
+        // Test a byte array with multiple bytes
+        byte[] input3 = "Hello World".getBytes();
+        assertArrayEquals(input3, Hex.decode(Hex.toHexString(input3)));
+    }
 }

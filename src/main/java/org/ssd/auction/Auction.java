@@ -18,9 +18,9 @@ import java.util.Date;
  */
 @Data
 public class Auction implements Serializable {
-    private byte[] auctionID;
-    private long maxTimeoutDuration;
-    private long initTime; // time at which the auction started
+    private final byte[] auctionID;
+    private final long maxTimeoutDuration;
+    private final long initTime; // time at which the auction started
     private final Item auctionedItem;
     private final PublicKey sellerPk;
 
