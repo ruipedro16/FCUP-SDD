@@ -1,8 +1,22 @@
 package org.ssd.p2p.communication;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NonNull;
 import org.ssd.auction.Bid;
 
-public record BidMessage(Bid bid) implements Message {
+@AllArgsConstructor
+@Getter
+public class BidMessage extends MessageContent {
+
+    @NonNull
+    private final Bid bid;
+
+    /**
+     * @return Bid message class type identifier
+     */
+    @Override
+    public MessageClass messageClass() {
+        return MessageClass.BID_MESSAGE;
+    }
 }

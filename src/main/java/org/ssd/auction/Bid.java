@@ -2,6 +2,7 @@ package org.ssd.auction;
 
 import lombok.Data;
 import lombok.NonNull;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.io.Serializable;
 import java.security.PublicKey;
@@ -20,5 +21,15 @@ public class Bid implements Serializable {
         this.itemID = itemID;
         this.amount = amount;
         this.buyerPK = buyerPK;
+    }
+
+    @Override
+    public String toString() {
+        String s = """
+                Bid:
+                    Item ID: %s
+                    Amount: %s
+                """;
+        return String.format(s, Hex.toHexString(this.getItemID()), this.getAmount());
     }
 }

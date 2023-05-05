@@ -1,5 +1,8 @@
 package org.ssd.p2p.communication;
 
-public interface Message {
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
+public class Message {
+    private MessageContent content;
 }

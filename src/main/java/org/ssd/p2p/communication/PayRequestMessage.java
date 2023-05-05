@@ -3,20 +3,20 @@ package org.ssd.p2p.communication;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
-import org.ssd.ledger.transactions.Transaction;
+import org.ssd.auction.Bid;
 
 @AllArgsConstructor
 @Getter
-public class TransactionMessage extends MessageContent {
+public class PayRequestMessage extends MessageContent {
 
     @NonNull
-    private final Transaction transaction;
+    private final Bid bid;
 
     /**
-     * @return Transaction type identifier
+     * @return Message class identifier
      */
     @Override
     public MessageClass messageClass() {
-        return null;
+        return MessageClass.REQ_PAYMENT_MESSAGE;
     }
 }

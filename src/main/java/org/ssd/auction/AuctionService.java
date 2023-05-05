@@ -3,10 +3,7 @@ package org.ssd.auction;
 import lombok.Data;
 import lombok.NonNull;
 import org.ssd.DHT;
-import org.ssd.p2p.communication.AuctionMessage;
-import org.ssd.p2p.communication.BidMessage;
-import org.ssd.p2p.communication.GetRunningAuctionMessage;
-import org.ssd.p2p.communication.RequestPaymentMessage;
+import org.ssd.p2p.communication.*;
 
 import java.util.*;
 
@@ -89,7 +86,7 @@ public class AuctionService {
                 .max(Comparator.comparing(Bid::getAmount))
                 .orElseThrow(NoSuchElementException::new);
 
-        RequestPaymentMessage message = new RequestPaymentMessage(highestBid);
+        PayRequestMessage message = new PayRequestMessage(highestBid);
         DHT.getCommunicationManager().broadcastMessage(message);
     }
 }

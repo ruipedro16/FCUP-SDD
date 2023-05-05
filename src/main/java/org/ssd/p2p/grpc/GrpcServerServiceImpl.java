@@ -162,7 +162,6 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
             new KadRemoteBroadcast(this.currentNode, request.getDepth(), msgID, msg);
             NodeContact contact = gRPCUtils.fromGRPC(request.getSendingNode());
             Context.current().fork().run(() -> this.messageConsumers.forEach(consumer -> consumer.accept(contact, msg)));
-
         }
     }
 }
