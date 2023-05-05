@@ -80,14 +80,14 @@ public class DHT {
 
     private static void initCommunicationManager() {
         DHT.communicationManager = new CommunicationManager(DHT.node, DHT.blockchain, DHT.auctionsService);
-        // DHT.node.getServer().registerMessageSubscriber(CommunicationManager::handleIncomingMessage);
+        // DHT.node.getServer().registerMessageSubscriber();
         // TODO: doesnt compile
 
         System.out.println("Initialized the Communication Manager");
     }
 
     private static void start(int port, @NonNull Consensus consensus, boolean isBootstrap) {
-        initNetwork(isBootstrap, port); // TODO: include the port
+        initNetwork(isBootstrap, port);
         initBlockchain(consensus);
         initAuctionService();
         initCommunicationManager();
