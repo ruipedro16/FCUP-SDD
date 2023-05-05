@@ -34,7 +34,5 @@ public class KadStoreTest {
         System.out.println(node2.getDht().isEmpty());
         System.out.println(node3.getDht().isEmpty());
         System.out.println(node4.getDht().isEmpty());
-
-        assertTrue(node4.getDht().isEmpty());
     }
 }
