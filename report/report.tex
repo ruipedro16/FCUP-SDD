@@ -29,6 +29,7 @@
 \title{Systems \& Data Security \\ [0.8em] \smaller{} Public Ledger for
 Auctions over Kademlia}
 \author{Marco Carneiro \and Rui Fernandes}
+% ToDo Add numbers later up201908329 up
 \date{\today}
 
 \renewcommand\labelitemi{--}
@@ -91,7 +92,7 @@ In this report, we briefly describe the application we developed and discuss the
 
 \pagenumbering{arabic}
 
-\section{Introduction}
+\section{Introduction}\label{sec:introduction}
 
 Kademlia~\cite{maymounkov2002kademlia}
 
@@ -100,32 +101,36 @@ of a Kademlia \acs{P2P} network and some optimizations that were implemented.
 \cref{sec:reputation} discusses some challenges that come with the potential implementation of a reputation system.
 Finally, \cref{sec:concl} concludes the report.
 
-\section{Problem \& Proposed Solution}
-
-Similar to Peermart~\cite{hausheer2005peermart}.
-
-
+\section{Problem \& Proposed Solution}\label{sec:problem-&-proposed-solution}
 
 Our implementation is divided in three parts:
 
 \begin{itemize}
-    \item \textbf{\acs{P2P} network:}
+    \item \textbf{\acs{P2P} network:} The Peer-to-Peer network should allow a node to join it and gossip other nodes using the Kademlia algorithm.
     
     \item \textbf{Public Ledger:} The public ledger should be able to store auction transactions.
     
-    \item \textbf{Auction Service:}
+    \item \textbf{Auction Service:} The auction services gives the ability to a node to broadcast an asset it wishes to sell.
+	Other nodes use this service to bid on the assets being sold.
 \end{itemize}
 
 \section{Kademlia Network}\label{sec:kademlia}
 
 In addition to the four \acs{RPC} of the Kademlia protocol, we implemented two additional \acsp{RPC}:
-one to broadcast a message to all the nodes in the network, and one to 
+one to broadcast a message to all the nodes in the network, and one to send a message to a specific node.
+The Kademlia implementation follows its specification which dictates the usage of four main processes.
+These would allow the network to gossip the existence, status and distance of nodes within it.
+
+The main four processes are: PING, STORE, FIND\_NODE and FIND\_VALUE. In order, these allow to check for the status of a node,
+store given information on nearest nodes, find a specific node on the network by replying which nodes are closest to the requested key,
+and to find a specific value in the storage of the recipient of the request.
+The \acsp{RPC} calls were implemented using gRPC for remote communication and its underlying Netty abstracted implementation.
 
 \begin{itemize}
 	\item Concurrency parameter $\alpha$
 \end{itemize}
 
-\subsection{Sybil \& Eclipse Attacks}
+\subsection{Sybil \& Eclipse Attacks}\label{subsec:sybil-&-eclipse-attacks}
 
 S-Kademlia~\cite{pecori2016s}.
 
@@ -174,6 +179,11 @@ be designed to prevent malicious nodes from cooperating to improve each other's 
 other nodes.
 
 \section{Auction System}\label{sec:auction}
+
+Originally, a solution similar to Peermart~\cite{hausheer2005peermart} was considered due to its algorithmic agnostic properties.
+A simpler solution was instead followed that follows the English Auction model just the same, with nodes bidding on a specific asset advertised by another node.
+The node which initiates the auction process by advertising an item to sell, is responsible from determining the best buyer and, upon completion of the
+auction, requesting the agreed payment. \textcolor{red}{complete}
 
 \section{Conclusion \& Future Work}\label{sec:concl}
 
