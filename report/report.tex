@@ -10,11 +10,12 @@
 \usepackage{setspace}
 \usepackage[dvipsnames]{xcolor}
 \usepackage[printonlyused]{acronym}
+\usepackage{csquotes}
 
 \onehalfspacing
 
 \newcommand*\acronymname{Acronyms}
-\newcommand*\acronymbiggest{RPC}
+\newcommand*\acronymbiggest{UTXO}
 
 \newcommand*\acronymfile{acros.tex}
 
@@ -27,7 +28,7 @@
 
 \title{Systems \& Data Security \\ [0.8em] \smaller{} Public Ledger for
 Auctions over Kademlia}
-\author{Marco \and Rui Fernandes}
+\author{Marco Carneiro \and Rui Fernandes}
 \date{\today}
 
 \renewcommand\labelitemi{--}
@@ -94,8 +95,9 @@ In this report, we briefly describe the application we developed and discuss the
 
 Kademlia~\cite{maymounkov2002kademlia}
 
-This report is structured as follows: \cref{sec:reputation} discusses some challenges that come with the potential implementation
-of a reputation system.
+This report is structured as follows: \cref{sec:kademlia} describes the implementation
+of a Kademlia \acs{P2P} network and some optimizations that were implemented.
+\cref{sec:reputation} discusses some challenges that come with the potential implementation of a reputation system.
 Finally, \cref{sec:concl} concludes the report.
 
 \section{Problem \& Proposed Solution}
@@ -119,13 +121,33 @@ Our implementation is divided in three parts:
 In addition to the four \acs{RPC} of the Kademlia protocol, we implemented two additional \acsp{RPC}:
 one to broadcast a message to all the nodes in the network, and one to 
 
+\begin{itemize}
+	\item Concurrency parameter $\alpha$
+\end{itemize}
+
 \subsection{Sybil \& Eclipse Attacks}
 
-~\cite{pecori2016s}.
+S-Kademlia~\cite{pecori2016s}.
+
+To prevent Sybil attacks~\cite{douceur2002sybil}, 
+When a new node joins the network, their node ID must be mined in a process that involves \textcolor{red}{Completar}. 
+This ensures that it is not computationally feasible for an attacker to flood the network with nodes under their control, 
+as the process of joining the network requires a significant amount of work.
 
 \section{Public Ledger}\label{sec:ledger}
 
-Regarding \acs{PoS}, we implemented 
+Every transaction is added to a transaction pool containing pending transactions, wich will then be used
+to generate a new block and add it to the ledger.
+
+As such, the balance of a wallet is the sum of all \acsp{UTXO} relative to that wallet.
+By following this approach, previously spent transaction outputs are not accepted in subsequent transactions, which solves
+the \textit{double spending problem}.
+
+Due to timing constraints, we were not able to implement \acs{DPoS}. Instead, we implemented \acs{PoS}.
+In this case, we consider that all nodes in the network can act as validators. Then, when validating the
+transactions of a block, we choose a validator ``at random'', taking into account their stake in the network -- i.e. 
+nodes with a higher stake are more likely to be chosen as validators. Nevertheless, to implement \ac{DPoS}, it would
+suffice to \textcolor{red}{completar}.
 
 \section{Reputation System}\label{sec:reputation}
 
@@ -139,7 +161,7 @@ adherence to the protocol would result in an increase in reputation. While imple
 task,  it is by no means a trivial task due to several intricacies.
 
 For example, there is the possibility of a node accumulating excessive positive reputation, which would potentially allow 
-it to perform negative actions without any penalty. To address this issue, different approaches can be considered. We could,
+it to perform negative actions without a significant penalty. To address this issue, different approaches can be considered. We could,
 for example, implement a system where it becomes increasingly difficult to gain reputation for nodes with high and low reputation, 
 which would make it harder to accumulate reputation and more challenging to recover from negative actions. On the other
 hand, we could also cap the maximum reputation value to prevent this issue. Finally, we could implement a system where 
@@ -148,7 +170,8 @@ should be considered.
 
 In addition, such a reputation system should balance accuracy and efficiency. In other words, it should be able to accuratly capture
 a node's behavior while maintaining low overheads in terms of computation, communication and storage. Finally, it should also
-be designed to prevent collusion.
+be designed to prevent malicious nodes from cooperating to improve each other's reputation or harm the reputation of
+other nodes.
 
 \section{Auction System}\label{sec:auction}
 

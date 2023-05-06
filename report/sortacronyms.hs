@@ -12,9 +12,11 @@ capitalise = unwords . map (\(x:xs) -> toUpper x : xs) . words
 acronyms :: [(String, String)]
 acronyms =
     [ ("P2P", "Peer-To-Peer")
-    , ("PoW", "Proof of Work")
-    , ("PoS", "Proof of Stake")
+    , ("PoW", "Proof-of-Work")
+    , ("PoS", "Proof-of-Stake")
+    , ("DPoS", "Delegated Proof-of-Stake")
     , ("RPC", "remote procedure call")
+    , ("UTXO", "Unspent Transaction Output")
     ]
 
 main :: IO ()
