@@ -24,7 +24,7 @@ public class AuctionUI implements Runnable {
         Menu menu = new Menu("Auction System", new String[]{
                 "Create Auction",
                 "Join auction",
-                "Show PK" // TODO: remover isto
+                "Show PK"
         });
 
         menu.setHandler(1, this::newAuction);

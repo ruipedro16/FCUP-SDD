@@ -47,6 +47,7 @@ public class MiningManager implements BlockchainManager {
         this.consumers = new ArrayList<>();
     }
 
+    @Override
     public void registerBlockConsumer(@NonNull Consumer<Block> consumer) {
         this.consumers.add(consumer);
     }
@@ -81,6 +82,7 @@ public class MiningManager implements BlockchainManager {
         this.running = false;
     }
 
+    @Override
     public void notifyNewBlock(@NonNull Block block) {
         this.blockchain.addBlock(block);
         this.consumers.forEach(consumer -> consumer.accept(block));

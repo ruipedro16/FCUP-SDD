@@ -42,6 +42,7 @@ public class StakingManager implements BlockchainManager {
         }
     }
 
+    @Override
     public void registerBlockConsumer(@NonNull Consumer<Block> consumer) {
         this.consumers.add(consumer);
     }
@@ -122,6 +123,7 @@ public class StakingManager implements BlockchainManager {
         return null;
     }
 
+    @Override
     public void notifyNewBlock(@NonNull Block block) {
         this.blockchain.addBlock(block);
         this.consumers.forEach(consumer -> consumer.accept(block));

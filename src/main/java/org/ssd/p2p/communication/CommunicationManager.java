@@ -41,7 +41,11 @@ public class CommunicationManager {
         new KadRemoteSendMessage(this.currentNode, nodeContact.getId(), messageData).trigger();
     }
 
-    public void messageReceiver(NodeContact sender, byte[] msg) throws IOException, ClassNotFoundException {
+    public void messageReceiver(@NonNull NodeContact sender, byte[] msg) throws IOException, ClassNotFoundException {
+        if (msg == null) {
+            throw new IllegalArgumentException();
+        }
+
         System.out.println("Message from : [" + Hex.toHexString(sender.getId()) + "]");
         MessageContent msgContent = (MessageContent) Utils.deserializeBytes(msg);
         handleIncomingMessage(msgContent);
