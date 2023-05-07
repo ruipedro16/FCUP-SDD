@@ -2,7 +2,7 @@ package org.ssd;
 
 import lombok.Getter;
 import lombok.NonNull;
-import org.ssd.auction.AuctionService;
+import org.ssd.auction.*;
 import org.ssd.constants.KademliaConstants;
 import org.ssd.ledger.BlockchainManager;
 import org.ssd.ledger.Consensus;
@@ -99,10 +99,29 @@ public class DHT {
         System.out.println("Initialized the Communication Manager");
     }
 
+    private static void initMenu(boolean isBootstrap) {
+        wallet = new Wallet();
+        if (!isBootstrap) {
+            //TODO: add 1 or 2 example auctions or even delete since it wont be advertised
+            Auction example1 = new Auction(
+                    new Item("TestItem",
+                            wallet.getPublicKey(),
+                            10
+                    ),
+                    60 * 60 * 1000, //1hr
+                    wallet.getPublicKey());
+            auctionsService.addAuction(new RunningAuction(example1));
+        }
+
+        Runnable actions = new AuctionUI();
+        actions.run();
+    }
+
     public static void start(int port, @NonNull Consensus consensus, boolean isBootstrap) {
         initNetwork(isBootstrap, port);
         initBlockchain(consensus);
         initAuctionService();
         initCommunicationManager();
+        initMenu(isBootstrap);
     }
 }

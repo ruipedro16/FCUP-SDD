@@ -17,7 +17,7 @@ public class AuctionUI implements Runnable {
     public void run() {
         Wallet wallet = DHT.getWallet();
 
-        System.out.println("Choose a seller ID: ");
+        System.out.println("Choose your seller ID: ");
         byte[] id = sc.nextLine().getBytes(StandardCharsets.UTF_8);
         wallet.setId(id);
 
@@ -32,8 +32,11 @@ public class AuctionUI implements Runnable {
         menu.setHandler(3, () -> {
             System.out.println(Hex.toHexString(wallet.getPublicKey().getEncoded()));
         });
+        boolean m = true;
+        while (m) {
+            m = menu.run();
+        }
 
-        menu.run();
     }
 
     private void newAuction() {
@@ -46,7 +49,6 @@ public class AuctionUI implements Runnable {
         System.out.println("Duration of the auction: ");
         long timeout = sc.nextLong();
 
-        Wallet wallet = DHT.getWallet();
         PublicKey pk = DHT.getWallet().getPublicKey();
         Item auctionedItem = new Item(itemName, pk, minAmount);
         Auction newAuction = new Auction(auctionedItem, timeout, pk);
@@ -54,7 +56,7 @@ public class AuctionUI implements Runnable {
         DHT.getAuctionsService().publishAuction(newAuction);
 
         System.out.println("Successfully created a new auction!");
-        System.out.println("Press ENTER to return");
+        System.out.println("Press ENTER to return");//TODO, fix on intellij it is ignored
         sc.nextLine();
     }
 

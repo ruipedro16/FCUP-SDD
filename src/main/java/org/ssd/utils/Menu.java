@@ -51,23 +51,23 @@ public class Menu {
         return opt;
     }
 
-    public void run() {
+    public boolean run() {
         show();
-        for (; ; ) {
-            int opt = readOption();
-            if (opt == 0) {
-                return;
-            } else if (opt < 0 || opt > this.options.size()) {
-                System.out.println("Invalid Option");
-            } else {
-                try {
-                    this.handlers.get(opt - 1).execute();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return;
+        int opt = readOption();
+        if (opt == 0) {
+            System.exit(0);
+        } else if (opt < 0 || opt > this.options.size()) {
+            System.out.println("Invalid Option");
+            return true;
+        } else {
+            try {
+                this.handlers.get(opt - 1).execute();
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
+        return false;
     }
 
     /*
