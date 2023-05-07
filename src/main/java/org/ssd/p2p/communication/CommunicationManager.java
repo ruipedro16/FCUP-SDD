@@ -15,7 +15,9 @@ import org.ssd.p2p.remote.KadRemoteBroadcast;
 import org.ssd.p2p.remote.KadRemoteSendMessage;
 import org.ssd.p2p.routing.NodeContact;
 import org.ssd.utils.CryptoUtils;
+import org.ssd.utils.Utils;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -37,6 +39,12 @@ public class CommunicationManager {
     public void sendMessage(@NonNull MessageContent message, @NonNull NodeContact nodeContact) {
         byte[] messageData = message.toString().getBytes(StandardCharsets.UTF_8);
         new KadRemoteSendMessage(this.currentNode, nodeContact.getId(), messageData).trigger();
+    }
+
+    public void messageReceiver(NodeContact sender, byte[] msg) throws IOException, ClassNotFoundException {
+        System.out.println("Message from : [" + Hex.toHexString(sender.getId()) + "]");
+        MessageContent msgContent = (MessageContent) Utils.deserializeBytes(msg);
+        handleIncomingMessage(msgContent);
     }
 
     public void handleIncomingMessage(@NonNull MessageContent message) {

@@ -16,6 +16,7 @@ import org.ssd.p2p.grpc.KadServer;
 import org.ssd.p2p.routing.NodeContact;
 import org.ssd.utils.Utils;
 
+import java.io.IOException;
 import java.net.InetAddress;
 
 public class DHT {
@@ -80,9 +81,14 @@ public class DHT {
 
     private static void initCommunicationManager() {
         DHT.communicationManager = new CommunicationManager(DHT.node, DHT.blockchain, DHT.auctionsService);
-        // DHT.node.getServer().registerMessageSubscriber();
-        // TODO: doesnt compile
-
+        DHT.node.getServer().registerMessageSubscriber((sender, msg) -> {
+            try {
+                communicationManager.messageReceiver(sender, msg);
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        //TODO: init mining manager
         System.out.println("Initialized the Communication Manager");
     }
 

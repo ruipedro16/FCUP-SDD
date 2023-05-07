@@ -1,6 +1,5 @@
 package org.ssd.utils;
 
-import jdk.dynalink.beans.StaticClass;
 import lombok.NonNull;
 import org.bouncycastle.util.Arrays;
 import org.ssd.ledger.transactions.Transaction;
@@ -21,6 +20,12 @@ public class Utils {
         oos.close();
         bos.close();
         return bos.toByteArray();
+    }
+
+    public static Object deserializeBytes(byte @NonNull [] data) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bos = new ByteArrayInputStream(data);
+        ObjectInputStream oos = new ObjectInputStream(bos);
+        return oos.readObject();
     }
 
     public static byte[] toByteArray(@NonNull List<byte[]> bytes) {
