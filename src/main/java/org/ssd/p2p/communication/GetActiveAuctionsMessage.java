@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class GetRunningAuctionMessage extends MessageContent {
+public class GetActiveAuctionsMessage extends MessageContent {
 
     //private final RunningAuction[] auctionsList;
 

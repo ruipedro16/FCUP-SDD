@@ -18,6 +18,7 @@ import org.ssd.utils.Utils;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +32,11 @@ public class Node {
     private final KadDHT dht;
     /**
      * List of the IDs of the messages that this node has seen
+     * Used for broadcasting
      */
     private final List<byte[]> seenMessages;
 
-    public Node(byte[] nodeID, int port) {
+    public Node(byte[] nodeID, int port) throws UnknownHostException {
         if (nodeID == null) {
             System.out.println("Generating node ID...");
             nodeID = generateNodeID(port);
@@ -44,7 +46,7 @@ public class Node {
         this.currentNode = new NodeContact(Utils.getLocalHostAddress(), port, nodeID, System.currentTimeMillis());
 
         this.server = new KadServer();
-        new Thread(() -> {
+        new Thread(() -> { // Server thread
             try {
                 this.server.start(this, port);
                 this.server.awaitTermination();
@@ -52,8 +54,11 @@ public class Node {
                 throw new RuntimeException(e);
             }
         }).start();
+
         this.clientManager = new KadClientManager();
-        this.routingTable = new RoutingTable(this.currentNode);
+        this.routingTable = new RoutingTable(
+                new NodeContact(InetAddress.getLocalHost(), port, nodeID, System.currentTimeMillis())
+        );
         this.dht = new KadDHT();
         this.seenMessages = new ArrayList<>();
     }
@@ -113,7 +118,8 @@ public class Node {
             throw new IllegalArgumentException("ID of the message cannot be null");
         }
 
-        boolean messageExists = seenMessages.stream().anyMatch(m -> java.util.Arrays.equals(m, messageId));
+        boolean messageExists = seenMessages.stream()
+                .anyMatch(m -> java.util.Arrays.equals(m, messageId));
 
         if (messageExists) {
             return false;

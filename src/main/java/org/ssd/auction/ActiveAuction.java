@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Data
-public class RunningAuction implements Serializable {
+public class ActiveAuction implements Serializable {
     private final Auction auction;
     private final List<Bid> bids;
 
-    public RunningAuction(@NonNull Auction auction) {
+    public ActiveAuction(@NonNull Auction auction) {
         this.auction = auction;
         this.bids = new ArrayList<>();
     }
@@ -42,13 +42,26 @@ public class RunningAuction implements Serializable {
         this.bids.add(bid);
     }
 
+    public void printMostRecentBid() {
+        Bid bid = getMostRecentBid();
+        if (bid == null) {
+            System.out.println("No bids");
+        } else {
+            System.out.println("Most recent bid: " + bid.toString());
+        }
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("Auction ID: ").append(Hex.toHexString(this.auction.getAuctionID()));
-        sb.append("\nBids: ");
-        this.bids.forEach(bid -> sb.append(bid).append(','));
-        sb.append('\n');
+        if (!this.bids.isEmpty()) {
+            sb.append("\nBids: ");
+            this.bids.forEach(bid -> sb.append(bid).append(','));
+            sb.append('\n');
+        } else {
+            sb.append("\nBids: No bids so far\n");
+        }
         return sb.toString();
     }
 }

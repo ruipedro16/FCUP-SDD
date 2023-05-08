@@ -9,13 +9,13 @@ import java.util.*;
 
 @Data
 public class AuctionService {
-    private final Map<byte[], RunningAuction> auctionMap;
+    private final Map<byte[], ActiveAuction> auctionMap;
 
     public AuctionService() {
         this.auctionMap = new HashMap<>();
     }
 
-    public void addAuction(@NonNull RunningAuction auction) {
+    public void addAuction(@NonNull ActiveAuction auction) {
         byte[] id = auction.getAuction().getAuctionID(); // TODO: FIX THIS. ID should be ITEMID
         this.auctionMap.put(id, auction);
     }
@@ -41,7 +41,7 @@ public class AuctionService {
     }
 
     public void publishAuction(@NonNull Auction auction) {
-        RunningAuction runningAuction = new RunningAuction(auction);
+        ActiveAuction runningAuction = new ActiveAuction(auction);
         byte[] id = auction.getAuctionID();
         this.auctionMap.put(id, runningAuction);
         AuctionMessage message = new AuctionMessage(runningAuction);
@@ -53,12 +53,12 @@ public class AuctionService {
             throw new IllegalArgumentException();
         }
 
-        RunningAuction auction = this.auctionMap.get(auctionId);
+        ActiveAuction auction = this.auctionMap.get(auctionId);
         return auction == null ? null : auction.getBids();
     }
 
     public void getNetworkAuctions() {
-        GetRunningAuctionMessage msg = new GetRunningAuctionMessage();
+        GetActiveAuctionsMessage msg = new GetActiveAuctionsMessage();
         DHT.getCommunicationManager().broadcastMessage(msg);
     }
 
@@ -67,11 +67,11 @@ public class AuctionService {
             throw new IllegalArgumentException();
         }
 
-        RunningAuction auction = this.auctionMap.get(auctionId);
+        ActiveAuction auction = this.auctionMap.get(auctionId);
         return auction == null ? null : auction.getMostRecentBid();
     }
 
-    public RunningAuction getAuctionById(byte[] id) {
+    public ActiveAuction getAuctionById(byte[] id) {
         if (id == null) {
             throw new IllegalArgumentException();
         }
@@ -79,7 +79,7 @@ public class AuctionService {
         return this.auctionMap.get(id); // may be null
     }
 
-    public void publishEndedAuction(@NonNull RunningAuction runningAuction) {
+    public void publishEndedAuction(@NonNull ActiveAuction runningAuction) {
         List<Bid> bids = runningAuction.getBids();
 
         Bid highestBid = bids.stream()

@@ -3,14 +3,14 @@ package org.ssd.p2p.communication;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
-import org.ssd.auction.RunningAuction;
+import org.ssd.auction.ActiveAuction;
 
 @AllArgsConstructor
 @Getter
 public class AuctionMessage extends MessageContent {
 
     @NonNull
-    private final RunningAuction auction;
+    private final ActiveAuction auction;
 
     /**
      * @return Auction message class type identidier

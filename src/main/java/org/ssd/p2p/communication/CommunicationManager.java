@@ -6,7 +6,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.ssd.DHT;
 import org.ssd.auction.AuctionService;
 import org.ssd.auction.Bid;
-import org.ssd.auction.RunningAuction;
+import org.ssd.auction.ActiveAuction;
 import org.ssd.ledger.block.Block;
 import org.ssd.ledger.block.Blockchain;
 import org.ssd.ledger.transactions.Transaction;
@@ -66,7 +66,7 @@ public class CommunicationManager {
             blockchain.addBlock(block);
         } else if (message.messageClass() == MessageClass.AUCTION_MESSAGE) { // BROADCAST_AUCTION
             AuctionMessage msg = (AuctionMessage) message;
-            RunningAuction auction = msg.getAuction();
+            ActiveAuction auction = msg.getAuction();
             System.out.println("Received an auction");
             auctionService.addAuction(auction);
         } else if (message.messageClass() == MessageClass.BID_MESSAGE) {

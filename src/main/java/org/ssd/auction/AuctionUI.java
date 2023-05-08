@@ -68,7 +68,7 @@ public class AuctionUI implements Runnable {
         byte[] id = Hex.decode(line); // assumes the auction exists
                                       // TODO: handle input of an auction that does not exist
 
-        RunningAuction auction = DHT.getAuctionsService().getAuctionById(id);
+        ActiveAuction auction = DHT.getAuctionsService().getAuctionById(id);
         Bid highestBid = auction.getHighestBid();
 
         System.out.println("Highest bid: " + highestBid.getAmount());
@@ -78,7 +78,7 @@ public class AuctionUI implements Runnable {
         sc.nextLine();
     }
 
-    private void printAuctions(@NonNull Map<byte[], RunningAuction> auctionMap) {
+    private void printAuctions(@NonNull Map<byte[], ActiveAuction> auctionMap) {
         // TODO
     }
 }
