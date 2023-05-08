@@ -6,6 +6,7 @@ import org.ssd.DHT;
 import org.ssd.p2p.communication.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 public class AuctionService {
@@ -88,5 +89,23 @@ public class AuctionService {
 
         PayRequestMessage message = new PayRequestMessage(highestBid);
         DHT.getCommunicationManager().broadcastMessage(message);
+    }
+
+    public void endAuction(@NonNull String item) {
+        Map.Entry<byte[], ActiveAuction> runningAuction = getRunningAuctionsByItemWithList(item, getMyRunningAuctions());
+        if (runningAuction == null) {
+            return;
+        }
+        publishEndedAuction(runningAuction.getValue());
+    }
+
+    public Map.Entry<byte[], ActiveAuction> getRunningAuctionsByItemWithList(@NonNull String name, @NonNull List<Map.Entry<byte[], ActiveAuction>> list) {
+        List<Map.Entry<byte[], ActiveAuction>> runningItemList =  list.stream().filter((auctionEntry) -> auctionEntry.getValue().getAuction().getAuctionedItem().getItemName().equals(name)).toList();
+        //should be only one
+        if (runningItemList.size() != 1) { return runningItemList.get(0); } else { return null; }
+    }
+
+    public List<Map.Entry<byte[], ActiveAuction>> getMyRunningAuctions() {
+        return this.auctionMap.entrySet().stream().filter((auctionEntry) -> auctionEntry.getValue().getAuction().getSellerPk() == DHT.getWallet().getPublicKey()).collect(Collectors.toList());
     }
 }

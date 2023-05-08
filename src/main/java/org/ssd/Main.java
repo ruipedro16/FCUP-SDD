@@ -2,6 +2,8 @@ package org.ssd;
 
 import org.ssd.ledger.Consensus;
 
+import java.net.UnknownHostException;
+
 public class Main {
     public static void main(String[] args) {
         /*
@@ -46,7 +48,10 @@ public class Main {
                 System.exit(1);
             }
         }
-
-        DHT.start(port, consensus, isBootstrap);
+        try {
+            DHT.start(port, consensus, isBootstrap);
+        } catch (UnknownHostException e) { //Todo
+            System.out.println(e.getMessage());
+        }
     }
 }

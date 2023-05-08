@@ -20,6 +20,7 @@ import org.ssd.utils.Utils;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class DHT {
     private static Node node;
@@ -45,7 +46,7 @@ public class DHT {
     @Getter
     private static CommunicationManager communicationManager;
 
-    private static void initNetwork(boolean isBootstrap, int port) {
+    private static void initNetwork(boolean isBootstrap, int port) throws UnknownHostException {
         if (isBootstrap) {
             DHT.node = new Node(KademliaConstants.BOOTSTRAP_NODE_ID, KademliaConstants.BOOTSTRAP_NODE_PORT);
         } else {
@@ -117,7 +118,7 @@ public class DHT {
         actions.run();
     }
 
-    public static void start(int port, @NonNull Consensus consensus, boolean isBootstrap) {
+    public static void start(int port, @NonNull Consensus consensus, boolean isBootstrap) throws UnknownHostException {
         initNetwork(isBootstrap, port);
         initBlockchain(consensus);
         initAuctionService();

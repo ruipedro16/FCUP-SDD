@@ -24,12 +24,14 @@ public class AuctionUI implements Runnable {
         Menu menu = new Menu("Auction System", new String[]{
                 "Create Auction",
                 "Join auction",
-                "Show PK"
+                "Close my auction",
+                "Show PK",
         });
 
         menu.setHandler(1, this::newAuction);
         menu.setHandler(2, this::joinAuctions);
-        menu.setHandler(3, () -> {
+        menu.setHandler(3, this::closeAuction);
+        menu.setHandler(4, () -> {
             System.out.println(Hex.toHexString(wallet.getPublicKey().getEncoded()));
         });
         boolean m = true;
@@ -80,5 +82,18 @@ public class AuctionUI implements Runnable {
 
     private void printAuctions(@NonNull Map<byte[], ActiveAuction> auctionMap) {
         // TODO
+    }
+
+    /**
+     * Closes an auction by specifying the item name
+     */
+    private void closeAuction() {
+        printAuctions(DHT.getAuctionsService().getAuctionMap());
+
+        System.out.println("Item name: ");
+        String itemName = sc.nextLine();
+        DHT.getAuctionsService().endAuction(itemName);
+        System.out.println("Press enter to return");
+        sc.nextLine();
     }
 }
