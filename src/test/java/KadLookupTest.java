@@ -3,10 +3,12 @@ import org.junit.Test;
 import org.ssd.constants.KademliaConstants;
 import org.ssd.p2p.Node;
 
+import java.net.UnknownHostException;
+
 public class KadLookupTest {
 
     @Test
-    public void testNetworkAndJoin() {
+    public void testNetworkAndJoin() throws UnknownHostException {
         //init network
         Node node1 = new Node(KademliaConstants.BOOTSTRAP_NODE_ID, KademliaConstants.BOOTSTRAP_NODE_PORT);
         Node node2 = new Node(null, 9000);

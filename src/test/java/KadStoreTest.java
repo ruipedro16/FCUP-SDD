@@ -5,12 +5,14 @@ import org.ssd.p2p.Node;
 import org.ssd.p2p.remote.KadRemoteStore;
 import org.ssd.p2p.storage.StoreData;
 
+import java.net.UnknownHostException;
+
 import static org.junit.Assert.assertTrue;
 
 public class KadStoreTest {
 
     @Test
-    public void testStore() {
+    public void testStore() throws UnknownHostException {
         Node node1 = new Node(KademliaConstants.BOOTSTRAP_NODE_ID, KademliaConstants.BOOTSTRAP_NODE_PORT);
         Node node2 = new Node(null, 9000);
         Node node3 = new Node(null, 9001);

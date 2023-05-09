@@ -63,6 +63,11 @@ public class KadClientManager {
         return P2PGrpcServiceGrpc.newBlockingStub(channel);
     }
 
+    private P2PGrpcServiceGrpc.P2PGrpcServiceStub initStub(@NonNull NodeContact nodeContact) {
+        ManagedChannel channel = getChannel(nodeContact);
+        return P2PGrpcServiceGrpc.newStub(channel);
+    }
+
     public void ping(@NonNull NodeContact recipient, @NonNull KadRemotePing pingAction) {
         Node currentNode = pingAction.getCurrentNode();
         P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub blockingStub = initBlockingStub(recipient);

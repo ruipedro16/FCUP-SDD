@@ -3,6 +3,7 @@ import org.junit.Test;
 import org.ssd.p2p.Node;
 
 import java.math.BigInteger;
+import java.net.UnknownHostException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,7 +21,7 @@ public class NodeTest {
     }
 
     @Test
-    public void testGenId() {
+    public void testGenId() throws UnknownHostException {
         Node node1 = new Node(null, 5005);
         System.out.println("GenID = " + Hex.toHexString(node1.getCurrentNode().getId()));
         assertEquals(node1.getCurrentNode().getId().length, 20); //20bytes
