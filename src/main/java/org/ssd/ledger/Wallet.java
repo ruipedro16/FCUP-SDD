@@ -7,7 +7,6 @@ import org.ssd.DHT;
 import org.ssd.ledger.transactions.Transaction;
 import org.ssd.ledger.transactions.TransactionInput;
 import org.ssd.ledger.transactions.TransactionOutput;
-import org.ssd.p2p.communication.Message;
 import org.ssd.p2p.communication.MessageContent;
 import org.ssd.p2p.communication.TransactionMessage;
 import org.ssd.utils.CryptoUtils;
