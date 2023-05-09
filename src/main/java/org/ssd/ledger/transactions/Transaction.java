@@ -3,6 +3,7 @@ package org.ssd.ledger.transactions;
 import lombok.Data;
 import lombok.NonNull;
 import org.bouncycastle.util.Arrays;
+import org.ssd.DHT;
 import org.ssd.utils.CryptoUtils;
 import org.ssd.utils.Utils;
 
@@ -59,10 +60,6 @@ public class Transaction implements Serializable {
         return CryptoUtils.hash(dataToHash);
     }
 
-    public static boolean checkTransactionID(@NonNull Transaction transaction) {
-        return java.util.Arrays.equals(transaction.getId(), Transaction.computeTransactionID(transaction));
-    }
-
     public void generateSignature(@NonNull PrivateKey privateKey) {
         byte[] data = Arrays.concatenate(
                 this.sender.getEncoded(),
@@ -102,4 +99,33 @@ public class Transaction implements Serializable {
                 .mapToDouble(TransactionOutput::getAmount)
                 .sum();
     }
+
+    /**
+     * Validates a transaction by checking its signature and the validity of its inputs and outputs.
+     * This method removes the transaction inputs from the UTXOs if they are valid.
+     *
+     * @return {@code true} if the transaction is valid, {@code false} otherwise.
+     */
+    public boolean validateTransaction() {
+        // Check if the transaction signature is valid & Check if the inputs and outputs amounts match
+        if (!verifySignature() || getInputsAmount() != getOutputsAmount()) {
+            return false;
+        }
+
+
+        // Check if each input's unspent output exists and has the correct amount
+        for (TransactionInput input : getTxInputs()) {
+            TransactionOutput unspentOutput = DHT.getBlockchain().getUTXOs().get(input.getTxOutputID());
+            if (unspentOutput == null || unspentOutput.getAmount() != input.getUnspentTxOutput().getAmount()) {
+                return false;
+            }
+
+            // Remove the input's unspent output from the UTXOs
+            DHT.getBlockchain().getUTXOs().remove(input.getTxOutputID());
+        }
+
+        // If all checks passed, the transaction is valid
+        return true;
+    }
+
 }
