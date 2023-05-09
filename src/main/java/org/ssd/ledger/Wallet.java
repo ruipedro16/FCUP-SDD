@@ -7,6 +7,9 @@ import org.ssd.DHT;
 import org.ssd.ledger.transactions.Transaction;
 import org.ssd.ledger.transactions.TransactionInput;
 import org.ssd.ledger.transactions.TransactionOutput;
+import org.ssd.p2p.communication.Message;
+import org.ssd.p2p.communication.MessageContent;
+import org.ssd.p2p.communication.TransactionMessage;
 import org.ssd.utils.CryptoUtils;
 
 import java.security.KeyPair;
@@ -20,7 +23,7 @@ import java.util.*;
 
 @Data
 public class Wallet {
-    private byte[] id; // Hash of the public key TODO: Fix this
+    private byte[] id; // Hash of the public key
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
@@ -81,6 +84,8 @@ public class Wallet {
          */
         txInputs.forEach(t -> UTXOs.remove(t.getTxOutputID())); // removes the spent UTXOs from the sender's UTXO list
 
+        ///////////////////////////// TODO:
+
         // Set the new UTXOs for the resulting transaction for the recipient
         newTransaction.getTxOutputs().add(new TransactionOutput(newTransaction.getRecipient(), amount, newTransaction.getId()));
 
@@ -99,7 +104,9 @@ public class Wallet {
         // Add the new transaction to the transaction pool.
         DHT.getBlockchain().getTransactionPool().addTransaction(newTransaction);
 
-        // TODO: Broadcast the new transaction to other nodes in the network.
+        // Broadcast the new transaction to other nodes in the network.
+        MessageContent txMessage = new TransactionMessage(newTransaction);
+        DHT.getCommunicationManager().broadcastMessage(txMessage);
 
         return newTransaction;
     }
