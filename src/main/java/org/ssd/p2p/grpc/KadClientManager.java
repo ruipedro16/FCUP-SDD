@@ -167,7 +167,7 @@ public class KadClientManager {
 
     public void broadCastMessage(@NonNull NodeContact recipient, @NonNull KadRemoteBroadcast broadcastAction) {
         Node currentNode = broadcastAction.currentNode();
-        System.out.println("Broadcasting message from node " + Hex.toHexString(currentNode.getCurrentNode().getId()));
+        System.out.println("Broadcasting message to node " + Hex.toHexString(recipient.getId()));
 
         P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub blockingStub = initBlockingStub(recipient);
 

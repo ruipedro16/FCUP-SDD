@@ -30,7 +30,13 @@ public class CommunicationManager {
     private final AuctionService auctionService;
 
     public void broadcastMessage(@NonNull MessageContent message) {
-        byte[] messageData = message.toString().getBytes(StandardCharsets.UTF_8);
+        //byte[] messageData = message.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] messageData;
+        try {
+            messageData = Utils.serializeObject(message);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         byte[] messageID = CryptoUtils.hash(messageData);
 
         new KadRemoteBroadcast(this.currentNode, 0, messageID, messageData).trigger();

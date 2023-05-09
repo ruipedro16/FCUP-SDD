@@ -52,7 +52,7 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
     @Override
     public void ping(ProtoNodeContact request, StreamObserver<ProtoNodeContact> responseObserver) {
-        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "]" + "PING request from " + request.getNodeId());
+        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "] PING request from " + request.getNodeId());
         handleProtoNodeContactMsg(request);
         ProtoNodeContact response = gRPCUtils.toGRPC(this.currentNode.getCurrentNode());
         responseObserver.onNext(response);
@@ -61,7 +61,7 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
     @Override
     public void store(ProtoContent request, StreamObserver<ProtoContent> responseObserver) {
-        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "]" + "STORE request from " + Hex.toHexString(request.getSendingNode().getNodeId().toByteArray()));
+        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "] STORE request from " + Hex.toHexString(request.getSendingNode().getNodeId().toByteArray()));
         handleProtoNodeContactMsg(request.getSendingNode());
 
         byte[] key = request.getKey().toByteArray();
@@ -80,7 +80,7 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
     @Override
     public void findNode(ProtoTargetContact request, StreamObserver<ProtoFindNodeResponse> responseObserver) {
-        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "]" + "FIND_NODE request from " + Hex.toHexString(request.getSendingNode().getNodeId().toByteArray()));
+        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "] FIND_NODE request from " + Hex.toHexString(request.getSendingNode().getNodeId().toByteArray()));
         handleProtoNodeContactMsg(request.getSendingNode());
 
         byte[] targetID = request.getTarget().toByteArray();
@@ -96,7 +96,7 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
     @Override
     public void findValue(ProtoTargetContact request, StreamObserver<ProtoFindValueResponse> responseObserver) {
-        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "]" + "FIND_VALUE request from " + Hex.toHexString(request.getSendingNode().getNodeId().toByteArray()));
+        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "] FIND_VALUE request from " + Hex.toHexString(request.getSendingNode().getNodeId().toByteArray()));
         handleProtoNodeContactMsg(request.getSendingNode());
 
         byte[] targetID = request.getTarget().toByteArray();
@@ -129,7 +129,7 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
     @Override
     public void sendMessage(ProtoMessage request, StreamObserver<ProtoMessageResponse> responseObserver) {
-        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "]" + "SEND_MESSAGE request from " + Hex.toHexString(request.getSendingNode().getNodeId().toByteArray()));
+        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "] SEND_MESSAGE request from " + Hex.toHexString(request.getSendingNode().getNodeId().toByteArray()));
         handleProtoNodeContactMsg(request.getSendingNode());
 
         NodeContact nodeContact = gRPCUtils.fromGRPC(request.getSendingNode());
@@ -147,6 +147,7 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
     @Override
     public void broadcastMessage(ProtoBroadcastMessage request, StreamObserver<ProtoNodeContact> responseObserver) {
+        System.out.println("[" + Hex.toHexString(this.currentNode.getCurrentNode().getId()) + "] BROADCAST_MESSAGE request from " + Hex.toHexString(request.getSendingNode().getNodeId().toByteArray()));
         handleProtoNodeContactMsg(request.getSendingNode());
 
         ProtoNodeContact response = gRPCUtils.toGRPC(this.currentNode.getCurrentNode());
