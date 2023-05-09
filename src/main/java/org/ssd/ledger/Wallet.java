@@ -64,7 +64,7 @@ public class Wallet {
             return null;
         }
 
-        // Find unspent transaction outputs (UTXOs) that can be used to fund the transaction.
+        // Find unspent transaction outputs (UTXOs) that can be used to fund the new transaction.
         List<TransactionInput> txInputs = new ArrayList<>();
         double total = 0;
         Iterator<TransactionOutput> utxoIterator = UTXOs.values().iterator();
@@ -78,18 +78,21 @@ public class Wallet {
         Transaction newTransaction = new Transaction(this.publicKey, recipient, amount, txInputs); // the ID is set in the constructor
         newTransaction.generateSignature(this.privateKey);
 
-        /*
-         * Update the UTXO lists to reflect the spent outputs and new outputs.
-         */
+        // Update the UTXO lists to reflect the spent outputs and new outputs.
         txInputs.forEach(t -> UTXOs.remove(t.getTxOutputID())); // removes the spent UTXOs from the sender's UTXO list
 
-        ///////////////////////////// TODO:
+        // Added this [TODO: confirmar (acrescentei isto)]
+        for (TransactionInput input : txInputs) {
+            TransactionOutput txOutput = DHT.getBlockchain().getUTXOs().get(input.getTxOutputID());
+            input.setUnspentTxOutput(txOutput);
+        }
 
-        // Set the new UTXOs for the resulting transaction for the recipient
+        // Set the new UTXOs for the resulting transaction for the recipient [TODO: CONFIRMAR ISTO (isto estava antes mas nao sei se tem de estar)]
         newTransaction.getTxOutputs().add(new TransactionOutput(newTransaction.getRecipient(), amount, newTransaction.getId()));
 
         // Set the new UTXOs for the resulting transaction for the recipient for the sender
         double remainingAmount = newTransaction.getInputsAmount() - amount;
+        newTransaction.getTxOutputs().add(new TransactionOutput(newTransaction.getRecipient(), amount, newTransaction.getId()));
         newTransaction.getTxOutputs().add(new TransactionOutput(newTransaction.getSender(), remainingAmount, newTransaction.getId()));
 
         // Mark used inputs as spent
