@@ -4,9 +4,9 @@ import lombok.Data;
 import lombok.NonNull;
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.DHT;
+import org.ssd.auction.ActiveAuction;
 import org.ssd.auction.AuctionService;
 import org.ssd.auction.Bid;
-import org.ssd.auction.ActiveAuction;
 import org.ssd.ledger.block.Block;
 import org.ssd.ledger.block.Blockchain;
 import org.ssd.ledger.transactions.Transaction;
@@ -54,23 +54,23 @@ public class CommunicationManager {
 
         System.out.println("Message from : [" + Hex.toHexString(sender.getId()) + "]");
         MessageContent msgContent = (MessageContent) Utils.deserializeBytes(msg);
-        handleIncomingMessage(msgContent);
+        handleIncomingMessage(sender, msgContent);
     }
 
-    public void handleIncomingMessage(@NonNull MessageContent message) {
-        if (message.messageClass() == MessageClass.TRANSACTION_MESSAGE) { // BROADCAST_TRANSACTION
+    public void handleIncomingMessage(@NonNull NodeContact sender, @NonNull MessageContent message) {
+        if (message.messageClass() == MessageClass.TRANSACTION_MESSAGE) {
             TransactionMessage msg = (TransactionMessage) message;
             Transaction transaction = msg.getTransaction();
             System.out.println("Received a transaction");
             System.out.println("Adding transaction to the transaction pool");
             blockchain.getTransactionPool().addTransaction(transaction);
-        } else if (message.messageClass() == MessageClass.BLOCK_MESSAGE) { // BROADCAST_BLOCK
+        } else if (message.messageClass() == MessageClass.BLOCK_MESSAGE) {
             BlockMessage msg = (BlockMessage) message;
             Block block = msg.getBlock();
             System.out.println("Received block " + Hex.toHexString(block.getHeader().getHash()));
             System.out.println("Adding block to the blockchain...");
             blockchain.addBlock(block);
-        } else if (message.messageClass() == MessageClass.AUCTION_MESSAGE) { // BROADCAST_AUCTION
+        } else if (message.messageClass() == MessageClass.AUCTION_MESSAGE) {
             AuctionMessage msg = (AuctionMessage) message;
             ActiveAuction auction = msg.getAuction();
             System.out.println("Received an auction");
@@ -81,8 +81,10 @@ public class CommunicationManager {
             System.out.println("Received bid");
             auctionService.addBid(bid);
         } else if (message.messageClass() == MessageClass.GET_AUCTION_MESSAGE) {
-            // todo: handle this in the auction service
+            System.out.println("Getting auctions in the network");
+            auctionService.sendAuction(sender);
         } else if (message.messageClass() == MessageClass.REQ_PAYMENT_MESSAGE) {
+            System.out.println("Requesting payment");
             PayRequestMessage msg = (PayRequestMessage) message;
             Bid bid = msg.getBid();
             if (DHT.getWallet().getPublicKey().equals(bid.getBuyerPK())) { // handle the payment if we are the bidder

@@ -46,10 +46,6 @@ public class Block implements Cloneable {
                 }
             }
 
-            if (transaction.validateTransaction()) { // Todo: confirmar
-                transactions.add(transaction);
-            }
-
             System.out.println("Transaction successfully added to the block");
         });
     }
