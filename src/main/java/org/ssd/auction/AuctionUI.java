@@ -1,6 +1,6 @@
 package org.ssd.auction;
 
-import lombok.NonNull;
+import com.google.protobuf.ByteString;
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.DHT;
 import org.ssd.ledger.Wallet;
@@ -116,7 +116,7 @@ public class AuctionUI implements Runnable {
     }
 
     private void printRunningAuctions() {
-        Map<byte[], ActiveAuction> activeAuctions = DHT.getAuctionsService().getAuctionMap();
+        Map<ByteString, ActiveAuction> activeAuctions = DHT.getAuctionsService().getAuctionMap();
         final StringBuilder sb = new StringBuilder();
         sb.append("Currently ongoing auctions:\n");
         sb.append("=========================\n");
@@ -124,10 +124,9 @@ public class AuctionUI implements Runnable {
             sb.append("No active auctions");
         } else {
             activeAuctions.forEach((id, activeAuction) -> {
-                sb.append("Auction : ").append(Hex.toHexString(id)).append("\n");
+                sb.append("Auction : ").append(Hex.toHexString(id.toByteArray())).append("\n");
                 sb.append(" - Item : ").append(activeAuction.getAuction().getAuctionedItem().getItemName());
                 sb.append(" - Minimum : ").append(activeAuction.getAuction().getAuctionedItem().getMinimumAmount());
-                //TODO. Add node id (might be unnecessary since we can bid based on item name)
                 Bid hb;
                 try {
                     hb = activeAuction.getHighestBid();

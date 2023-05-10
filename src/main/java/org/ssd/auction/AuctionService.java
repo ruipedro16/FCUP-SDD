@@ -1,5 +1,6 @@
 package org.ssd.auction;
 
+import com.google.protobuf.ByteString;
 import lombok.Data;
 import lombok.NonNull;
 import org.ssd.DHT;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class AuctionService {
-    private final Map<byte[], ActiveAuction> auctionMap;
+    private final Map<ByteString, ActiveAuction> auctionMap;
 
     public AuctionService() {
         this.auctionMap = new HashMap<>();
@@ -20,7 +21,7 @@ public class AuctionService {
 
     public void addAuction(@NonNull ActiveAuction auction) {
         byte[] id = auction.getAuction().getAuctionedItem().getItemID();
-        this.auctionMap.put(id, auction);
+        this.auctionMap.put(ByteString.copyFrom(id), auction);
     }
 
     public boolean containsAuction(byte[] id) {
@@ -28,17 +29,17 @@ public class AuctionService {
             throw new IllegalArgumentException();
         }
 
-        return auctionMap.containsKey(id);
+        return auctionMap.containsKey(ByteString.copyFrom(id));
     }
 
     public void addBid(@NonNull Bid bid) {
         byte[] auctionID = bid.getItemID();
-        this.auctionMap.get(auctionID).placeBid(bid);
+        this.auctionMap.get(ByteString.copyFrom(auctionID)).placeBid(bid);
     }
 
     public void publishBid(@NonNull Bid bid) {
         byte[] auctionID = bid.getItemID();
-        this.auctionMap.get(auctionID).placeBid(bid);
+        this.auctionMap.get(ByteString.copyFrom(auctionID)).placeBid(bid);
         BidMessage message = new BidMessage(bid);
         DHT.getCommunicationManager().broadcastMessage(message);
     }
@@ -46,7 +47,7 @@ public class AuctionService {
     public void publishAuction(@NonNull Auction auction) {
         ActiveAuction runningAuction = new ActiveAuction(auction);
         byte[] id = auction.getAuctionedItem().getItemID(); // Use item id to publish, auctionId becomes useless
-        this.auctionMap.put(id, runningAuction);
+        this.auctionMap.put(ByteString.copyFrom(id), runningAuction);
         AuctionMessage message = new AuctionMessage(runningAuction);
         DHT.getCommunicationManager().broadcastMessage(message);
     }
@@ -56,7 +57,7 @@ public class AuctionService {
             throw new IllegalArgumentException();
         }
 
-        ActiveAuction auction = this.auctionMap.get(auctionId);
+        ActiveAuction auction = this.auctionMap.get(ByteString.copyFrom(auctionId));
         return auction == null ? null : auction.getBids();
     }
 
@@ -70,7 +71,7 @@ public class AuctionService {
             throw new IllegalArgumentException();
         }
 
-        ActiveAuction auction = this.auctionMap.get(auctionId);
+        ActiveAuction auction = this.auctionMap.get(ByteString.copyFrom(auctionId));
         return auction == null ? null : auction.getMostRecentBid();
     }
 
@@ -79,7 +80,7 @@ public class AuctionService {
             throw new IllegalArgumentException();
         }
 
-        return this.auctionMap.get(id); // may be null
+        return this.auctionMap.get(ByteString.copyFrom(id)); // may be null
     }
 
     public void publishEndedAuction(@NonNull ActiveAuction runningAuction) {
@@ -94,7 +95,7 @@ public class AuctionService {
     }
 
     public boolean endAuction(@NonNull String item) {
-        Pair<byte[], ActiveAuction> runningAuction = getRunningAuctionsByItemWithList(item, getMyRunningAuctions());
+        Pair<ByteString, ActiveAuction> runningAuction = getRunningAuctionsByItemWithList(item, getMyRunningAuctions());
 
         if (runningAuction == null) {
             return false;
@@ -104,8 +105,8 @@ public class AuctionService {
         return true;
     }
 
-    public Pair<byte[], ActiveAuction> getRunningAuctionsByItemWithList(@NonNull String name,
-                                                                             @NonNull Map<byte[], ActiveAuction> map) {
+    public Pair<ByteString, ActiveAuction> getRunningAuctionsByItemWithList(@NonNull String name,
+                                                                             @NonNull Map<ByteString, ActiveAuction> map) {
         return map.entrySet().stream()
                 .filter(auctionEntry -> auctionEntry.getValue().getAuction().getAuctionedItem().getItemName().equals(name))
                 .findFirst()
@@ -113,7 +114,7 @@ public class AuctionService {
                 .orElse(null);
     }
 
-    public Map<byte[], ActiveAuction> getMyRunningAuctions() {
+    public Map<ByteString, ActiveAuction> getMyRunningAuctions() {
         return this.auctionMap.entrySet().stream()
                 .filter(auctionEntry -> auctionEntry.getValue().getAuction().getSellerPk().equals(DHT.getWallet().getPublicKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
