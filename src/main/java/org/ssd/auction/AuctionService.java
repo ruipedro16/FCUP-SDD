@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NonNull;
 import org.ssd.DHT;
 import org.ssd.p2p.communication.*;
+import org.ssd.p2p.routing.NodeContact;
+import org.ssd.utils.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,21 +94,37 @@ public class AuctionService {
     }
 
     public boolean endAuction(@NonNull String item) {
-        Map.Entry<byte[], ActiveAuction> runningAuction = getRunningAuctionsByItemWithList(item, getMyRunningAuctions());
+        Pair<byte[], ActiveAuction> runningAuction = getRunningAuctionsByItemWithList(item, getMyRunningAuctions());
+
         if (runningAuction == null) {
             return false;
         }
-        publishEndedAuction(runningAuction.getValue());
+
+        publishEndedAuction(runningAuction.getSecond());
         return true;
     }
 
-    public Map.Entry<byte[], ActiveAuction> getRunningAuctionsByItemWithList(@NonNull String name, @NonNull List<Map.Entry<byte[], ActiveAuction>> list) {
-        List<Map.Entry<byte[], ActiveAuction>> runningItemList =  list.stream().filter((auctionEntry) -> auctionEntry.getValue().getAuction().getAuctionedItem().getItemName().equals(name)).toList();
-        //should be only one
-        if (runningItemList.size() != 1) { return runningItemList.get(0); } else { return null; }
+    public Pair<byte[], ActiveAuction> getRunningAuctionsByItemWithList(@NonNull String name,
+                                                                             @NonNull Map<byte[], ActiveAuction> map) {
+        return map.entrySet().stream()
+                .filter(auctionEntry -> auctionEntry.getValue().getAuction().getAuctionedItem().getItemName().equals(name))
+                .findFirst()
+                .map(Pair::of)
+                .orElse(null);
     }
 
-    public List<Map.Entry<byte[], ActiveAuction>> getMyRunningAuctions() {
-        return this.auctionMap.entrySet().stream().filter((auctionEntry) -> auctionEntry.getValue().getAuction().getSellerPk() == DHT.getWallet().getPublicKey()).collect(Collectors.toList());
+    public Map<byte[], ActiveAuction> getMyRunningAuctions() {
+        return this.auctionMap.entrySet().stream()
+                .filter(auctionEntry -> auctionEntry.getValue().getAuction().getSellerPk().equals(DHT.getWallet().getPublicKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public void sendAuction(@NonNull NodeContact nodeContact) {
+        this.auctionMap.values().forEach(
+                activeAuction -> {
+                    MessageContent msg = new AuctionMessage(activeAuction);
+                    DHT.getCommunicationManager().sendMessage(msg, nodeContact);
+                }
+        );
     }
 }
