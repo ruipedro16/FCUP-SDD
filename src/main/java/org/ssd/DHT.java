@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.ssd.auction.*;
 import org.ssd.constants.KademliaConstants;
-import org.ssd.ledger.BlockchainManager;
 import org.ssd.ledger.Consensus;
 import org.ssd.ledger.Wallet;
 import org.ssd.ledger.block.Blockchain;
@@ -35,10 +34,13 @@ public class DHT {
     private static Blockchain blockchain;
 
     @Getter
-    private static BlockchainManager blockchainManager;
+    private static MiningManager miningManager; // NULL in PoS
 
     @Getter
-    private static Wallet wallet;
+    private static StakingManager stakingManager; // NULL in PoW
+
+    @Getter
+    private static Wallet wallet; // PK is here
 
     @Getter
     private static Consensus consensus;
@@ -68,11 +70,16 @@ public class DHT {
         DHT.blockchain = new Blockchain();
         System.out.println("Initialized the blockchain");
 
+        DHT.wallet = new Wallet();
+        System.out.println("Initialized the wallet");
+
         if (consensus.equals(Consensus.PoW)) {
-            DHT.blockchainManager = new MiningManager(DHT.blockchain);
+            DHT.stakingManager = null;
+            DHT.miningManager = new MiningManager(DHT.blockchain);
             System.out.println("Initialized the mining manager");
         } else {
-            DHT.blockchainManager = new StakingManager(DHT.blockchain);
+            DHT.stakingManager = new StakingManager(DHT.blockchain);
+            DHT.stakingManager.registerValidator(DHT.wallet.getPublicKey());
             System.out.println("Initialized the staking manager");
         }
     }
@@ -92,16 +99,22 @@ public class DHT {
             }
         });
 
-        DHT.blockchainManager.registerBlockConsumer(block -> {
-            MessageContent msg = new BlockMessage(block);
-            communicationManager.broadcastMessage(msg);
-        });
+        if (DHT.consensus.equals(Consensus.PoW)) {
+            DHT.miningManager.registerBlockConsumer(block -> {
+                MessageContent msg = new BlockMessage(block);
+                communicationManager.broadcastMessage(msg);
+            });
+        } else {
+            DHT.stakingManager.registerBlockConsumer(block -> {
+                MessageContent msg = new BlockMessage(block);
+                communicationManager.broadcastMessage(msg);
+            });
+        }
 
         System.out.println("Initialized the Communication Manager");
     }
 
     private static void initMenu(boolean isBootstrap) {
-        wallet = new Wallet();
         if (!isBootstrap) {
             //TODO: add 1 or 2 example auctions or even delete since it wont be advertised
             Auction example1 = new Auction(

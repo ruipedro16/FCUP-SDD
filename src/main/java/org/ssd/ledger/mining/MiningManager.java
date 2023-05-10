@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NonNull;
 import org.ssd.DHT;
 import org.ssd.constants.BlockchainConstants;
-import org.ssd.ledger.BlockchainManager;
 import org.ssd.ledger.Consensus;
 import org.ssd.ledger.block.Block;
 import org.ssd.ledger.block.Blockchain;
@@ -12,7 +11,6 @@ import org.ssd.ledger.transactions.Transaction;
 import org.ssd.ledger.transactions.TransactionPool;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -23,7 +21,7 @@ import java.util.function.Consumer;
  */
 
 @Data
-public class MiningManager implements BlockchainManager {
+public class MiningManager {
     private final Blockchain blockchain;
     private final TransactionPool transactionPool;
     private MiningWorker miningWorker;
@@ -48,7 +46,6 @@ public class MiningManager implements BlockchainManager {
         this.consumers = new ArrayList<>();
     }
 
-    @Override
     public void registerBlockConsumer(@NonNull Consumer<Block> consumer) {
         this.consumers.add(consumer);
     }
@@ -83,7 +80,6 @@ public class MiningManager implements BlockchainManager {
         this.running = false;
     }
 
-    @Override
     public void notifyNewBlock(@NonNull Block block) {
         this.blockchain.addBlock(block);
         this.consumers.forEach(consumer -> consumer.accept(block));

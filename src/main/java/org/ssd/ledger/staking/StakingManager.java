@@ -3,7 +3,6 @@ package org.ssd.ledger.staking;
 import lombok.NonNull;
 import org.ssd.DHT;
 import org.ssd.constants.BlockchainConstants;
-import org.ssd.ledger.BlockchainManager;
 import org.ssd.ledger.Consensus;
 import org.ssd.ledger.block.Block;
 import org.ssd.ledger.block.Blockchain;
@@ -17,7 +16,7 @@ import java.util.function.Consumer;
 /**
  * cf. MiningManager => Same but for PoS
  */
-public class StakingManager implements BlockchainManager {
+public class StakingManager {
     private final Blockchain blockchain;
     private final TransactionPool transactionPool;
     private final List<Consumer<Block>> consumers;
@@ -42,13 +41,18 @@ public class StakingManager implements BlockchainManager {
         }
     }
 
-    @Override
     public void registerBlockConsumer(@NonNull Consumer<Block> consumer) {
         this.consumers.add(consumer);
     }
 
-    public void registerValidator(@NonNull PublicKey publicKey, double stakedAmount) {
-        this.validators.put(publicKey, stakedAmount);
+    public void registerValidator(@NonNull PublicKey publicKey) {
+        this.validators.put(publicKey, (double) 0);
+    }
+
+    public void setValidatorStake(@NonNull PublicKey publicKey, double stake) {
+        if (this.validators.containsKey(publicKey)) {
+            this.validators.put(publicKey, stake);
+        }
     }
 
     /**
@@ -123,7 +127,6 @@ public class StakingManager implements BlockchainManager {
         return null;
     }
 
-    @Override
     public void notifyNewBlock(@NonNull Block block) {
         this.blockchain.addBlock(block);
         this.consumers.forEach(consumer -> consumer.accept(block));
