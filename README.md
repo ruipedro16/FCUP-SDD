@@ -1,5 +1,7 @@
 # ssd_2023
 
+- [ ] No PoS, tem este Hashmap `private final Map<PublicKey, Double> validators;`. É preciso adicionar codigo para que ao inicializar cada nodo da rede, a pk desse nodo seja adicionada a este hashmap. Tb e preciso calcular o staked amount de cada nodo (provavelmente no fim de cada transacao (?))
+
 - [ ] A validacao das transacoess e feita no metodo `Block.addTransactions` ou no `Transaction.validateTransaction`? (Talvez juntar estes dois metodos)
 
 
