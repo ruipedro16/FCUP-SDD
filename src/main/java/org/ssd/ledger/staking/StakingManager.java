@@ -62,7 +62,7 @@ public class StakingManager implements BlockchainManager {
             this.running = true;
 
             int n = Math.min(transactionPool.getPoolSize(), BlockchainConstants.MAX_N_TRANSACTIONS);
-            LinkedList<Transaction> newTransactions = transactionPool.getTransactions(n);
+            List<Transaction> newTransactions = transactionPool.getTransactions(n);
 
             // Select a validator for the block
             PublicKey validatorPK = selectValidator();

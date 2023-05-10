@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  */
 public class TransactionPool {
     private final List<Transaction> pendingTransactions;
-    private final List<Consumer<Integer>> consumers; // == subscribers
+    private final List<Consumer<Integer>> consumers;
 
     /**
      * Initializes the transaction pool with no pending transactions and no consumers.
@@ -58,10 +58,10 @@ public class TransactionPool {
      * @param n
      * @return
      */
-    public LinkedList<Transaction> getTransactions(int n) {
+    public List<Transaction> getTransactions(int n) {
         assert (n > 0);
 
-        LinkedList<Transaction> transactionsToRemove = new LinkedList<>();
+        List<Transaction> transactionsToRemove = new LinkedList<>();
         for (int i = 0; i < n && !pendingTransactions.isEmpty(); i++) {
             transactionsToRemove.add(pendingTransactions.remove(0));
         }

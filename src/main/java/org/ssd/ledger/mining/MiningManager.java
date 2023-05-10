@@ -39,6 +39,7 @@ public class MiningManager implements BlockchainManager {
 
         this.blockchain = blockchain;
         this.transactionPool = blockchain.getTransactionPool();
+        this.running = false;
 
         if (transactionPool != null) {
             transactionPool.registerSubscriber(this::handleNewTransaction);
@@ -65,7 +66,7 @@ public class MiningManager implements BlockchainManager {
             this.running = true;
 
             int n = Math.min(transactionPool.getPoolSize(), BlockchainConstants.MAX_N_TRANSACTIONS);
-            LinkedList<Transaction> newTransactions = transactionPool.getTransactions(n);
+            List<Transaction> newTransactions = transactionPool.getTransactions(n);
 
             Block blockToMine = new Block(this.blockchain.getLastBlock().getHeader().getHash());
             blockToMine.addTransactions(newTransactions);

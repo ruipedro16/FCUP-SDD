@@ -14,14 +14,9 @@ public class BlockHeader {
     private byte[] previousHash;
     private byte[] merkleRoot;
     private long timestamp;
-    private int nonce; // this will be set in the miningworker
+    private int nonce;
     private PublicKey validatorPK; // TODO: only in PoS, is null in PoW
 
-
-    /*
-     * For PoW
-     * For PoS we will also require the Public Key of the Validator
-     */
     public BlockHeader(byte[] previousHash) {
         this.previousHash = previousHash;
         this.timestamp = System.currentTimeMillis();
