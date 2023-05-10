@@ -50,8 +50,9 @@ public class Main {
         }
         try {
             DHT.start(port, consensus, isBootstrap);
-        } catch (UnknownHostException e) { //Todo
-            System.out.println(e.getMessage());
+        } catch (UnknownHostException e) {
+            System.err.println("Unable to initialize the app");
+            System.exit(-1);
         }
     }
 }

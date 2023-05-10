@@ -46,5 +46,4 @@ public class KademliaConstants {
                             T_REFRESH = TimeUnit.SECONDS.toMillis(tRefresh),
                             T_REPLICATE = TimeUnit.SECONDS.toMillis(tReplicate),
                             T_REPUBLISH = TimeUnit.SECONDS.toMillis(tRepublish);
-
 }

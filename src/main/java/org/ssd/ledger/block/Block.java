@@ -41,13 +41,16 @@ public class Block implements Cloneable {
 
             if (header.getPreviousHash() != null) { // the hash of the genesis block is null
                 if ((!transaction.verifySignature())) {
-                    System.out.println("Transaction Signature failed to verify. Ignored.");
+                    System.out.println("Transaction signature failed to verify. Ignored.");
                     return;
                 }
             }
 
-            transactions.add(transaction);
-            System.out.println("Transaction Successfully added to the block");
+            if (transaction.validateTransaction()) { // Todo: confirmar
+                transactions.add(transaction);
+            }
+
+            System.out.println("Transaction successfully added to the block");
         });
     }
 

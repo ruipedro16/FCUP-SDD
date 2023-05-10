@@ -7,20 +7,22 @@ import org.bouncycastle.util.Arrays;
 import org.ssd.utils.CryptoUtils;
 
 import java.security.PublicKey;
+import java.util.Optional;
 
 @Data
 public class BlockHeader {
     private byte[] hash;
-    private byte[] previousHash;
+    private final byte[] previousHash;
     private byte[] merkleRoot;
     private long timestamp;
     private int nonce;
-    private PublicKey validatorPK; // TODO: only in PoS, is null in PoW
+    private PublicKey validatorPK; // only in PoS, is null in PoW
 
     public BlockHeader(byte[] previousHash) {
         this.previousHash = previousHash;
         this.timestamp = System.currentTimeMillis();
         this.hash = computeHash();
+        this.validatorPK = null;
     }
 
 
