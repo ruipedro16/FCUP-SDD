@@ -17,7 +17,7 @@ public class AuctionService {
     }
 
     public void addAuction(@NonNull ActiveAuction auction) {
-        byte[] id = auction.getAuction().getAuctionID(); // TODO: FIX THIS. ID should be ITEMID
+        byte[] id = auction.getAuction().getAuctionedItem().getItemID();
         this.auctionMap.put(id, auction);
     }
 
@@ -43,7 +43,7 @@ public class AuctionService {
 
     public void publishAuction(@NonNull Auction auction) {
         ActiveAuction runningAuction = new ActiveAuction(auction);
-        byte[] id = auction.getAuctionID();
+        byte[] id = auction.getAuctionedItem().getItemID(); // Use item id to publish, auctionId becomes useless
         this.auctionMap.put(id, runningAuction);
         AuctionMessage message = new AuctionMessage(runningAuction);
         DHT.getCommunicationManager().broadcastMessage(message);
@@ -91,12 +91,13 @@ public class AuctionService {
         DHT.getCommunicationManager().broadcastMessage(message);
     }
 
-    public void endAuction(@NonNull String item) {
+    public boolean endAuction(@NonNull String item) {
         Map.Entry<byte[], ActiveAuction> runningAuction = getRunningAuctionsByItemWithList(item, getMyRunningAuctions());
         if (runningAuction == null) {
-            return;
+            return false;
         }
         publishEndedAuction(runningAuction.getValue());
+        return true;
     }
 
     public Map.Entry<byte[], ActiveAuction> getRunningAuctionsByItemWithList(@NonNull String name, @NonNull List<Map.Entry<byte[], ActiveAuction>> list) {
