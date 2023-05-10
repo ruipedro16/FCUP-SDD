@@ -81,10 +81,8 @@ public class RoutingTable {
             throw new IllegalArgumentException();
         }
 
-        int n = KademliaConstants.K;
-
         Set<NodeContact> sortedContacts = new TreeSet<>(new NodeContactDistanceComparator(targetID));
-        sortedContacts.addAll(this.getAllNodes()); // TODO: remove this
+        // sortedContacts.addAll(this.getAllNodes()); // TODO: remove this
         int bucketIndex = getBucketIndex(targetID);
 
         for (int i = 0; i < KademliaConstants.B; i++) {
@@ -102,23 +100,19 @@ public class RoutingTable {
             }
 
             // Break out of the loop if we have found the required number of contacts, or if we have searched all relevant k-buckets
-            if (sortedContacts.size() > n || !lookBefore && !lookAfter) {
+            if (sortedContacts.size() > KademliaConstants.K || !lookBefore && !lookAfter) {
                 break;
             }
         }
 
         return sortedContacts.stream()
-                .limit(n)
+                .limit(KademliaConstants.K)
                 .collect(Collectors.toList());
     }
 
     public void warnUnresponsiveContact(@NonNull NodeContact nodeContact) {
         int bucketIndex = getBucketIndex(nodeContact);
         this.buckets.get(bucketIndex).removeContact(nodeContact);
-    }
-
-    public void warnUnresponsiveContacts(@NonNull List<NodeContact> nodeContacts) {
-        nodeContacts.forEach(this::warnUnresponsiveContact);
     }
 
     public String toStringOmitEmpty() {
@@ -141,7 +135,6 @@ public class RoutingTable {
                 sb.append(this.buckets.get(i).toString());
             }
         }
-        //this.buckets.forEach(sb::append);
         return sb.toString();
     }
 }

@@ -25,6 +25,7 @@ public class Blockchain implements Serializable {
     public Blockchain() {
         this.blocks = new ArrayList<>();
         Block genesis = new Block(null); // the previousHash of the genesis block is NULL
+                                                     // The genesis block does not contain any transactions
         this.blocks.add(genesis);
         this.transactionPool = new TransactionPool();
         this.UTXOs = new HashMap<>();
@@ -35,7 +36,6 @@ public class Blockchain implements Serializable {
     }
 
     public Block getLastBlock() {
-        // getLastBlock never returns NULL. There is always a block because the blockchain is initialized with a genesis block
 
         return this.blocks.get(this.blocks.size() - 1);
     }
