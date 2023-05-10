@@ -17,6 +17,6 @@ public class TransactionMessage extends MessageContent {
      */
     @Override
     public MessageClass messageClass() {
-        return null;
+        return MessageClass.TRANSACTION_MESSAGE;
     }
 }

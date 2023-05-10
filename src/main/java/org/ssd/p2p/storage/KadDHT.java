@@ -24,13 +24,17 @@ public class KadDHT implements Map<byte[], StoreData> {
     }
 
     public void store(byte[] key, byte[] value, byte[] originalPublisherID) {
-        // TODO: rever para ver se esta certo
-        this.storedDataMap.computeIfPresent(key, (k, v) -> {
-            v.updateValue(value);
-            return v;
-        });
+        if (key == null || originalPublisherID == null) {
+            throw new IllegalArgumentException();
+        }
 
-        this.storedDataMap.computeIfAbsent(key, k -> new StoreData(key, value, originalPublisherID));
+        if (this.storedDataMap.containsKey(key)) { // if the key is in the map we update it
+            StoreData valueData = this.storedDataMap.get(key);
+            valueData.updateValue(value);
+        } else { // otherwise we create a new StoreData object
+            StoreData newData = new StoreData(key, value, originalPublisherID);
+            this.storedDataMap.put(key, newData);
+        }
     }
 
     @Override

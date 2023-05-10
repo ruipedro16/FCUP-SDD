@@ -12,5 +12,6 @@ public enum MessageClass {
     GET_AUCTION_MESSAGE(GetActiveAuctionsMessage.class),
     REQ_PAYMENT_MESSAGE(PayRequestMessage.class),
     TRANSACTION_MESSAGE(TransactionMessage.class);
+
     private final Class<? extends MessageContent> type;
 }

@@ -14,6 +14,10 @@ public class KadRemotePing implements KadAction {
     private final byte[] targetID;
 
     public KadRemotePing(@NonNull Node currentNode, byte[] targetID) {
+        if (targetID == null) {
+            throw new IllegalArgumentException();
+        }
+
         this.currentNode = currentNode;
         this.targetID = targetID;
     }
@@ -25,7 +29,6 @@ public class KadRemotePing implements KadAction {
                 .filter(contact -> Arrays.equals(contact.getId(), targetID))
                 .findFirst()
                 .ifPresent(contact -> this.currentNode.getClientManager().ping(contact, this));
-
     }
 
     @Override
