@@ -19,24 +19,12 @@ public class Bucket {
         this.replacementCache = new ConcurrentLinkedDeque<>(); // thread-safe implementation of a deque that allows concurrent access to the queue without the need for explicit synchronization.
     }
 
-    public boolean contains(@NonNull NodeContact contact) {
-        return this.contacts.contains(contact);
-    }
-
-    public int getSize() {
-        return this.contacts.size();
-    }
-
     public List<NodeContact> getAllContacts() {
         return new ArrayList<>(this.contacts);
     }
 
-    public boolean isFull() {
+    private boolean isFull() {
         return this.contacts.size() == KademliaConstants.K;
-    }
-
-    public boolean isEmpty() {
-        return this.contacts.isEmpty();
     }
 
     public synchronized void insertContact(@NonNull NodeContact nodeContact) {

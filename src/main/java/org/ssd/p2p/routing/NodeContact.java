@@ -19,6 +19,10 @@ public class NodeContact {
     private int staleCount;
 
     public NodeContact(@NonNull InetAddress address, int port, byte[] id, long lastSeen) {
+        if (id == null) {
+            throw new IllegalArgumentException();
+        }
+
         this.address = address;
         this.port = port;
         this.id = id;
@@ -39,6 +43,9 @@ public class NodeContact {
         this.staleCount = 0;
     }
 
+    /*
+     * Comparison based only on the id, port & address
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {

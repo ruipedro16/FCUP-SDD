@@ -37,15 +37,15 @@ public class Transaction implements Serializable {
 
     public static byte[] computeTransactionID(@NonNull Transaction transaction) {
         byte[] txInputBytes = Utils.toByteArray(
-            transaction.txInputs.stream()
-                    .map(TransactionInput::getBytes)
-                    .collect(Collectors.toList())
+                transaction.txInputs.stream()
+                        .map(TransactionInput::getBytes)
+                        .collect(Collectors.toList())
         );
 
         byte[] txOutputBytes = Utils.toByteArray(
-            transaction.txOutputs.stream()
-                    .map(TransactionOutput::getBytes)
-                    .collect(Collectors.toList())
+                transaction.txOutputs.stream()
+                        .map(TransactionOutput::getBytes)
+                        .collect(Collectors.toList())
         );
 
         byte[] tmp = Arrays.concatenate(txInputBytes, txOutputBytes);
@@ -127,5 +127,4 @@ public class Transaction implements Serializable {
         // If all checks passed, the transaction is valid
         return true;
     }
-
 }
