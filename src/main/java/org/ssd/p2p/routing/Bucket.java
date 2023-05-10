@@ -27,6 +27,10 @@ public class Bucket {
         return this.contacts.size() == KademliaConstants.K;
     }
 
+    public boolean isEmpty() {
+        return this.contacts.isEmpty();
+    }
+
     public synchronized void insertContact(@NonNull NodeContact nodeContact) {
         // If the contact already exists in the bucket, we move it to the tail of the bucket
         if (this.contacts.contains(nodeContact)) {

@@ -54,7 +54,7 @@ public class ActiveAuction implements Serializable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("Auction ID: ").append(Hex.toHexString(this.auction.getAuctionID()));
+        sb.append("Auction ID: ").append(Hex.toHexString(this.auction.getAuctionedItem().getItemID()));
         if (!this.bids.isEmpty()) {
             sb.append("\nBids: ");
             this.bids.forEach(bid -> sb.append(bid).append(','));

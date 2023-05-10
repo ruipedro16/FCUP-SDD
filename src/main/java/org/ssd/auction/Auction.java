@@ -18,7 +18,6 @@ import java.util.Date;
  */
 @Data
 public class Auction implements Serializable {
-    private final byte[] auctionID;
     private final long maxTimeoutDuration;
     private final long initTime; // time at which the auction started
     private final Item auctionedItem;
@@ -29,23 +28,6 @@ public class Auction implements Serializable {
         this.maxTimeoutDuration = timeout;
         this.initTime = System.currentTimeMillis();
         this.sellerPk = sellerPk;
-        this.auctionID = generateAuctionID();
-    }
-
-    /**
-     * Generates an id for an auction from the init time and the item ID
-     *
-     * @return Generated ID
-     */
-    private byte[] generateAuctionID() {
-        byte[] dataToHash = Arrays.concatenate(
-                this.auctionedItem.getItemID(),
-                Longs.toByteArray(this.initTime),
-                Longs.toByteArray(this.maxTimeoutDuration),
-                this.sellerPk.getEncoded()
-        );
-
-        return CryptoUtils.hash(dataToHash);
     }
 
     public String toString() {
@@ -59,7 +41,7 @@ public class Auction implements Serializable {
                 """;
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
         Date initDate = new Date(this.getInitTime());
-        return String.format(s, Hex.toHexString(this.getAuctionID()), Hex.toHexString(this.sellerPk.getEncoded()),
+        return String.format(s, Hex.toHexString(this.auctionedItem.getItemID()), Hex.toHexString(this.sellerPk.getEncoded()),
                 sdf.format(initDate), this.getMaxTimeoutDuration(), this.getAuctionedItem().toString());
     }
 }

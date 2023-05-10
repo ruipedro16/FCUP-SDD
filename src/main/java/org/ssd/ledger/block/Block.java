@@ -16,9 +16,7 @@ public class Block implements Cloneable {
     private final List<Transaction> transactions;
 
     public Block(byte[] previousHash) {
-        if (previousHash == null) {
-            throw new IllegalArgumentException();
-        }
+        // NOTE: for the genesis block, previousHash is NULL
 
         this.header = new BlockHeader(previousHash);
         this.transactions = new ArrayList<>();
@@ -41,7 +39,7 @@ public class Block implements Cloneable {
                 return;
             }
 
-            if (header.getPreviousHash() != null) { // the hash of the genesis block is `null`
+            if (header.getPreviousHash() != null) { // the hash of the genesis block is null
                 if ((!transaction.verifySignature())) {
                     System.out.println("Transaction Signature failed to verify. Ignored.");
                     return;

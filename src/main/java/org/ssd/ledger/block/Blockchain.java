@@ -37,10 +37,6 @@ public class Blockchain implements Serializable {
     public Block getLastBlock() {
         // getLastBlock never returns NULL. There is always a block because the blockchain is initialized with a genesis block
 
-        // if (this.blocks.size() > 0) {
         return this.blocks.get(this.blocks.size() - 1);
-        //}
-
-        //return null;
     }
 }
