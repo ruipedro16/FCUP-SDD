@@ -1,19 +1,17 @@
 package org.ssd.p2p.remote;
 
 
-import lombok.Getter;
 import lombok.NonNull;
 import org.ssd.constants.KademliaConstants;
 import org.ssd.p2p.Node;
-import org.ssd.p2p.routing.NodeContact;
 import org.ssd.p2p.routing.Bucket;
+import org.ssd.p2p.routing.NodeContact;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-public record KadRemoteBroadcast(@Getter Node currentNode, @Getter int depth, @Getter byte[] messageID,
-                                 @Getter byte[] message) implements KadAction {
+public record KadRemoteBroadcast(Node currentNode, int depth, byte[] messageID, byte[] message) implements KadAction {
     public KadRemoteBroadcast(@NonNull Node currentNode, int depth, byte[] messageID, byte[] message) {
         if (messageID == null) {
             throw new IllegalArgumentException();

@@ -40,7 +40,7 @@ public class DHT {
     private static StakingManager stakingManager; // NULL in PoW
 
     @Getter
-    private static Wallet wallet; // PK is here
+    private static Wallet wallet; // Public Key is here
 
     @Getter
     private static Consensus consensus;

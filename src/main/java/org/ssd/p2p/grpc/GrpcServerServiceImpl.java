@@ -7,8 +7,8 @@ import lombok.NonNull;
 import org.bouncycastle.util.encoders.Hex;
 import org.ssd.*;
 import org.ssd.p2p.Node;
-import org.ssd.p2p.routing.NodeContact;
 import org.ssd.p2p.remote.KadRemoteBroadcast;
+import org.ssd.p2p.routing.NodeContact;
 import org.ssd.p2p.storage.StoreData;
 import org.ssd.utils.Pair;
 import org.ssd.utils.Utils;
@@ -16,7 +16,6 @@ import org.ssd.utils.gRPCUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImplBase {
@@ -40,14 +39,14 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
      * @throws NullPointerException if msg is null
      */
     private void handleProtoNodeContactMsg(@NonNull GeneratedMessageV3 msg) {
-        CompletableFuture.runAsync(() -> {
-            if (msg instanceof ProtoNodeContact) {
-                NodeContact incomingContact = new NodeContact(Utils.getAddressFromString(((ProtoNodeContact) msg).getNodeIpAddress()),
-                        ((ProtoNodeContact) msg).getNodePort(), ((ProtoNodeContact) msg).getNodeId().toByteArray(), System.currentTimeMillis());
+        new Thread(() -> {
+            if (msg instanceof ProtoNodeContact nodeMsg) {
+                NodeContact incomingContact = new NodeContact(Utils.getAddressFromString(nodeMsg.getNodeIpAddress()),
+                        nodeMsg.getNodePort(), nodeMsg.getNodeId().toByteArray(), System.currentTimeMillis());
 
                 this.currentNode.getRoutingTable().addContact(incomingContact);
             }
-        });
+        }).start();
     }
 
     @Override
@@ -66,6 +65,7 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
         byte[] key = request.getKey().toByteArray();
         byte[] value = request.getValue().toByteArray();
+
         this.currentNode.getDht().store(key, value, request.getOriginalPublisherId().toByteArray());
 
         ProtoContent response = ProtoContent.newBuilder()
@@ -85,6 +85,7 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
         byte[] targetID = request.getTarget().toByteArray();
         List<NodeContact> contactList = this.currentNode.getRoutingTable().getKClosestNodes(targetID);
+
         ProtoFindNodeResponse response = ProtoFindNodeResponse.newBuilder()
                 .setSendingNode(gRPCUtils.toGRPC(this.currentNode.getCurrentNode()))
                 .setFoundNodes(gRPCUtils.toGRPC(contactList))
@@ -101,7 +102,8 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
         byte[] targetID = request.getTarget().toByteArray();
         boolean found = this.currentNode.getDht().containsKey(targetID);
-        if (found) {
+
+        if (found) { // if the value is found in the DHT, we return it
             StoreData data = this.currentNode.getDht().get(targetID);
 
             ProtoFindValueResponse response = ProtoFindValueResponse.newBuilder()
@@ -112,7 +114,6 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
 
             responseObserver.onNext(response);
         } else {
-            // TODO: [DOC] Ask the K closest Nodes
             List<NodeContact> kClosest = this.currentNode.getRoutingTable().getKClosestNodes(targetID);
 
             ProtoFindValueResponse response = ProtoFindValueResponse.newBuilder()
@@ -160,9 +161,11 @@ public class GrpcServerServiceImpl extends P2PGrpcServiceGrpc.P2PGrpcServiceImpl
         byte[] msg = msgIdPair.getSecond();
 
         if (this.currentNode.addToSeenMessages(msgID)) {
-            new KadRemoteBroadcast(this.currentNode, request.getDepth(), msgID, msg);
+            new KadRemoteBroadcast(this.currentNode, request.getDepth(), msgID, msg); // Todo: This operation is never triggered
             NodeContact contact = gRPCUtils.fromGRPC(request.getSendingNode());
-            Context.current().fork().run(() -> this.messageConsumers.forEach(consumer -> consumer.accept(contact, msg)));
+            Context.current()
+                    .fork()
+                    .run(() -> this.messageConsumers.forEach(consumer -> consumer.accept(contact, msg)));
         }
     }
 }

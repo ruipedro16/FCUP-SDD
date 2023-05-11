@@ -63,11 +63,6 @@ public class KadClientManager {
         return P2PGrpcServiceGrpc.newBlockingStub(channel);
     }
 
-    private P2PGrpcServiceGrpc.P2PGrpcServiceStub initStub(@NonNull NodeContact nodeContact) {
-        ManagedChannel channel = getChannel(nodeContact);
-        return P2PGrpcServiceGrpc.newStub(channel);
-    }
-
     public void ping(@NonNull NodeContact recipient, @NonNull KadRemotePing pingAction) {
         Node currentNode = pingAction.getCurrentNode();
         P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub blockingStub = initBlockingStub(recipient);
@@ -140,9 +135,10 @@ public class KadClientManager {
             ProtoFindValueResponse response = blockingStub.findValue(targetContact);
             if (response.getDataType() == DataType.FOUND_VALUE) {
                 StoreData data = gRPCUtils.fromGRPC(response.getFoundValue());
-                // contentLookupAction.onSuccess(recipient, data);
+                contentLookupAction.onSuccess(recipient, data);
             } else {
-
+                List<NodeContact> nodeContactList = gRPCUtils.fromGRPC(response.getFoundNodes().getNodesList());
+                contentLookupAction.onSuccess(recipient, nodeContactList);
             }
         } catch (StatusRuntimeException e) {
             shutdownChannel(recipient);

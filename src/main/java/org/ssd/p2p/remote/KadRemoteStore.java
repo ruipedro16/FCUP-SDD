@@ -9,6 +9,11 @@ import org.ssd.p2p.storage.StoreData;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This class represents a Kademlia remote store action, which stores a {@link org.ssd.p2p.storage.StoreData}
+ * in the distributed hash table (DHT) of a {@link org.ssd.p2p.Node}. This action triggers a remote find node action
+ * to retrieve the k-closest nodes to the given key and sends the store request to each node except the current node.
+ */
 public record KadRemoteStore(@Getter Node currentNode, @Getter StoreData data) implements KadAction {
     public KadRemoteStore(@NonNull Node currentNode, @NonNull StoreData data) {
         this.currentNode = currentNode;
@@ -21,9 +26,10 @@ public record KadRemoteStore(@Getter Node currentNode, @Getter StoreData data) i
 
         KadRemoteFindNode lookUpAction = new KadRemoteFindNode(this.currentNode, this.data.getKey());
         lookUpAction.trigger();
+
         List<NodeContact> nextContacts = lookUpAction.getKClosestResponded();
         nextContacts.stream()
-                .filter(contact -> !Arrays.equals(contact.getId(), this.currentNode.getCurrentNode().getId()))
+                .filter(contact -> !Arrays.equals(contact.getId(), this.currentNode.getCurrentNode().getId())) // do not forward the msg to self
                 .forEach(contact -> this.currentNode.getClientManager().store(contact, this));
     }
 

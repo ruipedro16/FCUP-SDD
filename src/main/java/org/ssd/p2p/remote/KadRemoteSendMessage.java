@@ -8,8 +8,7 @@ import org.ssd.p2p.routing.NodeContact;
 import java.util.Arrays;
 import java.util.List;
 
-public record KadRemoteSendMessage(@Getter Node currentNode, @Getter byte[] targetID,
-                                   @Getter byte[] message) implements KadAction {
+public record KadRemoteSendMessage(Node currentNode, byte[] targetID, byte[] message) implements KadAction {
     public KadRemoteSendMessage(@NonNull Node currentNode, byte[] targetID, byte[] message) {
         if (targetID == null) {
             throw new IllegalArgumentException();
