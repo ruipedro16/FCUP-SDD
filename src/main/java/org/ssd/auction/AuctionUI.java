@@ -49,12 +49,9 @@ public class AuctionUI implements Runnable {
         System.out.println("Min value for bid: ");
         double minAmount = sc.nextDouble();
 
-        System.out.println("Duration of the auction: ");
-        long timeout = sc.nextLong();
-
         PublicKey pk = DHT.getWallet().getPublicKey();
         Item auctionedItem = new Item(itemName, pk, minAmount);
-        Auction newAuction = new Auction(auctionedItem, timeout, pk);
+        Auction newAuction = new Auction(auctionedItem, pk);
 
         DHT.getAuctionsService().publishAuction(newAuction);
 

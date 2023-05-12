@@ -18,15 +18,11 @@ import java.util.Date;
  */
 @Data
 public class Auction implements Serializable {
-    private final long maxTimeoutDuration;
-    private final long initTime; // time at which the auction started
     private final Item auctionedItem;
     private final PublicKey sellerPk;
 
-    public Auction(@NonNull Item auctionedItem, long timeout, @NonNull PublicKey sellerPk) {
+    public Auction(@NonNull Item auctionedItem, @NonNull PublicKey sellerPk) {
         this.auctionedItem = auctionedItem;
-        this.maxTimeoutDuration = timeout;
-        this.initTime = System.currentTimeMillis();
         this.sellerPk = sellerPk;
     }
 
@@ -35,13 +31,9 @@ public class Auction implements Serializable {
                 Auction:
                     Auction ID: %s
                     Seller PK: %s
-                    Init time: %s
-                    Max duration: %s
                     %s
                 """;
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
-        Date initDate = new Date(this.getInitTime());
-        return String.format(s, Hex.toHexString(this.auctionedItem.getItemID()), Hex.toHexString(this.sellerPk.getEncoded()),
-                sdf.format(initDate), this.getMaxTimeoutDuration(), this.getAuctionedItem().toString());
+        return String.format(s, Hex.toHexString(this.auctionedItem.getItemID()), Hex.toHexString(this.sellerPk.getEncoded()));
     }
 }

@@ -122,7 +122,6 @@ public class DHT {
                             wallet.getPublicKey(),
                             10
                     ),
-                    60 * 60 * 1000, //1hr
                     wallet.getPublicKey());
             auctionsService.addAuction(new ActiveAuction(example1));
             auctionsService.publishAuction(example1);
