@@ -74,10 +74,12 @@ public class DHT {
         System.out.println("Initialized the wallet");
 
         if (consensus.equals(Consensus.PoW)) {
+            DHT.consensus = Consensus.PoW;
             DHT.stakingManager = null;
             DHT.miningManager = new MiningManager(DHT.blockchain);
             System.out.println("Initialized the mining manager");
         } else {
+            DHT.consensus = Consensus.PoS;
             DHT.stakingManager = new StakingManager(DHT.blockchain);
             DHT.stakingManager.registerValidator(DHT.wallet.getPublicKey());
             System.out.println("Initialized the staking manager");
