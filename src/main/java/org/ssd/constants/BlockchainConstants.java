@@ -12,4 +12,6 @@ public class BlockchainConstants {
     public static final int MIN_N_TRANSACTIONS = 1;
     public static final int MAX_N_TRANSACTIONS = 3;
 
+    public static final int INITIAL_WALLET_BALANCE = 10;
+
 }

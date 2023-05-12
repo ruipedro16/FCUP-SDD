@@ -19,16 +19,11 @@ public class KademliaConstants {
     /**
      * B : size in bits of the key
      * K : maximum number of contacts stored in a K-Bucket
-     * alpha : degree of parallelism in network calls
+     * alpha : degree of parallelism in network calls (broadcast depth)
      */
     public static final int B = 160, K = 20, ALPHA = 3;
 
     public static final int STALENESS_LIMIT = 5;
-
-    /**
-     * Maximum number of nodes to broadcast to
-     */
-    public static final int MAX_BROADCAST_PER_DEPTH = 3;
 
     /**
      * Kademlia time constants in ms

@@ -7,7 +7,6 @@ import org.bouncycastle.util.Arrays;
 import org.ssd.utils.CryptoUtils;
 
 import java.security.PublicKey;
-import java.util.Optional;
 
 @Data
 public class BlockHeader {

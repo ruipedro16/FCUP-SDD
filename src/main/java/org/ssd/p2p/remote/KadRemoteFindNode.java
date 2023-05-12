@@ -46,7 +46,7 @@ public class KadRemoteFindNode implements KadAction {
                 .toList();
     }
 
-    private boolean checkContacts() {
+    private boolean isDone() {
         if (this.pendingResponsesMap.size() >= KademliaConstants.ALPHA) {
             return false;
         }
@@ -57,6 +57,7 @@ public class KadRemoteFindNode implements KadAction {
                 .toList();
 
         boolean shouldContinue = !nextContacts.isEmpty() || !this.pendingResponsesMap.isEmpty();
+
         if (shouldContinue) {
             for (NodeContact node : nextContacts) {
                 this.actionStatusMap.put(node, KadActionStatus.AWAITING_RESPONSE);
@@ -77,7 +78,7 @@ public class KadRemoteFindNode implements KadAction {
         int totalTimeWaited = 0;
         int timeInterval = 20;
 
-        while (!checkContacts()) {
+        while (!isDone()) {
             try {
                 TimeUnit.MILLISECONDS.sleep(totalTimeWaited);
                 totalTimeWaited += timeInterval;
@@ -93,7 +94,7 @@ public class KadRemoteFindNode implements KadAction {
         this.actionStatusMap.put(nodeContact, KadActionStatus.RESPONDED);
         this.currentNode.getRoutingTable().addContact(nodeContact);
         nodeContacts.forEach(node -> this.actionStatusMap.putIfAbsent(node, KadActionStatus.NOT_ASKED));
-        checkContacts();
+        isDone();
     }
 
     @Override
@@ -101,6 +102,6 @@ public class KadRemoteFindNode implements KadAction {
         this.pendingResponsesMap.remove(nodeContact);
         this.actionStatusMap.put(nodeContact, KadActionStatus.FAILED);
         this.currentNode.getRoutingTable().warnUnresponsiveContact(nodeContact);
-        checkContacts();
+        isDone();
     }
 }

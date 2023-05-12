@@ -85,6 +85,10 @@ public class StakingManager {
                 .sum();
     }
 
+    public double getValidatorStake(@NonNull PublicKey publicKey) {
+        return this.validators.get(publicKey);
+    }
+
     /**
      * Selects a validator using a proof-of-stake algorithm based on the total amount staked by each validator.
      * <p>

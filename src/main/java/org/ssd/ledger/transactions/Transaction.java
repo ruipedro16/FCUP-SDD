@@ -60,7 +60,7 @@ public class Transaction implements Serializable {
         return CryptoUtils.hash(dataToHash);
     }
 
-    public void generateSignature(@NonNull PrivateKey privateKey) {
+    public void setSignature(@NonNull PrivateKey privateKey) {
         byte[] data = Arrays.concatenate(
                 this.sender.getEncoded(),
                 this.recipient.getEncoded(),

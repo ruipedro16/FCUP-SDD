@@ -166,7 +166,7 @@ public class KadClientManager {
         }
     }
 
-    public void broadCastMessage(@NonNull NodeContact recipient, @NonNull KadRemoteBroadcast broadcastAction) {
+    public void broadCastMessage(@NonNull NodeContact recipient, @NonNull KadRemoteBroadcast broadcastAction, int depth) {
         Node currentNode = broadcastAction.currentNode();
         System.out.println("Broadcasting message to node " + Hex.toHexString(recipient.getId()));
 
@@ -174,7 +174,7 @@ public class KadClientManager {
 
         ProtoBroadcastMessage message = ProtoBroadcastMessage.newBuilder()
                 .setSendingNode(gRPCUtils.toGRPC(currentNode.getCurrentNode()))
-                .setDepth(broadcastAction.depth())
+                .setDepth(depth)
                 .setMessage(ByteString.copyFrom(broadcastAction.message()))
                 .setMessageId(ByteString.copyFrom(broadcastAction.messageID()))
                 .build();

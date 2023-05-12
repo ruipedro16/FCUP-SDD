@@ -28,15 +28,15 @@ public record KadRemoteBroadcast(Node currentNode, int depth, byte[] messageID, 
         SecureRandom random = new SecureRandom();
         this.currentNode.addToSeenMessages(messageID);
 
-        for (int i = 0; i < KademliaConstants.B; i++) {
+        for (int i = depth; i < KademliaConstants.B; i++) {
             Bucket bucket = this.currentNode.getRoutingTable().getBuckets().get(i);
             List<NodeContact> clonedBucket = new ArrayList<>(this.currentNode.getRoutingTable().getBuckets().get(i).getAllContacts());
 
             if (!bucket.isEmpty()) {
-                for (int j = 0; j < KademliaConstants.MAX_BROADCAST_PER_DEPTH && !clonedBucket.isEmpty(); j++) {
+                for (int j = 0; j < KademliaConstants.ALPHA && !clonedBucket.isEmpty(); j++) {
                     int randomIndex = random.nextInt(clonedBucket.size());
                     NodeContact toBroadcast = clonedBucket.remove(randomIndex);
-                    this.currentNode.getClientManager().broadCastMessage(toBroadcast, this);
+                    this.currentNode.getClientManager().broadCastMessage(toBroadcast, this, depth + 1);
                 }
             }
         }
