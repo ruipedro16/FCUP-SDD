@@ -113,22 +113,12 @@ public class DHT {
             });
         }
 
+        auctionsService.getNetworkAuctions(); //ToDo: auctions are not being received
+
         System.out.println("Initialized the Communication Manager");
     }
 
-    private static void initMenu(boolean isBootstrap) {
-        if (!isBootstrap) {
-            //TODO: add 1 or 2 example auctions or even delete since it wont be advertised
-            Auction example1 = new Auction(
-                    new Item("TestItem",
-                            wallet.getPublicKey(),
-                            10
-                    ),
-                    wallet.getPublicKey());
-            auctionsService.addAuction(new ActiveAuction(example1));
-            auctionsService.publishAuction(example1);
-        }
-
+    private static void initMenu() {
         Runnable actions = new AuctionUI();
         actions.run();
     }
@@ -138,6 +128,6 @@ public class DHT {
         initBlockchain(consensus);
         initAuctionService();
         initCommunicationManager();
-        initMenu(isBootstrap);
+        initMenu();
     }
 }

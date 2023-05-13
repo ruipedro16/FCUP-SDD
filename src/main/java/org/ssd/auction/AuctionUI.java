@@ -23,16 +23,18 @@ public class AuctionUI implements Runnable {
         wallet.setId(id);
 
         Menu menu = new Menu("Auction System", new String[]{
-                "Create Auction",
+                "Create auction",
                 "Join auction",
                 "Close my auction",
+                "Show all auctions",
                 "Show PK",
         });
 
         menu.setHandler(1, this::newAuction);
         menu.setHandler(2, this::joinAuctions);
         menu.setHandler(3, this::closeAuction);
-        menu.setHandler(4, () -> {
+        menu.setHandler(4, this::printRunningAuctions);
+        menu.setHandler(5, () -> {
             System.out.println(Hex.toHexString(wallet.getPublicKey().getEncoded()));
         });
         boolean m = true;
@@ -71,14 +73,14 @@ public class AuctionUI implements Runnable {
         }
         byte[] id = Hex.decodeStrict(line);
 
-        if (!DHT.getAuctionsService().containsAuction(id)) {// todo: returns false, byte[] does not override Object.equals (dunno why it works below), use ByteString on Maps maybe?
+        if (!DHT.getAuctionsService().containsAuction(id)) {
             System.out.println("Invalid id! Try again...");
             return;
         }
-        ActiveAuction auction = DHT.getAuctionsService().getAuctionById(id);// todo: THIS WORKS
+        ActiveAuction auction = DHT.getAuctionsService().getAuctionById(id);
         System.out.println("New bid: ");
         double b = sc.nextDouble();
-        if (b <= auction.getAuction().getAuctionedItem().getMinimumAmount()) { // todo: BUT IT SAYS NULL WHEN IT GETS HERE
+        if (b <= auction.getAuction().getAuctionedItem().getMinimumAmount()) {
             System.out.println("Value below minimal amount. Try again...\n");
         }
         Bid myBid = new Bid(id, b, DHT.getWallet().getPublicKey());
