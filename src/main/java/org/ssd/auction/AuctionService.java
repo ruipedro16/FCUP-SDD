@@ -4,10 +4,13 @@ import com.google.protobuf.ByteString;
 import lombok.Data;
 import lombok.NonNull;
 import org.ssd.DHT;
+import org.ssd.constants.KademliaConstants;
 import org.ssd.p2p.communication.*;
 import org.ssd.p2p.routing.NodeContact;
 import org.ssd.utils.Pair;
+import org.ssd.utils.Utils;
 
+import java.net.InetAddress;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,7 +66,12 @@ public class AuctionService {
 
     public void getNetworkAuctions() {
         GetActiveAuctionsMessage msg = new GetActiveAuctionsMessage();
-        DHT.getCommunicationManager().broadcastMessage(msg);
+        InetAddress localhost = Utils.getLocalHostAddress();
+        NodeContact bootstrapContact = new NodeContact(
+                localhost, KademliaConstants.BOOTSTRAP_NODE_PORT,
+                KademliaConstants.BOOTSTRAP_NODE_ID, System.currentTimeMillis());
+        //DHT.getCommunicationManager().broadcastMessage(msg); //ToDo: this does not reply, but sends
+        DHT.getCommunicationManager().sendMessage(msg, bootstrapContact);
     }
 
     public Bid getLastBid(byte[] auctionId) {
