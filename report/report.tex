@@ -5,7 +5,7 @@
 \usepackage[capitalise, noabbrev]{cleveref}
 \usepackage{graphicx} 
 \usepackage{float}
-\usepackage{a4wide}
+% \usepackage{a4wide}
 \usepackage{relsize}
 \usepackage{setspace}
 \usepackage[dvipsnames]{xcolor}
@@ -43,14 +43,14 @@ December\fi, \number \year}
     pdfborder={0 0 0},
     colorlinks,
     breaklinks=true,
-    linkcolor=Sepia,
+    linkcolor=black,
     urlcolor=NavyBlue,
     citecolor=Sepia,
 }
 
-\crefformat{section}{\S#2#1#3} % see manual of cleveref, section 8.2.1
-\crefformat{subsection}{\S#2#1#3}
-\crefformat{subsubsection}{\S#2#1#3}
+% \crefformat{section}{\S#2#1#3} % see manual of cleveref, section 8.2.1
+% \crefformat{subsection}{\S#2#1#3}
+% \crefformat{subsubsection}{\S#2#1#3}
 
 \begin{document}
 
@@ -74,14 +74,6 @@ December\fi, \number \year}
 
 \pagenumbering{roman}
 
-\begin{abstract}
-
-In this report, we briefly describe the application we developed and discuss the decisions we made.
-
-\end{abstract}
-
-\clearpage
-
 \tableofcontents \vspace{2.5\baselineskip}
 \listoffigures
 
@@ -95,27 +87,31 @@ In this report, we briefly describe the application we developed and discuss the
 
 \section{Introduction}\label{sec:introduction}
 
-Kademlia~\cite{maymounkov2002kademlia}
-
-This report is structured as follows: \cref{sec:kademlia} describes the implementation
-of a Kademlia \acs{P2P} network and some optimizations that were implemented.
-\cref{sec:reputation} discusses some challenges that come with the potential implementation of a reputation system.
-Finally, \cref{sec:concl} concludes the report.
-
-\section{Problem \& Proposed Solution}\label{sec:problem-&-proposed-solution}
-
-Our implementation is divided in three parts:
+The purpose of this project is to develop and implement a decentralized public
+ledger capable of storing auction transactions. This implementation is devided into
+the following three parts:
 
 \begin{itemize}
-    \item \textbf{\acs{P2P} network:} The Peer-to-Peer network should allow a node to join it and gossip other nodes using the Kademlia algorithm.
+    \item \textbf{\acs{P2P} network:} The \ac{P2P} network should allow a node to join it and gossip 
+	the necessary data to other nodes in order to support the blockchain.
     
-    \item \textbf{Public Ledger:} The public ledger should be able to store auction transactions.
+    \item \textbf{Decentralized Public Ledger:} The public ledger should be modular and be able to store auction transactions.
+    As the consensus mechanism, we support both \ac{PoW} and \ac{PoS}.
     
-    \item \textbf{Auction Service:} The auction services gives the ability to a node to broadcast an asset it wishes to sell.
-	Other nodes use this service to bid on the assets being sold.
+    \item \textbf{Auction Mechanisms:} The auction system capable of supporting sellers and buyers using the
+	a single attribute auction that follows the English auction.
 \end{itemize}
 
+The report is structured as follows: 
+\cref{sec:kademlia} describes the implementation of a Kademlia \acs{P2P} network.
+\cref{sec:ledger} details the implementation of the ledger and the underlying consensus mechanisms.
+\cref{sec:reputation} discusses some challenges that come with the potential implementation of a reputation system.
+\cref{sec:auction} describes the auction system.
+Finally, \cref{sec:concl} concludes the report.
+
 \section{Kademlia Network}\label{sec:kademlia}
+
+Kademlia~\cite{maymounkov2002kademlia}
 
 In addition to the four \acs{RPC} of the Kademlia protocol, we implemented two additional \acsp{RPC}:
 one to broadcast a message to all the nodes in the network, and one to send a message to a specific node.
@@ -129,7 +125,7 @@ the recipient of the request. These \acsp{RPC} calls were implemented using gRPC
 Netty abstracted implementation.
 
 \begin{itemize}
-	\item Concurrency parameter $\alpha$
+	\item Concurrency parameter $\alpha = 3$ as discussed in~\cref{maymounkov2002kademlia}
 \end{itemize}
 
 % Based on https://roborooter.com/post/kademlia-study/ Section 4.1
@@ -146,7 +142,11 @@ When a new node joins the network, their node ID must be mined in a process that
 This ensures that it is not computationally feasible for an attacker to flood the network with nodes under their control, 
 as the process of joining the network requires a significant amount of work.
 
+Regarding Eclipse attacks, 
+
 \section{Public Ledger}\label{sec:ledger}
+
+\subsection{Transactions}
 
 Every transaction is added to a transaction pool containing pending transactions, wich will then be used
 to generate a new block and add it to the ledger.
@@ -155,17 +155,18 @@ As such, the balance of a wallet is the sum of all \acsp{UTXO} relative to that 
 By following this approach, previously spent transaction outputs are not accepted in subsequent transactions, which solves
 the \textit{double spending problem}.
 
+\subsection*{Consensus Mechanisms}
+
 Due to timing constraints, we were not able to implement \acs{DPoS}. Instead, we implemented \acs{PoS}.
 In this case, we consider that all nodes in the network can act as validators. Then, when validating the
 transactions of a block, we choose a validator ``at random'', taking into account their stake in the network -- i.e. 
-nodes with a higher stake are more likely to be chosen as validators. Nevertheless, to implement \ac{DPoS}, it would
-suffice to \textcolor{red}{completar}.
+nodes with a higher stake are more likely to be chosen as validators. 
 
 \section{Reputation System}\label{sec:reputation}
 
 Due to time limitations, we were not able to implement a reputation system.  Regardless, our idea was to
 implement a system that allowed us to identify unreliable nodes within the network. As a consequence, these nodes 
-would be used less often for routing and would potentially be removed (\textcolor{red}{ignorados pq nao da para remover um nodo ?}) altogether from the network.
+would be used less often for routing and would potentially be ignored altogether.
 
 To achieve this, we would compute and publish a \texttt{reputation} score to each node in the network, which would be then updated based
 on the behavious of the corresponding node -- deviating from the protocol would lead to a decrease in reputation, whereas 
@@ -185,23 +186,35 @@ a node's behavior while maintaining low overheads in terms of computation, commu
 be designed to prevent malicious nodes from cooperating to improve each other's reputation or harm the reputation of
 other nodes.
 
-\section{Auction System}\label{sec:auction}
+\section{Auction Mechanisms}\label{sec:auction}
 
 Originally, a solution similar to Peermart~\cite{hausheer2005peermart} was considered due to its algorithmic agnostic properties.
-A simpler solution was instead followed that follows the English Auction model just the same, with nodes bidding on a specific asset advertised by another node.
-The node which initiates the auction process by advertising an item to sell, is responsible from determining the best buyer and, upon completion of the
-auction, requesting the agreed payment. \textcolor{red}{complete}
+A simpler solution was instead followed that follows the English Auction model. 
 
-\section{Conclusion \& Future Work}\label{sec:concl}
+The auction system allows nodes to list items for auction, which all nodes in the network can then subscribe to and bid on. 
+After the item is sold, it should be marked as sold and no longer available for bidding.
+The node which initiates the auction process by advertising an item to sell, is responsible from determining the who the
+buyer is -- the node with the highest bid -- and, upon completion of the auction, request the agreed payment.
 
-Unfortunately, due to \textcolor{red}{timing constraints/time limitations}, we were not able to test
-our application using Google Cloud's virtual machines. Nevertheless, 
+\section{Conclusion}\label{sec:concl}
 
-... using an identity-based approach, such as the one discussed in~\cite{4627256}.
+In this report, we disscussed the implementation of a decentralized public ledger that supports both
+\acs{PoW} and \acs{PoS} as the consensus mechanism. Regarding the \acs{P2P} network, we implemented 
+we integrated Kademlia as the routing protocol for efficient and reliable information exchange among 
+peers, and implemented protections against Sybil and Eclipse attacks.
+We also implemented auction mechanisms that stores transactions on the blockchain. 
+Finally, we also incorporated a publisher-subscriber model on top of the Kademlia network
+to support the auction system.
+
+Unfortunately, due to time constraints, we were not able to test our application using Google Cloud's virtual machines. 
+Nevertheless, we believe that with enough time, these flaws could be addressed without difficulty. 
+
+Overall, this practical assignemnt provided us with valuable insights into the challenges of implementing security in a 
+complex system, as well as an understanding of the intricacies of building a \ac{P2P} network.
 
 \clearpage
 
-\bibliographystyle{unsrt} % TODO: change this
+\bibliographystyle{unsrt}
 \bibliography{refs}
 
 \end{document}
