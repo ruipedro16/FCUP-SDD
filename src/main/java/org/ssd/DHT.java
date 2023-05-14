@@ -20,6 +20,7 @@ import org.ssd.utils.Utils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
 
 public class DHT {
     private static Node node;
@@ -113,17 +114,17 @@ public class DHT {
             });
         }
 
-        auctionsService.getNetworkAuctions(); //ToDo: auctions are not being received
-
         System.out.println("Initialized the Communication Manager");
     }
 
-    private static void initMenu() {
+    private static void initMenu() throws InterruptedException {
+        TimeUnit.SECONDS.sleep(5); //allow FIND_NODE to reply
+        DHT.getAuctionsService().getNetworkAuctions(); // do this here, after all services are up //ToDo: auctions are not being received
         Runnable actions = new AuctionUI();
         actions.run();
     }
 
-    public static void start(int port, @NonNull Consensus consensus, boolean isBootstrap) throws UnknownHostException {
+    public static void start(int port, @NonNull Consensus consensus, boolean isBootstrap) throws UnknownHostException, InterruptedException {
         initNetwork(isBootstrap, port);
         initBlockchain(consensus);
         initAuctionService();

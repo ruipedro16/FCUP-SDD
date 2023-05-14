@@ -123,7 +123,7 @@ public class AuctionService {
     public void sendAuction(@NonNull NodeContact nodeContact) {
         this.auctionMap.values().forEach(
                 activeAuction -> {
-                    MessageContent msg = new AuctionMessage(activeAuction);
+                    AuctionMessage msg = new AuctionMessage(activeAuction);
                     DHT.getCommunicationManager().sendMessage(msg, nodeContact);
                 }
         );

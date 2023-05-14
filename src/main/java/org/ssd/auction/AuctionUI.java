@@ -26,7 +26,7 @@ public class AuctionUI implements Runnable {
                 "Create auction",
                 "Join auction",
                 "Close my auction",
-                "Show all auctions",
+                "Show all active auctions",
                 "Show PK",
         });
 
@@ -106,9 +106,9 @@ public class AuctionUI implements Runnable {
         }
         success = DHT.getAuctionsService().endAuction(itemName);
         if (success) {
-            System.out.println("Auction closed");
+            System.out.println("Auction closed\n");
         } else {
-            System.out.println("Auction couldn't be closed or you don't own this auction");
+            System.out.println("Auction couldn't be closed or you don't own this auction\n");
         }
         System.out.println("Press enter to return");
         sc.nextLine();
@@ -120,7 +120,7 @@ public class AuctionUI implements Runnable {
         sb.append("Currently ongoing auctions:\n");
         sb.append("=========================\n");
         if (activeAuctions.isEmpty()) {
-            sb.append("No active auctions");
+            sb.append("No active auctions\n");
         } else {
             activeAuctions.forEach((id, activeAuction) -> {
                 sb.append("Auction : ").append(Hex.toHexString(id.toByteArray())).append("\n");

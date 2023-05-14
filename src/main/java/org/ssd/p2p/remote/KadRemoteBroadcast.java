@@ -9,6 +9,7 @@ import org.ssd.p2p.routing.NodeContact;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public record KadRemoteBroadcast(Node currentNode, int depth, byte[] messageID, byte[] message) implements KadAction {
@@ -36,7 +37,9 @@ public record KadRemoteBroadcast(Node currentNode, int depth, byte[] messageID, 
                 for (int j = 0; j < KademliaConstants.ALPHA && !clonedBucket.isEmpty(); j++) {
                     int randomIndex = random.nextInt(clonedBucket.size());
                     NodeContact toBroadcast = clonedBucket.remove(randomIndex);
-                    this.currentNode.getClientManager().broadCastMessage(toBroadcast, this, depth + 1);
+                    if (!Arrays.equals(toBroadcast.getId(), this.currentNode.getCurrentNode().getId())) { //ToDo: this is only needed because of the buckets keeping the currentNode as contact
+                        this.currentNode.getClientManager().broadCastMessage(toBroadcast, this, depth + 1);
+                    }
                 }
             }
         }

@@ -18,7 +18,6 @@ import org.ssd.utils.CryptoUtils;
 import org.ssd.utils.Utils;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Routes messages based on type
@@ -43,7 +42,13 @@ public class CommunicationManager {
     }
 
     public void sendMessage(@NonNull MessageContent message, @NonNull NodeContact nodeContact) {
-        byte[] messageData = message.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] messageData;
+        try {
+            messageData = Utils.serializeObject(message);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         new KadRemoteSendMessage(this.currentNode, nodeContact.getId(), messageData).trigger();
     }
 
@@ -52,8 +57,8 @@ public class CommunicationManager {
             throw new IllegalArgumentException();
         }
 
-        System.out.println("Message from : [" + Hex.toHexString(sender.getId()) + "]");
         MessageContent msgContent = (MessageContent) Utils.deserializeBytes(msg);
+        System.out.println(msgContent.messageClass()); //TODO: This doesnt always print
         handleIncomingMessage(sender, msgContent);
     }
 

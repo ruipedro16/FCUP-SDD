@@ -149,6 +149,7 @@ public class KadClientManager {
     public void sendMessage(@NonNull NodeContact recipient, @NonNull KadRemoteSendMessage sendMessageAction) {
         Node currentNode = sendMessageAction.currentNode();
         byte[] message = sendMessageAction.message();
+        System.out.println("Sending message to node " + Hex.toHexString(recipient.getId()));
 
         P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub blockingStub = initBlockingStub(recipient);
 

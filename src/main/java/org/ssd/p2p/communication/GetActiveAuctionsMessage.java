@@ -7,10 +7,8 @@ import lombok.Getter;
 @Getter
 public class GetActiveAuctionsMessage extends MessageContent {
 
-    //private final RunningAuction[] auctionsList;
-
     /**
-     * @return Get Running Auction class type
+     * @return Get Active Auction class type
      */
     @Override
     public MessageClass messageClass() {
