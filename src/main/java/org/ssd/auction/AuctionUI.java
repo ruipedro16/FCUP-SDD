@@ -82,6 +82,9 @@ public class AuctionUI implements Runnable {
         double b = sc.nextDouble();
         if (b <= auction.getAuction().getAuctionedItem().getMinimumAmount()) {
             System.out.println("Value below minimal amount. Try again...\n");
+            System.out.println("Press enter to return");
+            sc.nextLine();
+            return;
         }
         Bid myBid = new Bid(id, b, DHT.getWallet().getPublicKey());
         auction.placeBid(myBid);

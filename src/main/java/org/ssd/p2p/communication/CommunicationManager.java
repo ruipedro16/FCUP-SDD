@@ -89,10 +89,10 @@ public class CommunicationManager {
             System.out.println("Getting auctions in the network");
             auctionService.sendAuction(sender);
         } else if (message.messageClass() == MessageClass.REQ_PAYMENT_MESSAGE) {
-            System.out.println("Requesting payment");
             PayRequestMessage msg = (PayRequestMessage) message;
             Bid bid = msg.getBid();
             if (DHT.getWallet().getPublicKey().equals(bid.getBuyerPK())) { // handle the payment if we are the bidder
+                System.out.println("Requesting payment");
                 DHT.getWallet().createTransaction(bid.getBuyerPK(), bid.getAmount());
             }
         }
