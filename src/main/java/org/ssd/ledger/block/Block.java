@@ -6,12 +6,13 @@ import org.ssd.DHT;
 import org.ssd.ledger.Consensus;
 import org.ssd.ledger.transactions.Transaction;
 
+import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class Block implements Cloneable {
+public class Block implements Cloneable, Serializable {
     private final BlockHeader header;
     private final List<Transaction> transactions;
 

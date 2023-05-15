@@ -12,7 +12,7 @@ import org.ssd.ledger.staking.StakingManager;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.communication.BlockMessage;
 import org.ssd.p2p.communication.CommunicationManager;
-import org.ssd.p2p.communication.MessageContent;
+import org.ssd.p2p.communication.Message;
 import org.ssd.p2p.grpc.KadServer;
 import org.ssd.p2p.routing.NodeContact;
 import org.ssd.utils.Utils;
@@ -104,12 +104,12 @@ public class DHT {
 
         if (DHT.consensus.equals(Consensus.PoW)) {
             DHT.miningManager.registerBlockConsumer(block -> {
-                MessageContent msg = new BlockMessage(block);
+                Message msg = new BlockMessage(block);
                 communicationManager.broadcastMessage(msg);
             });
         } else {
             DHT.stakingManager.registerBlockConsumer(block -> {
-                MessageContent msg = new BlockMessage(block);
+                Message msg = new BlockMessage(block);
                 communicationManager.broadcastMessage(msg);
             });
         }

@@ -6,10 +6,11 @@ import org.bouncycastle.util.Arrays;
 import org.ssd.utils.CryptoUtils;
 import org.ssd.utils.Utils;
 
+import java.io.Serializable;
 import java.security.PublicKey;
 
 @Data
-public class TransactionOutput {
+public class TransactionOutput implements Serializable {
     private byte[] ID;
     private PublicKey recipient;
     private double amount;

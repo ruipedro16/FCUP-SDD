@@ -7,7 +7,7 @@ import org.ssd.ledger.transactions.Transaction;
 
 @AllArgsConstructor
 @Getter
-public class TransactionMessage extends MessageContent {
+public class TransactionMessage extends Message {
 
     @NonNull
     private final Transaction transaction;

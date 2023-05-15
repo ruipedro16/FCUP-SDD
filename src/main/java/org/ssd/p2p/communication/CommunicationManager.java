@@ -1,5 +1,6 @@
 package org.ssd.p2p.communication;
 
+import com.google.protobuf.ByteString;
 import lombok.Data;
 import lombok.NonNull;
 import org.bouncycastle.util.encoders.Hex;
@@ -28,7 +29,7 @@ public class CommunicationManager {
     private final Blockchain blockchain;
     private final AuctionService auctionService;
 
-    public void broadcastMessage(@NonNull MessageContent message) {
+    public void broadcastMessage(@NonNull Message message) {
         //byte[] messageData = message.toString().getBytes(StandardCharsets.UTF_8);
         byte[] messageData;
         try {
@@ -41,7 +42,7 @@ public class CommunicationManager {
         new KadRemoteBroadcast(this.currentNode, 0, messageID, messageData).trigger();
     }
 
-    public void sendMessage(@NonNull MessageContent message, @NonNull NodeContact nodeContact) {
+    public void sendMessage(@NonNull Message message, @NonNull NodeContact nodeContact) {
         byte[] messageData;
         try {
             messageData = Utils.serializeObject(message);
@@ -57,19 +58,18 @@ public class CommunicationManager {
             throw new IllegalArgumentException();
         }
 
-        MessageContent msgContent = (MessageContent) Utils.deserializeBytes(msg);
-        System.out.println(msgContent.messageClass()); //TODO: This doesnt always print
+        Message msgContent = (Message) Utils.deserializeBytes(msg);
         handleIncomingMessage(sender, msgContent);
     }
 
-    public void handleIncomingMessage(@NonNull NodeContact sender, @NonNull MessageContent message) {
+    public void handleIncomingMessage(@NonNull NodeContact sender, @NonNull Message message) {
         if (message.messageClass() == MessageClass.TRANSACTION_MESSAGE) {
             TransactionMessage msg = (TransactionMessage) message;
             Transaction transaction = msg.getTransaction();
             System.out.println("Received a transaction");
             System.out.println("Adding transaction to the transaction pool");
             blockchain.getTransactionPool().addTransaction(transaction);
-        } else if (message.messageClass() == MessageClass.BLOCK_MESSAGE) {
+        } else if (message.messageClass() == MessageClass.BLOCK_MESSAGE) {//ToDo: verify if only the relevant block is added, it seems after a payment is made, all nodes mine and add their own block to all DHT
             BlockMessage msg = (BlockMessage) message;
             Block block = msg.getBlock();
             System.out.println("Received block " + Hex.toHexString(block.getHeader().getHash()));
@@ -95,6 +95,11 @@ public class CommunicationManager {
                 System.out.println("Requesting payment");
                 DHT.getWallet().createTransaction(bid.getBuyerPK(), bid.getAmount());
             }
+            //remove auction from active auctions
+            auctionService.getAuctionMap().remove(ByteString.copyFrom(bid.getItemID()));
+        } else if (message.messageClass() == MessageClass.REQ_BLOCKCHAIN) {
+            RequestBlockchainMessage msg = (RequestBlockchainMessage) message;
+            //ToDo
         }
     }
 }

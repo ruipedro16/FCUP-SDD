@@ -6,10 +6,11 @@ import lombok.Data;
 import org.bouncycastle.util.Arrays;
 import org.ssd.utils.CryptoUtils;
 
+import java.io.Serializable;
 import java.security.PublicKey;
 
 @Data
-public class BlockHeader {
+public class BlockHeader implements Serializable {
     private byte[] hash;
     private final byte[] previousHash;
     private byte[] merkleRoot;

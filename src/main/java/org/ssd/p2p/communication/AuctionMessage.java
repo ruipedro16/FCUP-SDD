@@ -7,7 +7,7 @@ import org.ssd.auction.ActiveAuction;
 
 @AllArgsConstructor
 @Getter
-public class AuctionMessage extends MessageContent {
+public class AuctionMessage extends Message {
 
     @NonNull
     private final ActiveAuction auction;

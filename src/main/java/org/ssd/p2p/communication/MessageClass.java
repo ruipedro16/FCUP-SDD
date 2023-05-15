@@ -11,7 +11,8 @@ public enum MessageClass {
     BLOCK_MESSAGE(BlockMessage.class),
     GET_AUCTION_MESSAGE(GetActiveAuctionsMessage.class),
     REQ_PAYMENT_MESSAGE(PayRequestMessage.class),
-    TRANSACTION_MESSAGE(TransactionMessage.class);
+    TRANSACTION_MESSAGE(TransactionMessage.class),
+    REQ_BLOCKCHAIN(RequestBlockchainMessage.class);
 
-    private final Class<? extends MessageContent> type;
+    private final Class<? extends Message> type;
 }

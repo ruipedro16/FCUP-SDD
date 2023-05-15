@@ -7,7 +7,7 @@ import org.ssd.auction.Bid;
 
 @AllArgsConstructor
 @Getter
-public class BidMessage extends MessageContent {
+public class BidMessage extends Message {
 
     @NonNull
     private final Bid bid;

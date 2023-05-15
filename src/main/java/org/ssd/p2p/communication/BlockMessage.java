@@ -7,7 +7,7 @@ import org.ssd.ledger.block.Block;
 
 @AllArgsConstructor
 @Getter
-public class BlockMessage extends MessageContent {
+public class BlockMessage extends Message {
 
     @NonNull
     private final Block block;

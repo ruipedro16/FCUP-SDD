@@ -24,17 +24,20 @@ public class AuctionUI implements Runnable {
 
         Menu menu = new Menu("Auction System", new String[]{
                 "Create auction",
-                "Join auction",
-                "Close my auction",
+                "Bid on auction",
+                "Close my auctions",
                 "Show all active auctions",
+                "Show funds",
                 "Show PK",
+                //ToDo: add a simple blockchain print
         });
 
         menu.setHandler(1, this::newAuction);
         menu.setHandler(2, this::joinAuctions);
         menu.setHandler(3, this::closeAuction);
         menu.setHandler(4, this::printRunningAuctions);
-        menu.setHandler(5, () -> {
+        menu.setHandler(5, this::printFunds);
+        menu.setHandler(6, () -> {
             System.out.println(Hex.toHexString(wallet.getPublicKey().getEncoded()));
         });
         boolean m = true;
@@ -80,7 +83,7 @@ public class AuctionUI implements Runnable {
         ActiveAuction auction = DHT.getAuctionsService().getAuctionById(id);
         System.out.println("New bid: ");
         double b = sc.nextDouble();
-        if (b <= auction.getAuction().getAuctionedItem().getMinimumAmount()) {
+        if (b < auction.getAuction().getAuctionedItem().getMinimumAmount()) {
             System.out.println("Value below minimal amount. Try again...\n");
             System.out.println("Press enter to return");
             sc.nextLine();
@@ -141,6 +144,10 @@ public class AuctionUI implements Runnable {
 
         }
         System.out.print(sb);
+    }
+
+    private void printFunds() {
+        System.out.println("Current funds : " + DHT.getWallet().getBalance());
     }
 
 }
