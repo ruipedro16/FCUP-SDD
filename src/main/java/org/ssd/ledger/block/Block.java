@@ -2,6 +2,7 @@ package org.ssd.ledger.block;
 
 import lombok.Data;
 import lombok.NonNull;
+import org.bouncycastle.util.encoders.Hex;
 import org.ssd.DHT;
 import org.ssd.ledger.Consensus;
 import org.ssd.ledger.transactions.Transaction;
@@ -54,5 +55,17 @@ public class Block implements Cloneable, Serializable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n   PrevHash: ").append(Hex.toHexString(this.getHeader().getHash()))
+                .append("\n   Hash: ").append(Hex.toHexString(this.getHeader().getHash()))
+                .append("\n   Time: ").append(this.getHeader().getTimestamp())
+                .append("\n   Nonce: ").append(this.getHeader().getNonce());
+        if (this.getHeader().getValidatorPK() != null) sb.append("\n   ValidatorPK: ").append(Hex.toHexString(this.getHeader().getValidatorPK().getEncoded()));
+        sb.append("\n}");
+        return sb.toString();
     }
 }

@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Data
 public class Blockchain implements Serializable {
-    private final List<Block> blocks;
+    private List<Block> blocks;
 
     /*
      * Pending transactions that will be included in new blocks
@@ -37,5 +37,18 @@ public class Blockchain implements Serializable {
 
     public Block getLastBlock() {
         return this.blocks.get(this.blocks.size() - 1);
+    }
+
+    public void replaceBlockchain(List<Block> blockchain) {
+        this.setBlocks(blockchain);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        this.getBlocks().forEach(block -> {
+            sb.append(block.toString()).append("\n");
+        });
+        return sb.toString();
     }
 }
