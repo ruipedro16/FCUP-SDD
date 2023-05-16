@@ -94,16 +94,21 @@ public class CommunicationManager {
                 System.out.println("Requesting payment");
                 DHT.getWallet().createTransaction(bid.getBuyerPK(), bid.getAmount());
             }
+
             //remove auction from active auctions
             auctionService.getAuctionMap().remove(ByteString.copyFrom(bid.getItemID()));
         } else if (message.messageClass() == MessageClass.REQ_BLOCKCHAIN) {
             RequestBlockchainMessage msg = (RequestBlockchainMessage) message;
+            BlockchainMessage blockchainMessage = new BlockchainMessage(this.blockchain);
+            sendMessage(blockchainMessage, sender);
+            /*
             this.blockchain.getBlocks().forEach(
                     block -> {
                         BlockMessage blockMessage = new BlockMessage(block);
                         sendMessage(blockMessage, sender);
                     }
             );
+             */
         }
     }
 }
