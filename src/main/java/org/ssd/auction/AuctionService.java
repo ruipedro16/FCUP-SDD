@@ -103,13 +103,14 @@ public class AuctionService {
     }
 
     public boolean endAuction(@NonNull String item) {
-        Pair<ByteString, ActiveAuction> runningAuction = getRunningAuctionsByItemWithList(item, getMyRunningAuctions());
+        Pair<ByteString, ActiveAuction> activeAuction = getRunningAuctionsByItemWithList(item, getMyRunningAuctions());
 
-        if (runningAuction == null) {
+        if (activeAuction == null) {
             return false;
         }
 
-        publishEndedAuction(runningAuction.getSecond());
+        publishEndedAuction(activeAuction.getSecond());
+        getAuctionMap().remove(activeAuction.getFirst());
         return true;
     }
 
