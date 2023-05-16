@@ -1,10 +1,6 @@
 package org.ssd.p2p.communication;
 
 public class RequestBlockchainMessage extends Message {
-
-
-
-
     /**
      * @return
      */

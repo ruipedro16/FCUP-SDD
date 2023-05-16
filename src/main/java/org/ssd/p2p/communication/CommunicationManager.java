@@ -30,7 +30,6 @@ public class CommunicationManager {
     private final AuctionService auctionService;
 
     public void broadcastMessage(@NonNull Message message) {
-        //byte[] messageData = message.toString().getBytes(StandardCharsets.UTF_8);
         byte[] messageData;
         try {
             messageData = Utils.serializeObject(message);
@@ -99,7 +98,12 @@ public class CommunicationManager {
             auctionService.getAuctionMap().remove(ByteString.copyFrom(bid.getItemID()));
         } else if (message.messageClass() == MessageClass.REQ_BLOCKCHAIN) {
             RequestBlockchainMessage msg = (RequestBlockchainMessage) message;
-            //ToDo
+            this.blockchain.getBlocks().forEach(
+                    block -> {
+                        BlockMessage blockMessage = new BlockMessage(block);
+                        sendMessage(blockMessage, sender);
+                    }
+            );
         }
     }
 }
