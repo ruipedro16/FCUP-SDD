@@ -60,7 +60,7 @@ public class Block implements Cloneable, Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{\n   PrevHash: ").append(Hex.toHexString(this.getHeader().getHash()))
+        sb.append("{\n   PrevHash: ").append(Hex.toHexString(this.getHeader().getPreviousHash()))
                 .append("\n   Hash: ").append(Hex.toHexString(this.getHeader().getHash()))
                 .append("\n   Time: ").append(this.getHeader().getTimestamp())
                 .append("\n   Nonce: ").append(this.getHeader().getNonce());
