@@ -17,6 +17,13 @@ import java.util.function.Consumer;
  * cf. MiningManager => Same but for PoS
  */
 public class StakingManager {
+    private static final Random random;;
+
+    static {
+        random = new Random();
+        random.setSeed(42L);
+    }
+
     private final Blockchain blockchain;
     private final TransactionPool transactionPool;
     private final List<Consumer<Block>> consumers;
@@ -119,7 +126,8 @@ public class StakingManager {
         sortedValidators.putAll(validators); // Copy entries from HashMap to TreeMap
 
         // generates a random number between 0 (inclusive) and totalStakedAmount (exclusive)
-        double r = Math.random() * totalStakedAmount;
+        // double r = Math.random() * totalStakedAmount;
+        double r = random.nextDouble() * totalStakedAmount; // random.nextDouble() is in [0, 1[
         double sum = 0;
         for (Map.Entry<PublicKey, Double> entry : sortedValidators.entrySet()) {
             sum += entry.getValue();
