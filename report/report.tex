@@ -5,7 +5,7 @@
 \usepackage[capitalise, noabbrev]{cleveref}
 \usepackage{graphicx} 
 \usepackage{float}
-% \usepackage{a4wide}
+\usepackage{a4wide}
 \usepackage{relsize}
 \usepackage{setspace}
 \usepackage[dvipsnames]{xcolor}
@@ -146,16 +146,34 @@ Regarding Eclipse attacks,
 
 \section{Public Ledger}\label{sec:ledger}
 
+The blockchain is essentially a chronological chain of interconnected blocks. 
+Each block contains a number of transactions that may differ from the number of 
+transactions in preceding or subsequent blocks
+
+Subsequent blocks in the blockchain provide an additional layer of verification for preceding blocks. 
+Each new block includes information that references the previous block, confirming its validity. 
+This reinforces the reliability of the entire blockchain.
+In other words, the fact that a block references the previous one through its has ensures that any 
+blockchain is immutable and tamper-resistant.
+
 \subsection{Transactions}
 
-Every transaction is added to a transaction pool containing pending transactions, wich will then be used
-to generate a new block and add it to the ledger.
+Once transactions are recorded in a block, they becomes an integral part of the blockchain~\cite{Transact84:online}.
+These transactions are initially added to a transaction pool that contains pending transactions, wich 
+will then be used to generate a new block and add it to the ledger.
 
-As such, the balance of a wallet is the sum of all \acsp{UTXO} relative to that wallet.
-By following this approach, previously spent transaction outputs are not accepted in subsequent transactions, which solves
-the \textit{double spending problem}.
+The concept of \acsp{UTXO} plays a crucial role in maintaining the integrity and security of the blockchain. 
+Each transaction output is considered unspent until it is consumed as an input in a subsequent transaction. 
+Once a transaction output is utilized, it can no longer be used as an input in any other transaction. 
+This prevents the duplication or reuse of transaction outputs, safeguarding the blockchain against fraudulent
+activities such as double spending.
 
-\subsection*{Consensus Mechanisms}
+\subsection{Consensus Mechanisms}
+
+In \acs{PoW}, the process of mining a block consists in finding a nonce that results in a hash of the 
+block header starting with a specific prefix length of zeros. This prefix length serves as the challenge 
+for the block's hash, setting the difficulty for mining the mining process. Miners iteratively try
+different nonce value until they find one that solves the challenge.
 
 Due to timing constraints, we were not able to implement \acs{DPoS}. Instead, we implemented \acs{PoS}.
 In this case, we consider that all nodes in the network can act as validators. Then, when validating the
