@@ -26,7 +26,7 @@ public class Transaction implements Serializable {
     private final List<TransactionInput> txInputs;
     private final List<TransactionOutput> txOutputs;
 
-    public Transaction(@NonNull PublicKey sender, @NonNull PublicKey recipient, double amount, List<TransactionInput> txInputs) {
+    public Transaction(PublicKey sender, PublicKey recipient, double amount, List<TransactionInput> txInputs) {
         this.sender = sender;
         this.recipient = recipient;
         this.amount = amount;
@@ -36,11 +36,16 @@ public class Transaction implements Serializable {
     }
 
     public static byte[] computeTransactionID(@NonNull Transaction transaction) {
-        byte[] txInputBytes = Utils.toByteArray(
-                transaction.txInputs.stream()
-                        .map(TransactionInput::getBytes)
-                        .collect(Collectors.toList())
-        );
+        byte[] txInputBytes;
+        if (transaction.getTxInputs() != null) {
+            txInputBytes = Utils.toByteArray(
+                    transaction.txInputs.stream()
+                            .map(TransactionInput::getBytes)
+                            .collect(Collectors.toList())
+            );
+        } else {
+            txInputBytes = "null".getBytes();
+        }
 
         byte[] txOutputBytes = Utils.toByteArray(
                 transaction.txOutputs.stream()

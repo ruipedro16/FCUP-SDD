@@ -68,7 +68,7 @@ public class CommunicationManager {
             System.out.println("Received a transaction");
             System.out.println("Adding transaction to the transaction pool");
             blockchain.getTransactionPool().addTransaction(transaction);
-        } else if (message.messageClass() == MessageClass.BLOCK_MESSAGE) {//ToDo: verify if only the relevant block is added, it seems after a payment is made, all nodes mine and add their own block to all DHT
+        } else if (message.messageClass() == MessageClass.BLOCK_MESSAGE) {
             BlockMessage msg = (BlockMessage) message;
             Block block = msg.getBlock();
             System.out.println("Received block " + Hex.toHexString(block.getHeader().getHash()));

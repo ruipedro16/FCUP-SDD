@@ -9,6 +9,8 @@ import org.ssd.ledger.Wallet;
 import org.ssd.ledger.block.Blockchain;
 import org.ssd.ledger.mining.MiningManager;
 import org.ssd.ledger.staking.StakingManager;
+import org.ssd.ledger.transactions.Transaction;
+import org.ssd.ledger.transactions.TransactionOutput;
 import org.ssd.p2p.Node;
 import org.ssd.p2p.communication.BlockMessage;
 import org.ssd.p2p.communication.CommunicationManager;
@@ -21,6 +23,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
+
+import static org.ssd.constants.BlockchainConstants.INITIAL_WALLET_BALANCE;
 
 public class DHT {
     private static Node node;
@@ -117,9 +121,18 @@ public class DHT {
         System.out.println("Initialized the Communication Manager");
     }
 
+    private static void addFunds() {
+        Transaction fundT = new Transaction(getWallet().getPublicKey(), getWallet().getPublicKey(), INITIAL_WALLET_BALANCE, null);
+        fundT.setSignature(getWallet().getPrivateKey());
+        fundT.getTxOutputs().add(new TransactionOutput(fundT.getRecipient(), fundT.getAmount(), fundT.getId()));
+        blockchain.getUTXOs().put(fundT.getTxOutputs().get(0).getID(), fundT.getTxOutputs().get(0));
+        blockchain.getTransactionPool().addTransaction(fundT);
+        System.out.println(wallet.getBalance());
+    }
+
     private static void initMenu() throws InterruptedException {
         TimeUnit.SECONDS.sleep(5); //allow FIND_NODE to reply
-        DHT.getAuctionsService().getNetworkAuctions(); // do this here, after all services are up //ToDo: auctions are not being received
+        DHT.getAuctionsService().getNetworkAuctions(); // do this here, after all services are up
         Runnable actions = new AuctionUI();
         actions.run();
     }
@@ -129,6 +142,7 @@ public class DHT {
         initBlockchain(consensus);
         initAuctionService();
         initCommunicationManager();
+        addFunds();
         initMenu();
     }
 }

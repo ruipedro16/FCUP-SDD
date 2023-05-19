@@ -16,6 +16,7 @@ import org.ssd.utils.gRPCUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class KadClientManager {
     private final Map<byte[], ManagedChannel> channels;
@@ -24,7 +25,7 @@ public class KadClientManager {
         this.channels = new ConcurrentHashMap<>();
     }
 
-    public ManagedChannel getChannel(@NonNull NodeContact nodeContact) {
+    public ManagedChannel obtainChannel(@NonNull NodeContact nodeContact) throws InterruptedException {
         byte[] nodeId = nodeContact.getId();
         ManagedChannel channel = null;
 
@@ -50,16 +51,30 @@ public class KadClientManager {
     }
 
     public void shutdownChannel(@NonNull NodeContact target) {
-        ManagedChannel channel = getChannel(target);
+        ManagedChannel channel = null;
+        try {
+            channel = obtainChannel(target);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        this.channels.remove(target.getId());
         if (channel.isShutdown() || channel.isTerminated()) {
             return;
         }
-        channel.shutdown();
-        this.channels.remove(target.getId());
+        try {
+            channel.shutdown().awaitTermination(2, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private P2PGrpcServiceGrpc.P2PGrpcServiceBlockingStub initBlockingStub(@NonNull NodeContact nodeContact) {
-        ManagedChannel channel = getChannel(nodeContact);
+        ManagedChannel channel = null;
+        try {
+            channel = obtainChannel(nodeContact);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         return P2PGrpcServiceGrpc.newBlockingStub(channel);
     }
 

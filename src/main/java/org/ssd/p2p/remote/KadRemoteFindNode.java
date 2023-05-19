@@ -26,10 +26,8 @@ public class KadRemoteFindNode implements KadAction {
         if (targetID == null) {
             throw new IllegalArgumentException("ID parameter cannot be null");
         }
-
         this.currentNode = currentNode;
         this.targetID = targetID;
-
         this.actionStatusMap = new TreeMap<>(new NodeContactDistanceComparator(targetID));
         this.pendingResponsesMap = new HashMap<>();
 
