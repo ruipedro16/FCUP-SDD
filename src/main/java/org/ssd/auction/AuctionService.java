@@ -70,7 +70,6 @@ public class AuctionService {
         NodeContact bootstrapContact = new NodeContact(
                 localhost, KademliaConstants.BOOTSTRAP_NODE_PORT,
                 KademliaConstants.BOOTSTRAP_NODE_ID, System.currentTimeMillis());
-        //DHT.getCommunicationManager().broadcastMessage(msg); //ToDo: this does not reply, but sends
         DHT.getCommunicationManager().sendMessage(msg, bootstrapContact);
     }
 
@@ -93,10 +92,16 @@ public class AuctionService {
 
     public void publishEndedAuction(@NonNull ActiveAuction runningAuction) {
         List<Bid> bids = runningAuction.getBids();
+        Bid highestBid;
 
-        Bid highestBid = bids.stream()
-                .max(Comparator.comparing(Bid::getAmount))
-                .orElseThrow(NoSuchElementException::new);
+        try {
+            highestBid = bids.stream()
+                    .max(Comparator.comparing(Bid::getAmount))
+                    .orElseThrow(NoSuchElementException::new);
+        } catch (NoSuchElementException e) {
+            highestBid = new Bid(runningAuction.getAuction().getAuctionedItem().getItemID(), 0.0, null);
+        }
+
 
         PayRequestMessage message = new PayRequestMessage(highestBid);
         DHT.getCommunicationManager().broadcastMessage(message);

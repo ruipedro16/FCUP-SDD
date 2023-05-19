@@ -1,7 +1,6 @@
 package org.ssd.auction;
 
 import lombok.Data;
-import lombok.NonNull;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.Serializable;
@@ -13,7 +12,7 @@ public class Bid implements Serializable {
     private final double amount;
     private final PublicKey buyerPK;
 
-    public Bid(byte[] itemID, double amount, @NonNull PublicKey buyerPK) {
+    public Bid(byte[] itemID, double amount, PublicKey buyerPK) {
         if (itemID == null) {
             throw new IllegalArgumentException();
         }
