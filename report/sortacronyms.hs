@@ -17,6 +17,7 @@ acronyms =
     , ("DPoS", "Delegated Proof-of-Stake")
     , ("RPC", "remote procedure call")
     , ("UTXO", "Unspent Transaction Output")
+    , ("DHT", "Distributed Hash Table")
     ]
 
 main :: IO ()
