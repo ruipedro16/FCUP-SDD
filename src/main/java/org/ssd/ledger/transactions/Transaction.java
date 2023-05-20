@@ -1,5 +1,6 @@
 package org.ssd.ledger.transactions;
 
+import com.google.protobuf.ByteString;
 import lombok.Data;
 import lombok.NonNull;
 import org.bouncycastle.util.Arrays;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class Transaction implements Serializable {
-    private final byte[] id;
+    private byte[] id;
     private final PublicKey sender;
     private final PublicKey recipient;
     private final double amount;
@@ -125,13 +126,13 @@ public class Transaction implements Serializable {
 
         // Check if each input's unspent output exists and has the correct amount
         for (TransactionInput input : getTxInputs()) {
-            TransactionOutput unspentOutput = DHT.getBlockchain().getUTXOs().get(input.getTxOutputID());
+            TransactionOutput unspentOutput = DHT.getBlockchain().getUTXOs().get(ByteString.copyFrom(input.getTxOutputID()));
             if (unspentOutput == null || unspentOutput.getAmount() != input.getUnspentTxOutput().getAmount()) {
                 return false;
             }
 
             // Remove the input's unspent output from the UTXOs
-            DHT.getBlockchain().getUTXOs().remove(input.getTxOutputID());
+            DHT.getBlockchain().getUTXOs().remove(ByteString.copyFrom(input.getTxOutputID()));
         }
 
         // If all checks passed, the transaction is valid

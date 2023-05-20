@@ -1,5 +1,6 @@
 package org.ssd.ledger.block;
 
+import com.google.protobuf.ByteString;
 import lombok.Data;
 import lombok.NonNull;
 import org.ssd.ledger.transactions.TransactionOutput;
@@ -20,7 +21,7 @@ public class Blockchain implements Serializable {
      */
     private final TransactionPool transactionPool;
 
-    private final Map<byte[], TransactionOutput> UTXOs;
+    private final Map<ByteString, TransactionOutput> UTXOs;
 
     public Blockchain() {
         this.blocks = new ArrayList<>();

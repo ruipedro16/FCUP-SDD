@@ -1,5 +1,6 @@
 package org.ssd.ledger;
 
+import com.google.protobuf.ByteString;
 import lombok.Data;
 import lombok.NonNull;
 import org.ssd.DHT;
@@ -22,25 +23,25 @@ public class Wallet {
     /**
      * Unspent transactions
      */
-    private Map<byte[], TransactionOutput> UTXOs;
+    private Map<ByteString, TransactionOutput> unspentTXOs;
 
     public Wallet() {
         KeyPair keyPair = CryptoUtils.generateKeyPair();
         this.privateKey = keyPair.getPrivate();
         this.publicKey = keyPair.getPublic();
         this.id = CryptoUtils.hash(this.publicKey.getEncoded());
-        this.UTXOs = new HashMap<>();
+        this.unspentTXOs = new HashMap<>();
     }
 
     /*
      * Iterate over the unspent transactions of the blockchain
      * See if they belong to me
-     * If so, add them to the UTXOs
-     * Return the sum of my UTXos
+     * If so, add them to the unspentTXOs
+     * Return the sum of my unspentTXOs
      */
     public double getBalance() {
         return DHT.getBlockchain().getUTXOs().values().stream().filter(utxo -> utxo.isMine(this.publicKey)).mapToDouble(utxo -> {
-            this.UTXOs.put(utxo.getID(), utxo); // add to the list of UTXOs
+            this.unspentTXOs.put(ByteString.copyFrom(utxo.getID()), utxo); // add to the list of unspentTXOs
             return utxo.getAmount();
         }).sum();
     }
@@ -53,20 +54,19 @@ public class Wallet {
             return null;
         }
 
-        // Find unspent transaction outputs (UTXOs) that can be used to fund the new transaction.
+        // Find unspent transaction outputs (unspentTXOs) that can be used to fund the new transaction.
         List<TransactionInput> txInputs = new ArrayList<>();
         double total = 0;
-        Iterator<TransactionOutput> utxoIterator = UTXOs.values().iterator();
-        while (utxoIterator.hasNext() && total < amount) { // stops adding inputs once the total value is greater than or equal to the transaction amount
+        Iterator<TransactionOutput> utxoIterator = unspentTXOs.values().iterator();
+        while (utxoIterator.hasNext() && total <= amount) { // stops adding inputs once the total value is greater than or equal to the transaction amount
             TransactionOutput utxo = utxoIterator.next();
             total += utxo.getAmount();
-            txInputs.add(new TransactionInput((utxo.getID())));
+            txInputs.add(new TransactionInput(utxo.getID()));
         }
 
         // Create a new transaction object and sign it
-        Transaction newTransaction = new Transaction(this.publicKey, recipient, amount, txInputs); // the ID is set in the constructor
-        newTransaction.setSignature(this.privateKey);
-
+        Transaction nTransaction = new Transaction(this.publicKey, recipient, amount, txInputs); // the ID is set in the constructor
+        nTransaction.setSignature(this.privateKey);
 
         // If in PoS, we need to update the stake of the recipient and the sender
         if (DHT.getConsensus() == Consensus.PoS) {
@@ -78,29 +78,30 @@ public class Wallet {
         }
 
         // Update the UTXO lists to reflect the spent outputs and new outputs.
-        txInputs.forEach(t -> UTXOs.remove(t.getTxOutputID())); // removes the spent UTXOs from the sender's UTXO list
+        txInputs.forEach(t -> unspentTXOs.remove(ByteString.copyFrom(t.getTxOutputID()))); // removes the spent unspentTXOs from the sender's UTXO list
 
         txInputs.forEach(input -> {
-            TransactionOutput txOutput = DHT.getBlockchain().getUTXOs().get(input.getTxOutputID());
+            TransactionOutput txOutput = DHT.getBlockchain().getUTXOs().get(ByteString.copyFrom(input.getTxOutputID()));
             input.setUnspentTxOutput(txOutput);
         });
 
-        // Set the new UTXOs for the resulting transaction for the recipient for the sender
-        double remainingAmount = newTransaction.getInputsAmount() - amount;
-        newTransaction.getTxOutputs().add(new TransactionOutput(newTransaction.getRecipient(), amount, newTransaction.getId()));
-        newTransaction.getTxOutputs().add(new TransactionOutput(newTransaction.getSender(), remainingAmount, newTransaction.getId()));
+        // Set the new unspentTXOs for the resulting transaction for the recipient for the sender
+        double remainingAmount = nTransaction.getInputsAmount() - amount;
+        nTransaction.setId(Transaction.computeTransactionID(nTransaction));
+        nTransaction.getTxOutputs().add(new TransactionOutput(nTransaction.getRecipient(), amount, nTransaction.getId()));
+        nTransaction.getTxOutputs().add(new TransactionOutput(nTransaction.getSender(), remainingAmount, nTransaction.getId()));
 
-        // Add new UTXOs to the blockchain
-        newTransaction.getTxOutputs().forEach(t -> DHT.getBlockchain().getUTXOs().put(t.getID(), t));
+        // Add new unspentTXOs to the blockchain
+        nTransaction.getTxOutputs().forEach(t -> DHT.getBlockchain().getUTXOs().put(ByteString.copyFrom(t.getID()), t));
 
         // Mark used inputs as spent
         txInputs.stream()
                 .filter(t -> t.getUnspentTxOutput() != null)
-                .forEach(t -> DHT.getBlockchain().getUTXOs().remove(t.getUnspentTxOutput().getID()));
+                .forEach(t -> DHT.getBlockchain().getUTXOs().remove(ByteString.copyFrom(t.getUnspentTxOutput().getID())));
 
         // Add the new transaction to the transaction pool.
-        DHT.getBlockchain().getTransactionPool().addTransaction(newTransaction);
+        DHT.getBlockchain().getTransactionPool().addTransaction(nTransaction);
 
-        return newTransaction;
+        return nTransaction;
     }
 }
