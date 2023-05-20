@@ -6,8 +6,6 @@ import org.ssd.DHT;
 import org.ssd.ledger.transactions.Transaction;
 import org.ssd.ledger.transactions.TransactionInput;
 import org.ssd.ledger.transactions.TransactionOutput;
-import org.ssd.p2p.communication.Message;
-import org.ssd.p2p.communication.TransactionMessage;
 import org.ssd.utils.CryptoUtils;
 
 import java.security.KeyPair;
@@ -102,10 +100,6 @@ public class Wallet {
 
         // Add the new transaction to the transaction pool.
         DHT.getBlockchain().getTransactionPool().addTransaction(newTransaction);
-
-        // Broadcast the new transaction to other nodes in the network.
-        Message txMessage = new TransactionMessage(newTransaction);
-        DHT.getCommunicationManager().broadcastMessage(txMessage);
 
         return newTransaction;
     }

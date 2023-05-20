@@ -15,6 +15,7 @@ import org.ssd.p2p.Node;
 import org.ssd.p2p.communication.BlockMessage;
 import org.ssd.p2p.communication.CommunicationManager;
 import org.ssd.p2p.communication.Message;
+import org.ssd.p2p.communication.TransactionMessage;
 import org.ssd.p2p.grpc.KadServer;
 import org.ssd.p2p.routing.NodeContact;
 import org.ssd.utils.Utils;
@@ -128,7 +129,8 @@ public class DHT {
         fundT.getTxOutputs().add(new TransactionOutput(fundT.getRecipient(), fundT.getAmount(), fundT.getId()));
         blockchain.getUTXOs().put(fundT.getTxOutputs().get(0).getID(), fundT.getTxOutputs().get(0));
         blockchain.getTransactionPool().addTransaction(fundT);
-        System.out.println(wallet.getBalance());
+        Message funds = new TransactionMessage(fundT);
+        DHT.getCommunicationManager().broadcastMessage(funds);
     }
 
     private static void initMenu() throws InterruptedException {

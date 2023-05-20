@@ -90,13 +90,22 @@ public class CommunicationManager {
         } else if (message.messageClass() == MessageClass.REQ_PAYMENT_MESSAGE) {
             PayRequestMessage msg = (PayRequestMessage) message;
             Bid bid = msg.getBid();
-            if (DHT.getWallet().getPublicKey().equals(bid.getBuyerPK())) { // handle the payment if we are the bidder
-                System.out.println("Requesting payment");
-                DHT.getWallet().createTransaction(bid.getBuyerPK(), bid.getAmount());
+            try {
+                if (DHT.getWallet().getPublicKey().equals(bid.getBuyerPK())) { // handle the payment if we are the bidder
+                    System.out.println("Requesting payment");
+                    Transaction newTransaction = DHT.getWallet().createTransaction(bid.getBuyerPK(), bid.getAmount());
+                    if (newTransaction != null) {
+                        // Broadcast the new transaction to other nodes in the network.
+                        Message txMessage = new TransactionMessage(newTransaction);
+                        broadcastMessage(txMessage);
+                    }
+                }
+            } catch (NullPointerException e) {
+                throw new RuntimeException(e);
+            } finally {
+                //remove auction from active auctions
+                auctionService.getAuctionMap().remove(ByteString.copyFrom(bid.getItemID()));
             }
-
-            //remove auction from active auctions
-            auctionService.getAuctionMap().remove(ByteString.copyFrom(bid.getItemID()));
         } else if (message.messageClass() == MessageClass.REQ_BLOCKCHAIN) {
             RequestBlockchainMessage msg = (RequestBlockchainMessage) message;
             BlockchainMessage blockchainMessage = new BlockchainMessage(this.blockchain);

@@ -37,15 +37,13 @@ public class Transaction implements Serializable {
     }
 
     public static byte[] computeTransactionID(@NonNull Transaction transaction) {
-        byte[] txInputBytes;
+        byte[] txInputBytes = null;
         if (transaction.getTxInputs() != null) {
             txInputBytes = Utils.toByteArray(
                     transaction.txInputs.stream()
                             .map(TransactionInput::getBytes)
                             .collect(Collectors.toList())
             );
-        } else {
-            txInputBytes = "null".getBytes();
         }
 
         byte[] txOutputBytes = Utils.toByteArray(
@@ -54,7 +52,13 @@ public class Transaction implements Serializable {
                         .collect(Collectors.toList())
         );
 
-        byte[] tmp = Arrays.concatenate(txInputBytes, txOutputBytes);
+        byte[] tmp;
+        if (txInputBytes == null) {
+            tmp = txOutputBytes;
+        } else {
+            tmp = Arrays.concatenate(txInputBytes, txOutputBytes);
+        }
+
 
         byte[] dataToHash = Arrays.concatenate(
                 transaction.sender.getEncoded(),
