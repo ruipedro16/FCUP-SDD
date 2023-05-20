@@ -69,6 +69,18 @@ public class MiningManager {
             blockToMine.addTransactions(newTransactions);
             this.miningWorker = new MiningWorker(this, blockToMine);
             this.miningWorker.start();
+            try {
+                this.miningWorker.join();
+            } catch (InterruptedException ignored) {
+
+            }
+            System.out.println("Block mined. Shutting down miner...");
+            shutDownMinerWorker();
+        }  else if (transactionPool.getPoolSize() < BlockchainConstants.MIN_N_TRANSACTIONS && this.running) {
+            shutDownMinerWorker();
+
+            System.out.println("Transaction pool does not have enough transactions, stopping the miner.");
+            this.running = false;
         }
     }
 
