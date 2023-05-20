@@ -51,20 +51,20 @@ public class KadClientManager {
     }
 
     public void shutdownChannel(@NonNull NodeContact target) {
-        ManagedChannel channel = null;
-        try {
-            channel = obtainChannel(target);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        this.channels.remove(target.getId());
-        if (channel.isShutdown() || channel.isTerminated()) {
+        ManagedChannel channel = this.channels.remove(target.getId());
+
+        if (channel == null || channel.isTerminated() || channel.isShutdown()) {
             return;
         }
+
         try {
-            channel.shutdown().awaitTermination(2, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            while (!channel.awaitTermination(10, TimeUnit.SECONDS)) {
+                channel.shutdownNow();
+            }
+        } catch (InterruptedException ignored) {
+
+        } finally {
+            channel.shutdownNow();
         }
     }
 
@@ -72,8 +72,8 @@ public class KadClientManager {
         ManagedChannel channel = null;
         try {
             channel = obtainChannel(nodeContact);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        } catch (InterruptedException ignored) {
+            // throw new RuntimeException(e);
         }
         return P2PGrpcServiceGrpc.newBlockingStub(channel);
     }
