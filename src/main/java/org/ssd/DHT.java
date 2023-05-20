@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import static org.ssd.constants.BlockchainConstants.INITIAL_WALLET_BALANCE;
 
 public class DHT {
+    @Getter
     private static Node node;
 
     @Getter

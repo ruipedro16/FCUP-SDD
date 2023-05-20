@@ -14,6 +14,7 @@ import java.util.Scanner;
 
 public class AuctionUI implements Runnable {
     private static final Scanner sc = new Scanner(System.in);
+
     @Override
     public void run() {
         Wallet wallet = DHT.getWallet();
@@ -30,7 +31,8 @@ public class AuctionUI implements Runnable {
                 "Show funds",
                 "Show PK",
                 "Show blockchain",
-                "Show Transaction Pool"
+                "Show Transaction Pool",
+                "Show DHT"
         });
 
         menu.setHandler(1, this::newAuction);
@@ -48,6 +50,12 @@ public class AuctionUI implements Runnable {
                     .getTransactionPool()
                     .getPendingTransactions()
                     .forEach(System.out::println);
+        });
+
+
+        menu.setHandler(9, () -> {
+            DHT.getNode().getDht()
+                    .forEach((key, value) -> System.out.println("Key: " + Hex.toHexString(key) + ", Value: " + Hex.toHexString(value.getValue())));
         });
 
         boolean m = true;
