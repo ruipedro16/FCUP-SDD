@@ -1,5 +1,6 @@
 package org.ssd.ledger.transactions;
 
+import lombok.Getter;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.function.Consumer;
  * to notify interested parties whenever new transactions are added to the pool.
  */
 public class TransactionPool {
+    @Getter
     private final List<Transaction> pendingTransactions;
     private final List<Consumer<Integer>> consumers;
 

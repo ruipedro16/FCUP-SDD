@@ -3,6 +3,7 @@ package org.ssd.ledger.transactions;
 import lombok.Data;
 import lombok.NonNull;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.encoders.Hex;
 import org.ssd.DHT;
 import org.ssd.utils.CryptoUtils;
 import org.ssd.utils.Utils;
@@ -131,5 +132,14 @@ public class Transaction implements Serializable {
 
         // If all checks passed, the transaction is valid
         return true;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Transaction from [").append(Hex.toHexString(this.sender.getEncoded()))
+                .append("] to [").append(Hex.toHexString(this.recipient.getEncoded()))
+                .append("], value: ").append(this.amount).append('\n');
+        return sb.toString();
     }
 }

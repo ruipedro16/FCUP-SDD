@@ -29,8 +29,8 @@ public class AuctionUI implements Runnable {
                 "Show all active auctions",
                 "Show funds",
                 "Show PK",
-                //ToDo: add a simple blockchain print
-                "Show blockchain"
+                "Show blockchain",
+                "Show Transaction Pool"
         });
 
         menu.setHandler(1, this::newAuction);
@@ -42,6 +42,14 @@ public class AuctionUI implements Runnable {
             System.out.println(Hex.toHexString(wallet.getPublicKey().getEncoded()));
         });
         menu.setHandler(7, this::printBlocks);
+
+        menu.setHandler(8, () -> {
+            DHT.getBlockchain()
+                    .getTransactionPool()
+                    .getPendingTransactions()
+                    .forEach(System.out::println);
+        });
+
         boolean m = true;
         while (m) {
             m = menu.run();
