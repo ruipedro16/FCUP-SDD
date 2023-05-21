@@ -143,13 +143,25 @@ public class DHT {
         blockchain.getUTXOs().put(ByteString.copyFrom(fundT.getTxOutputs().get(0).getID()), fundT.getTxOutputs().get(0));
         blockchain.getTransactionPool().addTransaction(fundT);
 
-        //Message funds = new TransactionMessage(fundT);
-        //DHT.getCommunicationManager().broadcastMessage(funds);
+        Message funds = new TransactionMessage(fundT);
+        DHT.getCommunicationManager().broadcastMessage(funds);
 
     }
 
-    private static void initMenu() throws InterruptedException {
-        TimeUnit.SECONDS.sleep(5); //allow FIND_NODE to reply
+    private static void initMenu(boolean bootstrap) throws InterruptedException {
+        InetAddress localhost = Utils.getLocalHostAddress();
+        NodeContact bootstrapContact = new NodeContact(
+                localhost, KademliaConstants.BOOTSTRAP_NODE_PORT,
+                KademliaConstants.BOOTSTRAP_NODE_ID, System.currentTimeMillis());
+
+        TimeUnit.SECONDS.sleep(3); //allow FIND_NODE to reply
+        if (!bootstrap) {
+            DHT.getCommunicationManager().sendMessage(new RequestBlockchainMessage(), bootstrapContact);
+            TimeUnit.SECONDS.sleep(3);
+            addFunds();
+        } else {
+            addFunds();
+        }
         DHT.getAuctionsService().getNetworkAuctions(); // do this here, after all services are up
         Runnable actions = new AuctionUI();
         actions.run();
@@ -188,8 +200,7 @@ public class DHT {
         initBlockchain(consensus);
         initAuctionService();
         initCommunicationManager();
-        addFunds();
         testWallets(false);
-        initMenu();
+        initMenu(isBootstrap);
     }
 }

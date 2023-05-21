@@ -108,16 +108,11 @@ public class CommunicationManager {
             }
         } else if (message.messageClass() == MessageClass.REQ_BLOCKCHAIN) {
             RequestBlockchainMessage msg = (RequestBlockchainMessage) message;
-            BlockchainMessage blockchainMessage = new BlockchainMessage(this.blockchain);
+            BlockchainMessage blockchainMessage = new BlockchainMessage(this.blockchain.getBlocks());
             sendMessage(blockchainMessage, sender);
-            /*
-            this.blockchain.getBlocks().forEach(
-                    block -> {
-                        BlockMessage blockMessage = new BlockMessage(block);
-                        sendMessage(blockMessage, sender);
-                    }
-            );
-             */
+        } else if (message.messageClass() == MessageClass.BLOCKCHAIN_MESSAGE) {
+            BlockchainMessage blockchain = (BlockchainMessage) message;
+            DHT.getBlockchain().replaceBlockchain(blockchain.getBlockchain());
         }
     }
 }
