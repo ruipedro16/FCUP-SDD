@@ -34,7 +34,6 @@ public class StakingManager {
      */
     @Getter
     private final Map<PublicKey, Double> validators;
-    private boolean running;
 
     public StakingManager(@NonNull Blockchain blockchain) {
         assert DHT.getConsensus().equals(Consensus.PoS);
@@ -43,7 +42,6 @@ public class StakingManager {
         this.transactionPool = blockchain.getTransactionPool();
         this.consumers = new ArrayList<>();
         this.validators = new HashMap<>();
-        this.running = false;
 
         if (transactionPool != null) {
             this.transactionPool.registerSubscriber(this::handleNewTransaction);
@@ -70,9 +68,8 @@ public class StakingManager {
      * @param nTransactions The number of new transactions in the pool.
      */
     private void handleNewTransaction(int nTransactions) {
-        if (transactionPool.getPoolSize() >= BlockchainConstants.MIN_N_TRANSACTIONS && !this.running) {
+        if (transactionPool.getPoolSize() >= BlockchainConstants.MIN_N_TRANSACTIONS) {
             System.out.println("Enough transactions in pool.");
-            this.running = true;
 
             int n = Math.min(transactionPool.getPoolSize(), BlockchainConstants.MAX_N_TRANSACTIONS);
             List<Transaction> newTransactions = transactionPool.getTransactions(n);
