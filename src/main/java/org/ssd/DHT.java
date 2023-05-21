@@ -189,7 +189,7 @@ public class DHT {
         initAuctionService();
         initCommunicationManager();
         addFunds();
-        testWallets(true);
+        testWallets(false);
         initMenu();
     }
 }
