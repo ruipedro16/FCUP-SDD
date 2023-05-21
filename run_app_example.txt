@@ -1,0 +1,5 @@
+bootstrap:
+ ./gradlew --console plain run --args="8080 PoW bootstrap"
+
+non boot:
+ ./gradlew --console plain run --args="XXXX PoW regular"

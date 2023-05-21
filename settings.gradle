@@ -1,2 +1,2 @@
 rootProject.name = 'SSD_2023'
-
+include('SSD_2023')
