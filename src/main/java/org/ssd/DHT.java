@@ -13,9 +13,7 @@ import org.ssd.ledger.staking.StakingManager;
 import org.ssd.ledger.transactions.Transaction;
 import org.ssd.ledger.transactions.TransactionOutput;
 import org.ssd.p2p.Node;
-import org.ssd.p2p.communication.BlockMessage;
-import org.ssd.p2p.communication.CommunicationManager;
-import org.ssd.p2p.communication.Message;
+import org.ssd.p2p.communication.*;
 import org.ssd.p2p.grpc.KadServer;
 import org.ssd.p2p.routing.NodeContact;
 import org.ssd.utils.Utils;
@@ -23,6 +21,7 @@ import org.ssd.utils.Utils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import static org.ssd.constants.BlockchainConstants.INITIAL_WALLET_BALANCE;
@@ -156,12 +155,41 @@ public class DHT {
         actions.run();
     }
 
+    public static void testWallets(boolean test) {
+        if (!test) return;
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Wallet main = new Wallet();
+        Wallet node1Wallet = new Wallet();
+        Wallet node2Wallet = new Wallet();
+
+        Transaction initT = new Transaction(main.getPublicKey(), node1Wallet.getPublicKey(), 100, null);
+        initT.setSignature(main.getPrivateKey());
+        initT.setId("0".getBytes(StandardCharsets.UTF_8));
+        initT.getTxOutputs().add(new TransactionOutput(initT.getRecipient(), initT.getAmount(), initT.getId()));
+        DHT.getBlockchain().getUTXOs().put(ByteString.copyFrom(initT.getTxOutputs().get(0).getID()), initT.getTxOutputs().get(0));
+        DHT.getBlockchain().getTransactionPool().addTransaction(initT);
+
+        System.out.println("node1Wallet's balance is: " + node1Wallet.getBalance());
+
+        DHT.getBlockchain().getTransactionPool().addTransaction(node1Wallet.createTransaction(node2Wallet.getPublicKey(), 25f));
+        System.out.println("node1Wallet's has: " + node1Wallet.getBalance());
+        System.out.println("node2Wallet's has: " + node2Wallet.getBalance());
+
+        System.out.println(DHT.getBlockchain().toString());
+    }
+    
     public static void start(int port, @NonNull Consensus consensus, boolean isBootstrap) throws UnknownHostException, InterruptedException {
         initNetwork(isBootstrap, port);
         initBlockchain(consensus);
         initAuctionService();
         initCommunicationManager();
         addFunds();
+        testWallets(true);
         initMenu();
     }
 }

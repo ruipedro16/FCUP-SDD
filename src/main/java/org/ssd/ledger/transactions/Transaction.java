@@ -25,8 +25,8 @@ public class Transaction implements Serializable {
     private final double amount;
     private byte[] signature;
 
-    private final List<TransactionInput> txInputs;
-    private final List<TransactionOutput> txOutputs;
+    private List<TransactionInput> txInputs;
+    private List<TransactionOutput> txOutputs;
 
     public Transaction(PublicKey sender, PublicKey recipient, double amount, List<TransactionInput> txInputs) {
         this.sender = sender;
