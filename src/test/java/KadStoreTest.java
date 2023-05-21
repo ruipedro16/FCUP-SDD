@@ -7,8 +7,6 @@ import org.ssd.p2p.storage.StoreData;
 
 import java.net.UnknownHostException;
 
-import static org.junit.Assert.assertTrue;
-
 public class KadStoreTest {
 
     @Test
@@ -36,5 +34,44 @@ public class KadStoreTest {
         System.out.println(node2.getDht().isEmpty());
         System.out.println(node3.getDht().isEmpty());
         System.out.println(node4.getDht().isEmpty());
+
+        System.out.println(node1.getDht().toString());
+        System.out.println(node2.getDht().toString());
+        System.out.println(node3.getDht().toString());
+        System.out.println(node4.getDht().toString());
     }
+
+    /**
+     * EX:
+     * Bucket[0]
+     * (0004e778a0a48b60d8840a7835b98e7c8c19ca4a, DESKTOP-JL1762N/172.18.80.1, 9008)
+     *
+     * Bucket[146]
+     * (00028470dc86ef5cf9ad90179601cdf201922e04, /172.18.80.1, 9006)
+     *
+     * Bucket[147]
+     * (000ee3d06ecab080f2bb833135bdb164d10923ee, /172.18.80.1, 9007)
+     * (000a4ad339b1d55e9d4dd42ddce640b6f2803963, /172.18.80.1, 9005)
+     *
+     * Bucket[158]
+     * (4405d03d7d92511556900e6cfacde2366e75a1e8, DESKTOP-JL1762N/172.18.80.1, 8080)
+     *
+     * KadDHT
+     * : [
+     * (000a4ad339b1d55e9d4dd42ddce640b6f2803963, 64617461)
+     * ]
+     * KadDHT
+     * : [
+     * (000a4ad339b1d55e9d4dd42ddce640b6f2803963, 64617461)
+     * ]
+     * KadDHT
+     * : [
+     * (000a4ad339b1d55e9d4dd42ddce640b6f2803963, 64617461)
+     * ]
+     * KadDHT
+     * : [
+     * (000a4ad339b1d55e9d4dd42ddce640b6f2803963, 64617461)
+     * ]
+     */
+
 }
