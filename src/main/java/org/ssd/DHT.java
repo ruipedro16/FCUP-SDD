@@ -136,6 +136,10 @@ public class DHT {
 
     private static void addFunds() {
         Wallet oneoff = new Wallet();
+        if (consensus == Consensus.PoS) {
+            DHT.stakingManager.registerValidator(oneoff.getPublicKey());
+            DHT.getStakingManager().getValidators().put(oneoff.getPublicKey(), (double) INITIAL_WALLET_BALANCE);
+        }
         Transaction fundT = new Transaction(oneoff.getPublicKey(), getWallet().getPublicKey(), INITIAL_WALLET_BALANCE, null);
         fundT.setSignature(oneoff.getPrivateKey());
         fundT.setId(Transaction.computeTransactionID(fundT));

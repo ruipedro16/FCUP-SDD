@@ -1,5 +1,6 @@
 package org.ssd.ledger.staking;
 
+import lombok.Getter;
 import lombok.NonNull;
 import org.ssd.DHT;
 import org.ssd.constants.BlockchainConstants;
@@ -17,7 +18,7 @@ import java.util.function.Consumer;
  * cf. MiningManager => Same but for PoS
  */
 public class StakingManager {
-    private static final Random random;;
+    private static final Random random;
 
     static {
         random = new Random();
@@ -31,6 +32,7 @@ public class StakingManager {
     /**
      * A map of public keys of validators to their respective stake amount.
      */
+    @Getter
     private final Map<PublicKey, Double> validators;
     private boolean running;
 
@@ -80,6 +82,7 @@ public class StakingManager {
             Block newBlock = new Block(this.blockchain.getLastBlock().getHeader().getHash());
             newBlock.addTransactions(newTransactions); // transactions are verified here
             newBlock.setValidator(validatorPK);
+            notifyNewBlock(newBlock);
         }
     }
 
